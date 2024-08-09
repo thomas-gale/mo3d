@@ -1,0 +1,32 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/ubuntu
+{
+	"name": "Ubuntu",
+	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	"image": "mcr.microsoft.com/devcontainers/base:jammy",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"modular-mojotools.vscode-mojo"
+			]
+		}
+	},
+	"features": {
+		"ghcr.io/devcontainers/features/python:1": {}
+	},
+	// Forwardin WSLg display into the container
+	"runArgs": [
+		"-v",
+		"/run/desktop/mnt/host/wslg/.X11-unix:/tmp/.X11-unix",
+		"-v",
+		"/run/desktop/mnt/host/wslg:/mnt/wslg",
+		"-e",
+		"DISPLAY=:0",
+		"-e",
+		"WAYLAND_DISPLAY=wayland-0",
+		"-e",
+		"XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir",
+		"-e",
+		"PULSE_SERVER=/mnt/wslg/PulseServer"
+	]
+}

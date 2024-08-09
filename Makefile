@@ -3,6 +3,11 @@
 install-sdl-mac:
 	brew install sdl2
 
+
+test-sdl-mac:
+	clang++ -std=c++17 -I/opt/homebrew/include/SDL2 -L/opt/homebrew/lib -lSDL2 test_sdl.cpp -o test_sdl
+	./test_sdl
+
 install:
 	pipx install poetry
 	poetry install --no-root

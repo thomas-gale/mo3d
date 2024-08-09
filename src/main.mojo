@@ -282,7 +282,6 @@ struct SDL:
     fn __init__(inout self):
         print("Binding SDL...")
         var lib_path = get_sdl_lib_path()
-        #let SDL = ffi.DLHandle('/usr/lib64/libSDL2.so')
         var SDL = ffi.DLHandle(lib_path)
 
         self.Init = SDL.get_function[c_SDL_Init]('SDL_Init')
@@ -326,8 +325,11 @@ fn main() raises:
     var res = sdl.Init(0x00000020)
     print(res)
 
+    var title_ptr = DTypePointer(StringRef("mo3d").data)
+    print(title_ptr)
+    
     var window = sdl.CreateWindow(
-        DTypePointer(StringRef("mo3d").data),
+        title_ptr,
         SDL_WINDOWPOS_UNDEFINED,
         SDL_WINDOWPOS_UNDEFINED,
         width,
@@ -337,7 +339,11 @@ fn main() raises:
     print(window)
 
     var renderer = sdl.CreateRenderer(window, -1, 0)
+    print(renderer)
+
     var display = sdl.CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, width, height)
+    print(display)
+
     _ = sdl.SetRenderTarget(renderer, display)
 
     fn redraw(sdl: SDL) raises:
@@ -357,15 +363,16 @@ fn main() raises:
     var event = Event()
 
     var running = True
-    while running:
-        while sdl.PollEvent(Pointer[Event].address_of(event)) != 0:
-            if (event.type == SDL_QUIT):
-                running = False
-                break
+    # while running:
+    #     while sdl.PollEvent(Pointer[Event].address_of(event)) != 0:
+    #         if (event.type == SDL_QUIT):
+    #             running = False
+    #             break
 
-        redraw(sdl)
+    #     redraw(sdl)
 
-        _ = sdl.Delay(Int32(1000 / 120))
+    #     _ = sdl.Delay(Int32(1000 / 120))
 
     sdl.DestroyWindow(window)
     sdl.Quit()
+    print("Goodbye, mo3d!")

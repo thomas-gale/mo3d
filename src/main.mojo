@@ -441,6 +441,7 @@ fn main() raises:
     while running:
         while sdl.PollEvent(Pointer[Event].address_of(event)) != 0:
             print("Event type:", event.type)
+            # This uncommented causes a segfault - TODO: Fix
             # if (event.type == SDL_QUIT):
             #     running = False
             #     break

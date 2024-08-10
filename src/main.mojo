@@ -323,10 +323,12 @@ fn main() raises:
 
     var sdl = SDL()
     var res = sdl.Init(0x00000020)
-    print(res)
+    if res != 0:
+        print("Failed to initialize SDL")
+        return
 
     var title_ptr = DTypePointer(StringRef("mo3d").data)
-    print(title_ptr)
+    print("Title ptr:", title_ptr)
     
     var window = sdl.CreateWindow(
         title_ptr,
@@ -336,33 +338,32 @@ fn main() raises:
         height,
         SDL_WINDOW_SHOWN,
     )
-    print(window)
+    print("Window ptr:", window)
 
     var renderer = sdl.CreateRenderer(window, -1, 0)
-    print(renderer)
+    print("Renderer ptr:", renderer)
 
     var display = sdl.CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, width, height)
-    print(display)
+    print("Display ptr:", display)
 
-    _ = sdl.SetRenderTarget(renderer, display)
+    # _ = sdl.SetRenderTarget(renderer, display)
 
-    fn redraw(sdl: SDL) raises:
-        _ = sdl.SetRenderTarget(renderer, display)
-        for y in range(height):
-            for x in range(width):
-                var r = 250
-                var g = 0
-                var b = 0
-                _ = sdl.SetRenderDrawColor(renderer, r, g, b, 255)
-                _ = sdl.RenderDrawPoint(renderer, y, x)
+    # fn redraw(sdl: SDL) raises:
+    #     _ = sdl.SetRenderTarget(renderer, display)
+    #     for y in range(height):
+    #         for x in range(width):
+    #             var r = 250
+    #             var g = 0
+    #             var b = 0
+    #             _ = sdl.SetRenderDrawColor(renderer, r, g, b, 255)
+    #             _ = sdl.RenderDrawPoint(renderer, y, x)
 
-        _ = sdl.SetRenderTarget(renderer, 0)
-        _ = sdl.RenderCopy(renderer, display, 0, 0)
-        _ = sdl.RenderPresent(renderer)
+    #     _ = sdl.SetRenderTarget(renderer, 0)
+    #     _ = sdl.RenderCopy(renderer, display, 0, 0)
+    #     _ = sdl.RenderPresent(renderer)
 
-    var event = Event()
-
-    var running = True
+    # var event = Event()
+    # var running = True
     # while running:
     #     while sdl.PollEvent(Pointer[Event].address_of(event)) != 0:
     #         if (event.type == SDL_QUIT):
@@ -375,4 +376,9 @@ fn main() raises:
 
     sdl.DestroyWindow(window)
     sdl.Quit()
+    
+    # Stop stuff being destroyed
+    # _ = sdl
+    _ = title_ptr
+
     print("Goodbye, mo3d!")

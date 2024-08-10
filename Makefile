@@ -3,7 +3,6 @@
 install-sdl-mac:
 	brew install sdl2
 
-
 test-sdl-mac:
 	clang++ -std=c++17 -I/opt/homebrew/include/SDL2 -L/opt/homebrew/lib -lSDL2 test_sdl.cpp -o bin/test_sdl
 	bin/test_sdl
@@ -12,6 +11,7 @@ install:
 	pipx install poetry
 	poetry install --no-root
 	curl -s https://get.modular.com | sh -
+	modular install max
 	modular install mojo
 
 run: 

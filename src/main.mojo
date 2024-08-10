@@ -439,20 +439,13 @@ fn main() raises:
     var event = Event()
     var running = True
     while running:
-        var event_code = sdl.PollEvent(Pointer[Event].address_of(event))
-        if event_code == 0:
-            continue
-        print("Event type:", event.type)
-        # print("Polling event...")
-        # while sdl.PollEvent(Pointer[Event].address_of(event)) != 0:
-        #     print("Event type:", event.type)
-        #     if (event.type == SDL_QUIT):
-        #         running = False
-        #         break
+        while sdl.PollEvent(Pointer[Event].address_of(event)) != 0:
+            print("Event type:", event.type)
+            # if (event.type == SDL_QUIT):
+            #     running = False
+            #     break
 
-        # redraw(sdl)
-
-        # _ = sdl.Delay(Int32(1000 / 120))
+        redraw(sdl)
 
     sdl.DestroyWindow(window)
     sdl.Quit()

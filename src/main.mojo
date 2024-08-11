@@ -393,7 +393,6 @@ fn main() raises:
         return
 
     var title_ptr = DTypePointer(StringRef("mo3d").data)
-
     var window = sdl.CreateWindow(
         title_ptr,
         SDL_WINDOWPOS_CENTERED,
@@ -437,16 +436,18 @@ fn main() raises:
         _ = sdl.RenderPresent(renderer)
 
     var event = Event()
-    var running = True
-    while running:
+    var fps = 120
+    var i = 480  # Max duration: 4 seconds at 120fps
+    while i > 0:
         while sdl.PollEvent(Pointer[Event].address_of(event)) != 0:
             print("Event type:", event.type)
-            # This uncommented causes a segfault - TODO: Fix
-            # if (event.type == SDL_QUIT):
-            #     running = False
-            #     break
+            if (event.type == SDL_QUIT):
+                print("Quitting...")
+                i = 0
 
         redraw(sdl)
+        i -= 1
+        _ = sdl.Delay(Int32((1000 / fps)))
 
     sdl.DestroyWindow(window)
     sdl.Quit()

@@ -85,7 +85,7 @@ fn main() raises:
 
         for y in range(height):
             for x in range(width):
-                var r = (Float32(t[y, x]) * Float32(255)).cast[DType.uint8]()
+                var r = (t[y, x] * 255).cast[DType.uint8]()
                 var g = 0
                 var b = 0
                 _ = sdl.SetRenderDrawColor(renderer, r, g, b, 255)

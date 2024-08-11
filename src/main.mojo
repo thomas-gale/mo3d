@@ -1,5 +1,7 @@
-from python import Python
-from python.object import PythonObject
+from algorithm import parallelize, vectorize
+from complex import ComplexSIMD, ComplexFloat64
+from math import iota
+from tensor import Tensor
 
 from mo3d.SDL import (
     SDL,
@@ -12,12 +14,37 @@ from mo3d.SDL import (
     SDL_QUIT,
 )
 
+alias float_type = DType.float32
+alias simd_width = 2 * simdwidthof[float_type]()
+
+alias width = 256
+alias height = 256
 
 fn main() raises:
+    # Basic example of using the SDL2 library to create a window and render to it.
+
     print("Hello, mo3d!")
 
-    var width = 256
-    var height = 256
+    # State
+    var t = Tensor[float_type](height, width)
+
+    @parameter
+    @no_inline
+    fn worker(row: Int):
+        @parameter
+        @no_inline
+        fn compute[simd_width: Int](col: Int):
+            """Each time we operate on a `simd_width` vector of pixels."""
+            var cx = (col + iota[float_type, simd_width]())
+            var cy = row
+            var c = ComplexSIMD[float_type, simd_width](cx, cy)
+            t.store[simd_width](
+                row * width + col, Float32(row/height)
+            )
+
+        # Vectorize the call to compute_vector where call gets a chunk of pixels.
+        # vectorize[compute, simd_width, width](width)
+        vectorize[compute, simd_width](width)
 
     var sdl = SDL()
     var res_code = sdl.Init(SDL_INIT_VIDEO)
@@ -50,7 +77,7 @@ fn main() raises:
         print("Failed to set render target")
         return
 
-    fn redraw(sdl: SDL) raises:
+    fn redraw(sdl: SDL, t: Tensor[float_type]) raises:
         var target_code = sdl.SetRenderTarget(renderer, display)
         if target_code != 0:
             print("Failed to set render target")
@@ -58,7 +85,7 @@ fn main() raises:
 
         for y in range(height):
             for x in range(width):
-                var r = 250
+                var r = (Float32(t[y, x]) * Float32(255)).cast[DType.uint8]()
                 var g = 0
                 var b = 0
                 _ = sdl.SetRenderDrawColor(renderer, r, g, b, 255)
@@ -67,6 +94,10 @@ fn main() raises:
         _ = sdl.SetRenderTarget(renderer, 0)
         _ = sdl.RenderCopy(renderer, display, 0, 0)
         _ = sdl.RenderPresent(renderer)
+
+    # Test
+    parallelize[worker](height, height)
+
 
     var event = Event()
     var fps = 120
@@ -80,7 +111,7 @@ fn main() raises:
                 running = False
                 break
 
-        redraw(sdl)
+        redraw(sdl, t)
         _ = sdl.Delay(Int32((1000 / fps)))
 
     sdl.DestroyWindow(window)

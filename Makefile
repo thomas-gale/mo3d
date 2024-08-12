@@ -16,16 +16,18 @@ install:
 run: 
 	poetry run mojo run src/main.mojo
 
-test: 
-	poetry run mojo test -I src test
-
 package:
 	mkdir -p bin
 	poetry run mojo package src/mo3d -o bin/mo3d.mojopkg
+	# To allow test in vscode intellisense
+	cp bin/mo3d.mojopkg test/mo3d/mo3d.mojopkg
+
+test: package
+	poetry run mojo test 
 
 build:
 	mkdir -p bin
 	poetry run mojo build src/main.mojo -o bin/mo3d
 
-run-build:
+run-build: build
 	bin/mo3d

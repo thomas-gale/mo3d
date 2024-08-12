@@ -21,6 +21,15 @@ alias fps = 120
 alias width = 256
 alias height = 256
 
+@no_inline
+fn basic_kernel_SIMD[
+    simd_width: Int
+](c: ComplexSIMD[float_type, simd_width]) -> SIMD[float_type, simd_width]:
+    var cx = c.re
+    var cy = c.im
+    var res = cy / width
+    return res
+
 fn main() raises:
     # Basic example of using the SDL2 library to create a window and render to it.
 
@@ -40,14 +49,13 @@ fn main() raises:
             var cx = (col + iota[float_type, simd_width]())
             var cy = row
             var c = ComplexSIMD[float_type, simd_width](cx, cy)
+
             t.store[simd_width](
-                row * width + col, Float32(row/height)
+                row * width + col, basic_kernel_SIMD[simd_width](c)
             )
 
         # Vectorize the call to compute_vector where call gets a chunk of pixels.
-        # vectorize[compute, simd_width, unroll_factor=width](width)
-        # vectorize[compute, simd_width](width)
-        vectorize[compute, 1](width)
+        vectorize[compute, simd_width](width)
 
     var sdl = SDL()
     var res_code = sdl.Init(SDL_INIT_VIDEO)
@@ -100,7 +108,6 @@ fn main() raises:
 
     # Test parallelize (number of work items, number of workers)
     parallelize[worker](height, height)
-
 
     var event = Event()
     var running: Bool = True

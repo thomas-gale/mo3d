@@ -1,8 +1,18 @@
 # mo3d
-Prototype 3d library for Mojo Lang
+Prototype 3d library for Mojo Lang.
 
-## attribution
-- [mojo-sdl](https://github.com/msteele/mojo-sdl/blob/main/SDL.mojo)
+## attribution and inspiration
+- [mojo-sdl](https://github.com/msteele/mojo-sdl/)
+- [magnum-graphics](https://magnum.graphics/)
+- [bevy](https://bevyengine.org/)
+- [ray tracing in weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.html)
 
 ## dev
-- Install `llvm`
+- devcontainer or mac
+- `make setup-linux-env` or `make setup-mac-env`
+- `make run`
+- `make ...` # See `Makefile`
+
+## progeess notes
+### hello world!
+

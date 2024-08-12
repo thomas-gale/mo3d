@@ -20,10 +20,6 @@ fn get_sdl_lib_path() -> StringLiteral:
     return ""
 
 
-#    SDL_PIXELFORMAT_RGBA8888 =
-#      SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED32, SDL_PACKEDORDER_RGBA,
-#                             SDL_PACKEDLAYOUT_8888, 32, 4),
-
 alias SDL_PIXELTYPE_PACKED32 = 6
 alias SDL_PACKEDORDER_RGBA = 4
 alias SDL_PACKEDLAYOUT_8888 = 6
@@ -100,7 +96,6 @@ alias SDL_QUIT = 0x100
 
 alias SDL_KEYDOWN = 0x300
 alias SDL_KEYUP = 0x301
-# alias SDL_
 
 alias SDL_MOUSEMOTION = 0x400
 alias SDL_MOUSEBUTTONDOWN = 0x401
@@ -192,9 +187,6 @@ struct Event:
     #     return Pointer.address_of(self).bitcast[MouseWheelEvent]().load()
 
 
-# alias Event = Keyevent
-
-
 @register_passable("trivial")
 struct Keyevent:
     var type: UInt32
@@ -260,7 +252,7 @@ alias c_SDL_SetRenderDrawBlendMode = fn (
 ) -> Int32
 alias c_SDL_SetRenderTarget = fn (
     r: Pointer[SDL_Renderer],
-    #                                 t: Pointer[SDL_Texture]) -> Int32
+    # t: Pointer[SDL_Texture]) -> Int32
     t: Int64,
 ) -> Int32
 
@@ -270,7 +262,6 @@ alias c_SDL_RenderCopy = fn (
     s: Int64,
     d: Int64,
 ) -> Int32
-# s: Pointer[SDL_Rect], d: Pointer[SDL_Rect]) -> Int32
 
 # SDL_surface.h
 alias c_SDL_FillRect = fn (Pointer[SDL_Surface], Int64, UInt32) -> Int32

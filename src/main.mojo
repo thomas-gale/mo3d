@@ -17,6 +17,7 @@ from mo3d.SDL import (
 alias float_type = DType.float32
 alias simd_width = 2 * simdwidthof[float_type]()
 
+alias fps = 120
 alias width = 256
 alias height = 256
 
@@ -24,6 +25,7 @@ fn main() raises:
     # Basic example of using the SDL2 library to create a window and render to it.
 
     print("Hello, mo3d!")
+    print("SIMD width:", simd_width)
 
     # State
     var t = Tensor[float_type](height, width)
@@ -43,8 +45,9 @@ fn main() raises:
             )
 
         # Vectorize the call to compute_vector where call gets a chunk of pixels.
-        # vectorize[compute, simd_width, width](width)
-        vectorize[compute, simd_width](width)
+        # vectorize[compute, simd_width, unroll_factor=width](width)
+        # vectorize[compute, simd_width](width)
+        vectorize[compute, 1](width)
 
     var sdl = SDL()
     var res_code = sdl.Init(SDL_INIT_VIDEO)
@@ -95,12 +98,11 @@ fn main() raises:
         _ = sdl.RenderCopy(renderer, display, 0, 0)
         _ = sdl.RenderPresent(renderer)
 
-    # Test
+    # Test parallelize (number of work items, number of workers)
     parallelize[worker](height, height)
 
 
     var event = Event()
-    var fps = 120
     var running: Bool = True
     while True:
         if not running:

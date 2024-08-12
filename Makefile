@@ -1,7 +1,11 @@
-.PHONY: install run test
+.PHONY: setup-linux-env setup-mac-env test-sdl-mac install run test package build run-build
 
-install-sdl-mac:
-	brew install sdl2
+setup-linux-env:
+	sudo apt update
+	sudo apt install -y llvm libsdl2-dev 
+
+setup-mac-env:
+	brew install llvm sdl2
 
 test-sdl-mac:
 	clang++ -std=c++17 -I/opt/homebrew/include/SDL2 -L/opt/homebrew/lib -lSDL2 test_sdl.cpp -o bin/test_sdl
@@ -12,7 +16,6 @@ install:
 	poetry install --no-root
 	curl -s https://get.modular.com | sh -
 	modular install max
-	modular install mojo
 
 run: 
 	poetry run mojo run src/main.mojo
@@ -30,10 +33,3 @@ build:
 
 run-build:
 	bin/mo3d
-
-build-test:
-	mkdir -p bin
-	poetry run mojo build src/tests.mojo -o bin/mo3dtest
-
-run-build-test:
-	bin/mo3dtest

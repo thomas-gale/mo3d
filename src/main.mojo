@@ -21,6 +21,7 @@ alias fps = 120
 alias width = 256
 alias height = 256
 
+
 @no_inline
 fn basic_kernel_SIMD[
     simd_width: Int
@@ -29,6 +30,7 @@ fn basic_kernel_SIMD[
     var cy = c.im
     var res = cy / width
     return res
+
 
 fn main() raises:
     # Basic example of using the SDL2 library to create a window and render to it.
@@ -40,10 +42,8 @@ fn main() raises:
     var t = Tensor[float_type](height, width)
 
     @parameter
-    @no_inline
     fn worker(row: Int):
         @parameter
-        @no_inline
         fn compute[simd_width: Int](col: Int):
             """Each time we operate on a `simd_width` vector of pixels."""
             var cx = (col + iota[float_type, simd_width]())

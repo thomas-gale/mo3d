@@ -13,7 +13,6 @@ from mo3d.SDL import (
     Event,
     SDL_QUIT,
 )
-from mo3d.numeric import NumericFloat32
 from mo3d.math import Vec4
 
 alias fps = 120

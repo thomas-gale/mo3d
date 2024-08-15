@@ -14,7 +14,7 @@ from mo3d.SDL import (
     SDL_QUIT,
 )
 from mo3d.numeric import NumericFloat32
-from mo3d.math import Vec3
+from mo3d.math import Vec4
 
 alias fps = 120
 alias width = 256

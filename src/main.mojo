@@ -24,23 +24,35 @@ alias width = 256
 alias height = 256
 alias channels = 2
 
+# Hard coded based on channels ^^
+alias interleaved_width = simdwidthof[float_type]()
+
 
 # These kernals take a ComplexSIMD (2D value) and return a SIMD (1D value)
 # TODO - improve the kernals to perform SIMD on an interleaved n dimensional value
-fn x_grad_SIMD[
+# fn x_grad_SIMD[
+#     simd_width: Int
+# ](c: ComplexSIMD[float_type, simd_width]) -> SIMD[float_type, simd_width]:
+#     var cx = c.re
+#     var res = cx / width
+#     return res
+
+
+# fn y_grad_SIMD[
+#     simd_width: Int
+# ](c: ComplexSIMD[float_type, simd_width]) -> SIMD[float_type, simd_width]:
+#     var cy = c.im
+#     var res = cy / height
+#     return res
+
+fn kernal_SIMD[
     simd_width: Int
-](c: ComplexSIMD[float_type, simd_width]) -> SIMD[float_type, simd_width]:
+](c: ComplexSIMD[float_type, simd_width]) -> SIMD[float_type, 2 * simd_width]:
     var cx = c.re
-    var res = cx / width
-    return res
-
-
-fn y_grad_SIMD[
-    simd_width: Int
-](c: ComplexSIMD[float_type, simd_width]) -> SIMD[float_type, simd_width]:
     var cy = c.im
-    var res = cy / height
-    return res
+    var res_x = cx / width
+    var res_y = cy / height
+    return res_x.interleave(res_y)
 
 
 fn main() raises:
@@ -50,29 +62,41 @@ fn main() raises:
     print("SIMD width:", simd_width)
 
     # State - TODO - collapse to single Tensor and place x,y in adjacent channels
-    var xt = Tensor[float_type](height, width)
-    var yt = Tensor[float_type](height, width)
+    var t = Tensor[float_type](height, width, channels)
+
+    # var xt = Tensor[float_type](height, width)
+    # var yt = Tensor[float_type](height, width)
 
     @parameter
     fn worker(row: Int):
         @parameter
         fn compute[simd_width: Int](col: Int):
             """Each time we operate on a `simd_width` vector of pixels."""
-            var cx = (col + iota[float_type, simd_width]())
-            var cy = row
-            var c = ComplexSIMD[float_type, simd_width](cx, cy)
+            # var cx = (col + iota[float_type, simd_width]())
+            # var cy = row
+            # var c = ComplexSIMD[float_type, simd_width](cx, cy)
 
-            xt.store[simd_width](
-                row * width + col,
-                x_grad_SIMD[simd_width](c),
-            )
-            yt.store[simd_width](
-                row * width + col,
-                y_grad_SIMD[simd_width](c),
+            # xt.store[simd_width](
+            #     row * width + col,
+            #     x_grad_SIMD[simd_width](c),
+            # )
+            # yt.store[simd_width](
+            #     row * width + col,
+            #     y_grad_SIMD[simd_width](c),
+            # )
+
+            # Interleaved SIMD
+            var cx = (col + iota[float_type, interleaved_width]())
+            var cy = row
+            var c = ComplexSIMD[float_type, interleaved_width](cx, cy)
+            
+            t.store[simd_width](
+                row * (width * channels) + col * channels,
+                kernal_SIMD[interleaved_width](c),
             )
 
         # Vectorize the call to compute_vector where call gets a chunk of pixels.
-        vectorize[compute, simd_width](width)
+        vectorize[compute, interleaved_width](width)
 
     var sdl = SDL()
     var res_code = sdl.Init(SDL_INIT_VIDEO)
@@ -99,7 +123,8 @@ fn main() raises:
         height,
     )
 
-    fn redraw(sdl: SDL, xt: Tensor[float_type], yt: Tensor[float_type]) raises:
+    # fn redraw(sdl: SDL, xt: Tensor[float_type], yt: Tensor[float_type]) raises:
+    fn redraw(sdl: SDL, t: Tensor[float_type]) raises:
         var target_code = sdl.SetRenderTarget(renderer, display_texture)
         if target_code != 0:
             print("Failed to set render target")
@@ -107,8 +132,10 @@ fn main() raises:
 
         for y in range(height):
             for x in range(width):
-                var r = (xt[y, x] * 255).cast[DType.uint8]()
-                var g = (yt[y, x] * 255).cast[DType.uint8]()
+                # var r = (xt[y, x] * 255).cast[DType.uint8]()
+                # var g = (yt[y, x] * 255).cast[DType.uint8]()
+                var r = (t[y, x, 0] * 255).cast[DType.uint8]()
+                var g = (t[y, x, 1] * 255).cast[DType.uint8]()
                 var b = 0
                 _ = sdl.SetRenderDrawColor(renderer, r, g, b, 255)
                 var draw_code = sdl.RenderDrawPoint(renderer, y, x)
@@ -132,7 +159,8 @@ fn main() raises:
             # recompute tensor on event (number of work items, number of workers)
             parallelize[worker](height, height)
 
-        redraw(sdl, xt, yt)
+        redraw(sdl, t)
+        # redraw(sdl, xt, yt)
         _ = sdl.Delay(Int32((1000 / fps)))
 
     sdl.DestroyWindow(window)

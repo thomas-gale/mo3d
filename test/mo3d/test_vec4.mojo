@@ -29,3 +29,14 @@ fn test_length_squared() raises:
 fn test_length() raises:
     var v = Vec4(SIMD[DType.float32, 4](3.0, 4.0, 0.0, 0.0))
     assert_equal(v.length(), 5)
+
+fn test_str() raises:
+    var v = Vec4(SIMD[DType.float32, 4](1.0, 2.0, 3.0, 4.0))
+    assert_equal(str(v), "1.0, 2.0, 3.0, 4.0")
+
+fn test_repr() raises:
+    var v = Vec4(SIMD[DType.float32, 4](1.0, 2.0, 3.0, 4.0))
+    assert_equal(
+        repr(v),
+        "Vec4(SIMD[DType.float32, 4](1.0, 2.0, 3.0, 4.0))"
+    )

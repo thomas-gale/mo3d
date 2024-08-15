@@ -2,9 +2,11 @@
 
 from math import sqrt
 
+
 @value
 struct Vec4[type: DType]():
-    var data: SIMD[type, size=4]
+    alias size = 4
+    var data: SIMD[type, size = Self.size]
 
     fn __init__(inout self):
         self.data = SIMD[type, 4](0)  # Value is splatted
@@ -20,6 +22,44 @@ struct Vec4[type: DType]():
 
     fn w(self) -> SIMD[type, 1]:
         return self.data[3]
+
+    fn length_squared(self) -> SIMD[type, 1]:
+        return SIMD.reduce_add(self.data * self.data)
+
+    fn length(self) -> SIMD[type, 1]:
+        return sqrt(self.length_squared())
+
+    # Utility functions
+
+    fn __str__(self) -> String:
+        """Readable representation of the vector"""
+        return (
+            str(self.x())
+            + ", "
+            + str(self.y())
+            + ", "
+            + str(self.z())
+            + ", "
+            + str(self.w())
+        )
+
+    fn __repr__(self) -> String:
+        """Unambiguous representation of the vector (c'tor syntax)"""
+        return (
+            "Vec4(SIMD[DType."
+            + str(type)
+            + ", "
+            + str(Self.size)
+            + "]("
+            + str(self.x())
+            + ", "
+            + str(self.y())
+            + ", "
+            + str(self.z())
+            + ", "
+            + str(self.w())
+            + "))"
+        )
 
     fn __getitem__(self, index: Int) -> SIMD[type, 1]:
         return self.data[index]
@@ -41,9 +81,3 @@ struct Vec4[type: DType]():
 
     fn __idiv__(inout self, other: Self):
         self.data /= other.data
-
-    fn length_squared(self) -> SIMD[type, 1]:
-        return SIMD.reduce_add(self.data * self.data)
-
-    fn length(self) -> SIMD[type, 1]:
-        return sqrt(self.length_squared())

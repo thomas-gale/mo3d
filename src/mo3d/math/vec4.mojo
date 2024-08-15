@@ -83,11 +83,55 @@ struct Vec4[type: DType](EqualityComparable, Stringable):
     fn __setitem__(inout self, index: Int, value: SIMD[type, 1]):
         self.e[index] = value
 
+    fn __lt__(self, rhs: Self) -> Bool:
+        """Lexical comparison."""
+
+        @parameter
+        for i in range(Self.size):
+            if self.e[i] < rhs.e[i]:
+                return True
+            elif self.e[i] > rhs.e[i]:
+                return False
+        return False
+
+    fn __le__(self, rhs: Self) -> Bool:
+        """Lexical comparison."""
+
+        @parameter
+        for i in range(Self.size):
+            if self.e[i] <= rhs.e[i]:
+                return True
+            elif self.e[i] > rhs.e[i]:
+                return False
+        return False
+
     fn __eq__(self, rhs: Self) -> Bool:
         return SIMD.reduce_and(self.e == rhs.e)
 
     fn __ne__(self, rhs: Self) -> Bool:
         return SIMD.reduce_or(self.e != rhs.e)
+
+    fn __gt__(self, rhs: Self) -> Bool:
+        """Lexical comparison."""
+
+        @parameter
+        for i in range(Self.size):
+            if self.e[i] > rhs.e[i]:
+                return True
+            elif self.e[i] < rhs.e[i]:
+                return False
+        return False
+
+    fn __ge__(self, rhs: Self) -> Bool:
+        """Lexical comparison."""
+
+        @parameter
+        for i in range(Self.size):
+            if self.e[i] >= rhs.e[i]:
+                return True
+            elif self.e[i] < rhs.e[i]:
+                return False
+        return False
 
     fn __add__(self, rhs: Self) -> Self:
         return Self(self.e + rhs.e)

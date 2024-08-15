@@ -16,38 +16,20 @@ from mo3d.SDL import (
 from mo3d.numeric import NumericFloat32
 from mo3d.math import Vec3
 
-alias float_type = DType.float32
-alias simd_width = 2 * simdwidthof[float_type]()
-
 alias fps = 120
 alias width = 256
 alias height = 256
 alias channels = 2
 
-# Hard coded based on channels ^^
-alias interleaved_width = simdwidthof[float_type]()
+alias float_type = DType.float32
+alias simd_width = 2 * simdwidthof[float_type]()
 
-
-# These kernals take a ComplexSIMD (2D value) and return a SIMD (1D value)
-# TODO - improve the kernals to perform SIMD on an interleaved n dimensional value
-# fn x_grad_SIMD[
-#     simd_width: Int
-# ](c: ComplexSIMD[float_type, simd_width]) -> SIMD[float_type, simd_width]:
-#     var cx = c.re
-#     var res = cx / width
-#     return res
-
-
-# fn y_grad_SIMD[
-#     simd_width: Int
-# ](c: ComplexSIMD[float_type, simd_width]) -> SIMD[float_type, simd_width]:
-#     var cy = c.im
-#     var res = cy / height
-#     return res
 
 fn kernal_SIMD[
     simd_width: Int
-](c: ComplexSIMD[float_type, simd_width]) -> SIMD[float_type, 2 * simd_width]:
+](c: ComplexSIMD[float_type, simd_width]) -> SIMD[
+    float_type, channels * simd_width
+]:
     var cx = c.re
     var cy = c.im
     var res_x = cx / width
@@ -56,47 +38,25 @@ fn kernal_SIMD[
 
 
 fn main() raises:
-    # Basic example of using the SDL2 library to create a window and render to it.
-
     print("Hello, mo3d!")
     print("SIMD width:", simd_width)
 
-    # State - TODO - collapse to single Tensor and place x,y in adjacent channels
     var t = Tensor[float_type](height, width, channels)
-
-    # var xt = Tensor[float_type](height, width)
-    # var yt = Tensor[float_type](height, width)
 
     @parameter
     fn worker(row: Int):
         @parameter
         fn compute[simd_width: Int](col: Int):
-            """Each time we operate on a `simd_width` vector of pixels."""
-            # var cx = (col + iota[float_type, simd_width]())
-            # var cy = row
-            # var c = ComplexSIMD[float_type, simd_width](cx, cy)
-
-            # xt.store[simd_width](
-            #     row * width + col,
-            #     x_grad_SIMD[simd_width](c),
-            # )
-            # yt.store[simd_width](
-            #     row * width + col,
-            #     y_grad_SIMD[simd_width](c),
-            # )
-
-            # Interleaved SIMD
-            var cx = (col + iota[float_type, interleaved_width]())
+            var cx = (col + iota[float_type, simd_width]())
             var cy = row
-            var c = ComplexSIMD[float_type, interleaved_width](cx, cy)
-            
-            t.store[simd_width](
+            var c = ComplexSIMD[float_type, simd_width](cx, cy)
+
+            t.store[channels * simd_width](
                 row * (width * channels) + col * channels,
-                kernal_SIMD[interleaved_width](c),
+                kernal_SIMD[simd_width](c),
             )
 
-        # Vectorize the call to compute_vector where call gets a chunk of pixels.
-        vectorize[compute, interleaved_width](width)
+        vectorize[compute, simd_width](width)
 
     var sdl = SDL()
     var res_code = sdl.Init(SDL_INIT_VIDEO)
@@ -123,7 +83,6 @@ fn main() raises:
         height,
     )
 
-    # fn redraw(sdl: SDL, xt: Tensor[float_type], yt: Tensor[float_type]) raises:
     fn redraw(sdl: SDL, t: Tensor[float_type]) raises:
         var target_code = sdl.SetRenderTarget(renderer, display_texture)
         if target_code != 0:
@@ -132,8 +91,6 @@ fn main() raises:
 
         for y in range(height):
             for x in range(width):
-                # var r = (xt[y, x] * 255).cast[DType.uint8]()
-                # var g = (yt[y, x] * 255).cast[DType.uint8]()
                 var r = (t[y, x, 0] * 255).cast[DType.uint8]()
                 var g = (t[y, x, 1] * 255).cast[DType.uint8]()
                 var b = 0
@@ -160,7 +117,6 @@ fn main() raises:
             parallelize[worker](height, height)
 
         redraw(sdl, t)
-        # redraw(sdl, xt, yt)
         _ = sdl.Delay(Int32((1000 / fps)))
 
     sdl.DestroyWindow(window)

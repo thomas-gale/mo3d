@@ -25,7 +25,7 @@ alias float_type = DType.float32
 alias simd_width = 2 * simdwidthof[float_type]()
 
 
-fn kernal_SIMD[
+fn kernel_SIMD[
     simd_width: Int
 ](c: ComplexSIMD[float_type, simd_width]) -> SIMD[
     float_type, channels * simd_width
@@ -53,7 +53,7 @@ fn main() raises:
 
             t.store[channels * simd_width](
                 row * (width * channels) + col * channels,
-                kernal_SIMD[simd_width](c),
+                kernel_SIMD[simd_width](c),
             )
 
         vectorize[compute, simd_width](width)

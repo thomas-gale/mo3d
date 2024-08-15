@@ -2,6 +2,7 @@ from algorithm import parallelize, vectorize
 from complex import ComplexSIMD, ComplexFloat64
 from math import iota
 from tensor import Tensor
+from testing import assert_equal
 
 from mo3d.window.SDL import (
     SDL,
@@ -18,10 +19,12 @@ from mo3d.math.vec4 import Vec4
 alias fps = 120
 alias width = 256
 alias height = 256
-alias channels = 2
+# alias channels = 2
+alias channels = Vec4[DType.float32].size
 
 alias float_type = DType.float32
-alias simd_width = 2 * simdwidthof[float_type]()
+# alias simd_width = simdwidthof[float_type]()
+alias simd_width = 4
 
 
 fn kernel_SIMD[
@@ -31,9 +34,29 @@ fn kernel_SIMD[
 ]:
     var cx = c.re
     var cy = c.im
-    var res_x = cx / width
-    var res_y = cy / height
-    return res_x.interleave(res_y)
+    # var r = cx / width
+    # var g = cy / height
+    # var b = cx / width 
+    # var a = cy / height
+
+    # Should be r1, g1, b1, a1, r2, g2, b2, a2, ...
+    # return r.interleave(g)
+    # var rb = SIMD[float_type, channels * simd_width](1.0)
+    var a = SIMD[float_type, 2 * simd_width](1.0)
+    var b = SIMD[float_type, 2 * simd_width](0.5)
+    # var a1 = a.interleave(b)
+    # var ab: SIMD[float_type, 4 * simd_width] = SIMD.join(a, b)
+    var a1 = SIMD[float_type, 4 * simd_width](0.9)
+    # if len(a1) != len(ab):
+        # print("Not equal")
+    return a1
+    # return rb
+    # var ga = SIMD[float_type, 2 * simd_width](g.interleave(a))
+    # return ga
+    # var com = SIMD[float_type, 4 * simd_width](rb.interleave(ga))
+    # return com
+    # return (r.interleave(b)).interleave(g.interleave(a))
+    # return r.interleave(g)
 
 
 fn main() raises:
@@ -41,6 +64,7 @@ fn main() raises:
     print("SIMD width:", simd_width)
 
     var t = Tensor[float_type](height, width, channels)
+    print("Tensor shape:", t.shape())
 
     @parameter
     fn worker(row: Int):
@@ -92,8 +116,13 @@ fn main() raises:
             for x in range(width):
                 var r = (t[y, x, 0] * 255).cast[DType.uint8]()
                 var g = (t[y, x, 1] * 255).cast[DType.uint8]()
+                # var b = (t[y, x, 2] * 255).cast[DType.uint8]()
+                # var a = (t[y, x, 3] * 255).cast[DType.uint8]()
+
                 var b = 0
-                _ = sdl.SetRenderDrawColor(renderer, r, g, b, 255)
+                var a = 255
+
+                _ = sdl.SetRenderDrawColor(renderer, r, g, b, a)
                 var draw_code = sdl.RenderDrawPoint(renderer, y, x)
                 if draw_code != 0:
                     print("Failed to draw point")

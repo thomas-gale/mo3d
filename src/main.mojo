@@ -3,7 +3,7 @@ from complex import ComplexSIMD, ComplexFloat64
 from math import iota
 from tensor import Tensor
 
-from mo3d.SDL import (
+from mo3d.window.SDL import (
     SDL,
     SDL_INIT_VIDEO,
     SDL_WINDOWPOS_CENTERED,
@@ -13,7 +13,7 @@ from mo3d.SDL import (
     Event,
     SDL_QUIT,
 )
-from mo3d.math import Vec4
+from mo3d.math.vec4 import Vec4
 
 alias fps = 120
 alias width = 256

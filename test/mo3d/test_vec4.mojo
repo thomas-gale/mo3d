@@ -1,6 +1,6 @@
 from testing import assert_true, assert_equal, assert_almost_equal
 
-from mo3d.math import Vec4
+from mo3d.math.vec4 import Vec4
 
 
 fn test_create_empty_vec4_float32() raises:

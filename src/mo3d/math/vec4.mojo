@@ -4,32 +4,48 @@ from math import sqrt
 
 
 @value
-struct Vec4[type: DType]():
+struct Vec4[type: DType](EqualityComparable, Stringable):
     alias size = 4
-    var data: SIMD[type, size = Self.size]
+    var e: SIMD[type, size = Self.size]
 
     fn __init__(inout self):
-        self.data = SIMD[type, 4](0)  # Value is splatted
+        self.e = SIMD[type, 4](0)
+
+    fn __init__(inout self, e: SIMD[type, 1]):
+        self.e = SIMD[type, 4](e)
 
     fn x(self) -> SIMD[type, 1]:
-        return self.data[0]
+        return self.e[0]
 
     fn y(self) -> SIMD[type, 1]:
-        return self.data[1]
+        return self.e[1]
 
     fn z(self) -> SIMD[type, 1]:
-        return self.data[2]
+        return self.e[2]
 
     fn w(self) -> SIMD[type, 1]:
-        return self.data[3]
+        return self.e[3]
 
     fn length_squared(self) -> SIMD[type, 1]:
-        return SIMD.reduce_add(self.data * self.data)
+        return SIMD.reduce_add(self.e * self.e)
 
     fn length(self) -> SIMD[type, 1]:
         return sqrt(self.length_squared())
 
-    # Utility functions
+    fn dot(self, rhs: Self) -> SIMD[type, 1]:
+        return SIMD.reduce_add(self.e * rhs.e)
+
+    fn cross(self, rhs: Self) -> Self:
+        return Self(
+            SIMD[type, Self.size](
+                self.e[1] * rhs.e[2] - self.e[2] * rhs.e[1],
+                self.e[2] * rhs.e[0] - self.e[0] * rhs.e[2],
+                self.e[0] * rhs.e[1] - self.e[1] * rhs.e[0],
+            )
+        )
+
+    fn unit(self) -> Self:
+        return self / self.length()
 
     fn __str__(self) -> String:
         """Readable representation of the vector"""
@@ -62,22 +78,40 @@ struct Vec4[type: DType]():
         )
 
     fn __getitem__(self, index: Int) -> SIMD[type, 1]:
-        return self.data[index]
+        return self.e[index]
 
     fn __setitem__(inout self, index: Int, value: SIMD[type, 1]):
-        self.data[index] = value
+        self.e[index] = value
+
+    fn __eq__(self, rhs: Self) -> Bool:
+        return SIMD.reduce_and(self.e == rhs.e)
+
+    fn __ne__(self, rhs: Self) -> Bool:
+        return SIMD.reduce_or(self.e != rhs.e)
+
+    fn __add__(self, rhs: Self) -> Self:
+        return Self(self.e + rhs.e)
+
+    fn __iadd__(inout self, rhs: Self):
+        self.e += rhs.e
 
     fn __neg__(self) -> Self:
-        return Self(-self.data)
+        return Self(-self.e)
 
-    fn __sub__(self, other: Self) -> Self:
-        return Self(self.data - other.data)
+    fn __sub__(self, rhs: Self) -> Self:
+        return Self(self.e - rhs.e)
 
-    fn __iadd__(inout self, other: Self):
-        self.data += other.data
+    fn __isub__(inout self, rhs: Self):
+        self.e -= rhs.e
 
-    fn __imul__(inout self, other: Self):
-        self.data *= other.data
+    fn __mul__(self, rhs: Self) -> Self:
+        return Self(self.e * rhs.e)
 
-    fn __idiv__(inout self, other: Self):
-        self.data /= other.data
+    fn __imul__(inout self, rhs: Self):
+        self.e *= rhs.e
+
+    fn __truediv__(self, rhs: Self) -> Self:
+        return Self(self.e / rhs.e)
+
+    fn __itruediv__(inout self, rhs: Self):
+        self.e /= rhs.e

@@ -5,6 +5,9 @@
 struct Vec4[type: DType]():
     var data: SIMD[type, size=4]
 
+    fn __init__(inout self):
+        self.data = SIMD[type, 4](0) # Value is splatted
+
     fn x(self) -> SIMD[type, 1]:
         return self.data[0]
 
@@ -16,3 +19,6 @@ struct Vec4[type: DType]():
 
     fn w(self) -> SIMD[type, 1]:
         return self.data[3]
+
+
+    

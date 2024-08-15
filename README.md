@@ -24,3 +24,8 @@ Prototype 3d library for [mojo](https://docs.modular.com/mojo/manual/)
 - Basic kernal, however, need to refine the vectorised worker code that sets the pixel stage (tensor `t`)
 
 ![image](https://github.com/user-attachments/assets/13f3c360-2ba6-441a-aebf-ed7507e45c3b)
+
+### 2024-08-15: interleaved SIMD tensor
+- Using SIMD [interleaving](https://docs.modular.com/mojo/stdlib/builtin/simd/SIMD#interleave) on the 3rd dimension `channels` in (tensor `t`)
+
+![image](https://github.com/user-attachments/assets/88cdf3c8-0241-4cf0-bea5-0015fb4795b7)

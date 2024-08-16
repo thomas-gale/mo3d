@@ -19,12 +19,10 @@ from mo3d.math.vec4 import Vec4
 alias fps = 120
 alias width = 256
 alias height = 256
-# alias channels = 2
 alias channels = Vec4[DType.float32].size
 
 alias float_type = DType.float32
-# alias simd_width = simdwidthof[float_type]()
-alias simd_width = 4
+alias simd_width = simdwidthof[float_type]()
 
 
 fn kernel_SIMD[
@@ -45,7 +43,7 @@ fn kernel_SIMD[
     var a = SIMD[float_type, 2 * simd_width](1.0)
     var b = SIMD[float_type, 2 * simd_width](0.5)
     # var a1 = a.interleave(b)
-    # var ab: SIMD[float_type, 4 * simd_width] = SIMD.join(a, b)
+    # var ab = rebind[SIMD[float_type, 4 * simd_width]](SIMD.join(a, b))
     var a1 = SIMD[float_type, 4 * simd_width](0.9)
     # if len(a1) != len(ab):
         # print("Not equal")

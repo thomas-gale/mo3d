@@ -10,8 +10,18 @@ setup-mac-env:
 install:
 	pipx install poetry
 	poetry install --no-root
-	curl -s https://get.modular.com | sh -
+	curl -s https://get.modular.com | sh -s -- ce42d51f-fb3c-4b98-bd05-9dcc020921b2
 	modular install max
+
+install-nightly:
+	pipx install poetry
+	poetry install --no-root
+	curl -s https://get.modular.com | sh -s -- ce42d51f-fb3c-4b98-bd05-9dcc020921b2
+	modular auth
+	modular install nightly/max
+
+install-magic:
+	curl -ssL https://modul.ar/magic-alpha | bash
 
 run: 
 	poetry run mojo run src/main.mojo

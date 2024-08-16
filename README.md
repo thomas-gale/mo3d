@@ -15,8 +15,19 @@ Prototype 3d library for [mojo](https://docs.modular.com/mojo/manual/)
 ## dev
 - devcontainer or mac
 - `make setup-linux-env` or `make setup-mac-env`
+-  https://docs.modular.com/max/install
 - `make run`
 - `make ...` # See `Makefile`
+
+### experimenting with nightly
+```
+$ mojo --version
+mojo 2024.8.1517 (ee6ccd9a)
+$ max --version
+max 2024.8.1517 (ee6ccd9a)
+Modular version 2024.8.1517
+```
+
 
 ## progess notes
 ### 2024-08-11: hello window

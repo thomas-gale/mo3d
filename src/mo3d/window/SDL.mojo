@@ -3,7 +3,6 @@
 
 from sys import ffi, info
 
-
 fn get_sdl_lib_path() -> StringLiteral:
     if info.os_is_linux():
         var lib_path = "/usr/lib/x86_64-linux-gnu/libSDL2.so"

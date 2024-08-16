@@ -161,6 +161,18 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
+# pixi environments
+.pixi
+*.egg-info
+# magic environments
+.magic
+
 # Binary files
 bin/
 *.mojopkg
+
+# pixi environments
+.pixi
+*.egg-info
+# magic environments
+.magic

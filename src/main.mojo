@@ -1,6 +1,7 @@
 from algorithm import parallelize, vectorize
 from complex import ComplexSIMD, ComplexFloat64
 from math import iota
+from memory.unsafe import LegacyPointer, DTypePointer
 from tensor import Tensor
 from testing import assert_equal
 
@@ -120,7 +121,7 @@ fn main() raises:
         if not running:
             break
 
-        while sdl.PollEvent(Pointer[Event].address_of(event)) != 0:
+        while sdl.PollEvent(LegacyPointer[Event].address_of(event)) != 0:
             if event.type == SDL_QUIT:
                 running = False
             # recompute tensor on event (number of work items, number of workers)

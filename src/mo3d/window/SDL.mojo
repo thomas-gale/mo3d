@@ -1,6 +1,7 @@
 # Attribution: https://github.com/msteele/mojo-sdl/tree/main
 # WIP: Upgrading for mojo 24.4.0
 
+from memory.unsafe import LegacyPointer
 from sys import ffi, info
 
 fn get_sdl_lib_path() -> StringLiteral:
@@ -78,16 +79,16 @@ struct SDL_Texture:
 @register_passable("trivial")
 struct SDL_Surface:
     var flags: UInt32
-    var format: Pointer[SDL_PixelFormat]
+    var format: LegacyPointer[SDL_PixelFormat]
     var w: Int32
     var h: Int32
     var pitch: Int32
-    var pixels: Pointer[UInt32]
-    var userdata: Pointer[Int8]
+    var pixels: LegacyPointer[UInt32]
+    var userdata: LegacyPointer[Int8]
     var locked: Int32
-    var list_blitmap: Pointer[Int8]
+    var list_blitmap: LegacyPointer[Int8]
     var clip_rect: SDL_Rect
-    var map: Pointer[Int8]
+    var map: LegacyPointer[Int8]
     var refcount: Int32
 
 
@@ -174,16 +175,16 @@ struct Event:
         self._padding3 = 0
 
     # def as_keyboard(self: Self) -> Keyevent:
-    #     return Pointer.address_of(Reference[Self, True, MutableStaticLifetime](self)).bitcast[Keyevent]().load()
+    #     return LegacyPointer.address_of(Reference[Self, True, MutableStaticLifetime](self)).bitcast[Keyevent]().load()
 
     # def as_mousemotion(self) -> MouseMotionEvent:
-    #     return Pointer.address_of(self).bitcast[MouseMotionEvent]().load()
+    #     return LegacyPointer.address_of(self).bitcast[MouseMotionEvent]().load()
 
     # def as_mousebutton(self) -> MouseButtonEvent:
-    #     return Pointer.address_of(self).bitcast[MouseButtonEvent]().load()
+    #     return LegacyPointer.address_of(self).bitcast[MouseButtonEvent]().load()
 
     # def as_mousewheel(self) -> MouseWheelEvent:
-    #     return Pointer.address_of(self).bitcast[MouseWheelEvent]().load()
+    #     return LegacyPointer.address_of(self).bitcast[MouseWheelEvent]().load()
 
 
 @register_passable("trivial")
@@ -215,10 +216,10 @@ alias c_SDL_Quit = fn () -> None
 # SDL_video.h
 alias c_SDL_CreateWindow = fn (
     DTypePointer[DType.uint8], Int32, Int32, Int32, Int32, Int32
-) -> Pointer[SDL_Window]
-alias c_SDL_DestroyWindow = fn (Pointer[SDL_Window]) -> None
-alias c_SDL_GetWindowSurface = fn (s: Pointer[Int8]) -> Pointer[SDL_Surface]
-alias c_SDL_UpdateWindowSurface = fn (s: Pointer[Int8]) -> Int32
+) -> LegacyPointer[SDL_Window]
+alias c_SDL_DestroyWindow = fn (LegacyPointer[SDL_Window]) -> None
+alias c_SDL_GetWindowSurface = fn (s: LegacyPointer[Int8]) -> LegacyPointer[SDL_Surface]
+alias c_SDL_UpdateWindowSurface = fn (s: LegacyPointer[Int8]) -> Int32
 
 # SDL_pixels.h
 alias c_SDL_MapRGB = fn (Int32, Int32, Int32, Int32) -> UInt32
@@ -227,49 +228,49 @@ alias c_SDL_MapRGB = fn (Int32, Int32, Int32, Int32) -> UInt32
 alias c_SDL_Delay = fn (Int32) -> UInt32
 
 # SDL_event.h
-alias c_SDL_PollEvent = fn (Pointer[Event]) -> Int32
+alias c_SDL_PollEvent = fn (LegacyPointer[Event]) -> Int32
 
 # SDL_render.h
-alias c_SDL_CreateRenderer = fn (Pointer[SDL_Window], Int32, UInt32) -> Pointer[
+alias c_SDL_CreateRenderer = fn (LegacyPointer[SDL_Window], Int32, UInt32) -> LegacyPointer[
     SDL_Renderer
 ]
 alias c_SDL_CreateWindowAndRenderer = fn (
-    Int32, Int32, UInt32, Pointer[Pointer[Int8]], Pointer[Pointer[SDL_Renderer]]
+    Int32, Int32, UInt32, LegacyPointer[LegacyPointer[Int8]], LegacyPointer[LegacyPointer[SDL_Renderer]]
 ) -> Int32
-alias c_SDL_RenderDrawPoint = fn (Pointer[SDL_Renderer], Int32, Int32) -> Int32
+alias c_SDL_RenderDrawPoint = fn (LegacyPointer[SDL_Renderer], Int32, Int32) -> Int32
 alias c_SDL_RenderDrawRect = fn (
-    r: Pointer[SDL_Renderer], rect: Pointer[SDL_Rect]
+    r: LegacyPointer[SDL_Renderer], rect: LegacyPointer[SDL_Rect]
 ) -> Int32
-alias c_SDL_RenderPresent = fn (s: Pointer[SDL_Renderer]) -> Int32
-alias c_SDL_RenderClear = fn (s: Pointer[SDL_Renderer]) -> Int32
+alias c_SDL_RenderPresent = fn (s: LegacyPointer[SDL_Renderer]) -> Int32
+alias c_SDL_RenderClear = fn (s: LegacyPointer[SDL_Renderer]) -> Int32
 alias c_SDL_SetRenderDrawColor = fn (
-    Pointer[SDL_Renderer], UInt8, UInt8, UInt8, UInt8
+    LegacyPointer[SDL_Renderer], UInt8, UInt8, UInt8, UInt8
 ) -> Int32
 alias SDL_BlendMode = Int
 alias c_SDL_SetRenderDrawBlendMode = fn (
-    Pointer[SDL_Renderer], SDL_BlendMode
+    LegacyPointer[SDL_Renderer], SDL_BlendMode
 ) -> Int32
 alias c_SDL_SetRenderTarget = fn (
-    r: Pointer[SDL_Renderer],
-    # t: Pointer[SDL_Texture]) -> Int32
+    r: LegacyPointer[SDL_Renderer],
+    # t: LegacyPointer[SDL_Texture]) -> Int32
     t: Int64,
 ) -> Int32
 
 alias c_SDL_RenderCopy = fn (
-    r: Pointer[SDL_Renderer],
-    t: Int64,  # t: Pointer[SDL_Texture],
+    r: LegacyPointer[SDL_Renderer],
+    t: Int64,  # t: LegacyPointer[SDL_Texture],
     s: Int64,
     d: Int64,
 ) -> Int32
 
 # SDL_surface.h
-alias c_SDL_FillRect = fn (Pointer[SDL_Surface], Int64, UInt32) -> Int32
+alias c_SDL_FillRect = fn (LegacyPointer[SDL_Surface], Int64, UInt32) -> Int32
 
 
 # texture
 alias c_SDL_CreateTexture = fn (
-    Pointer[SDL_Renderer], UInt32, Int32, Int32, Int32
-) -> Int64  # Pointer[SDL_Texture]
+    LegacyPointer[SDL_Renderer], UInt32, Int32, Int32, Int32
+) -> Int64  # LegacyPointer[SDL_Texture]
 
 
 alias SDL_WINDOWPOS_UNDEFINED = 0x1FFF0000

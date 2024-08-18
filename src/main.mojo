@@ -10,20 +10,20 @@ from testing import assert_equal
 from time import now, sleep
 
 from mo3d.window.SDL import (
-    SDL,
     SDL_INIT_VIDEO,
+    SDL_PIXELFORMAT_RGBA8888,
+    SDL_QUIT,
+    SDL_TEXTUREACCESS_TARGET,
     SDL_WINDOWPOS_CENTERED,
     SDL_WINDOW_SHOWN,
-    SDL_PIXELFORMAT_RGBA8888,
-    SDL_TEXTUREACCESS_TARGET,
+    SDL,
     Event,
-    SDL_QUIT,
 )
 from mo3d.math.vec4 import Vec4
 
 alias fps = 120
 alias width = 256
-alias height = 256
+alias height = 192
 alias channels = Vec4[DType.float32].size
 
 alias float_type = DType.float32
@@ -55,6 +55,7 @@ fn main() raises:
 
     var t = Tensor[float_type](height, width, channels)
     print("Tensor shape:", t.shape())
+
 
     @parameter
     fn worker(row: Int):
@@ -102,6 +103,9 @@ fn main() raises:
             print("Failed to set render target")
             return
 
+        # Clear the renderer first
+        _ = sdl.RenderClear(renderer)
+
         for y in range(height):
             for x in range(width):
                 var r = (t[y, x, 0] * 255).cast[DType.uint8]()
@@ -110,9 +114,9 @@ fn main() raises:
                 var a = (t[y, x, 3] * 255).cast[DType.uint8]()
 
                 _ = sdl.SetRenderDrawColor(renderer, r, g, b, a)
-                var draw_code = sdl.RenderDrawPoint(renderer, y, x)
+                var draw_code = sdl.RenderDrawPoint(renderer, x, y)
                 if draw_code != 0:
-                    print("Failed to draw point")
+                    print("Failed to draw point at (", x, ", ", y, ")")
                     return
 
         _ = sdl.SetRenderTarget(renderer, 0)

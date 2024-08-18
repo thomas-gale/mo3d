@@ -11,20 +11,24 @@ install:
 	curl -ssL https://modul.ar/magic-alpha | bash
 
 run: 
-	magic run mojo run src/main.mojo
+	# magic run mojo run src/main.mojo
+	mojo run src/main.mojo
 
 package:
 	mkdir -p bin
-	magic run mojo package src/mo3d -o bin/mo3d.mojopkg
+	# magic run mojo package src/mo3d -o bin/mo3d.mojopkg
+	mojo package src/mo3d -o bin/mo3d.mojopkg
 	# To allow test in vscode intellisense
 	cp bin/mo3d.mojopkg test/mo3d/mo3d.mojopkg
 
 test: package
-	magic run mojo test 
+	# magic run mojo test 
+	mojo test
 
 build:
 	mkdir -p bin
-	magic run mojo build src/main.mojo -o bin/mo3d
+	# magic run mojo build src/main.mojo -o bin/mo3d
+	mojo build src/main.mojo -o bin/mo3d
 
 run-build: build
 	bin/mo3d

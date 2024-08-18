@@ -1,7 +1,10 @@
 from algorithm import parallelize, vectorize
 from complex import ComplexSIMD, ComplexFloat64
 from math import iota
-from memory.unsafe import LegacyPointer, DTypePointer
+
+# from memory.unsafe import LegacyPointer, DTypePointer
+from memory import UnsafePointer
+from sys import simdwidthof
 from tensor import Tensor
 from testing import assert_equal
 from time import now, sleep
@@ -75,7 +78,7 @@ fn main() raises:
         return
 
     var window = sdl.CreateWindow(
-        DTypePointer(StringRef("mo3d").data),
+        UnsafePointer(StringRef("mo3d").data),
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
         width,
@@ -129,22 +132,34 @@ fn main() raises:
             break
 
         last_time = now()
-        while sdl.PollEvent(LegacyPointer[Event].address_of(event)) != 0:
+        while sdl.PollEvent(UnsafePointer[Event].address_of(event)) != 0:
             if event.type == SDL_QUIT:
                 running = False
             # recompute tensor on event (number of work items, number of workers)
             parallelize[worker](height, height)
-        average_compute_time = (1.0 - alpha) * average_compute_time + alpha * (now() - last_time)
-        
+        average_compute_time = (1.0 - alpha) * average_compute_time + alpha * (
+            now() - last_time
+        )
+
         last_time = now()
         redraw(sdl, t)
-        average_redraw_time = (1.0 - alpha) * average_redraw_time + alpha * (now() - last_time)
+        average_redraw_time = (1.0 - alpha) * average_redraw_time + alpha * (
+            now() - last_time
+        )
 
-        _ = sdl.Delay(Int32((1000 / fps)))
+        _ = sdl.Delay((Float32(1000) / Float32(fps)).cast[DType.int32]())
 
     sdl.DestroyWindow(window)
     sdl.Quit()
 
-    print("Average compute time: " + str(average_compute_time/(1024*1024)) + " ms") 
-    print("Average redraw time: " + str(average_redraw_time/(1024*1024)) + " ms") 
+    print(
+        "Average compute time: "
+        + str(average_compute_time / (1024 * 1024))
+        + " ms"
+    )
+    print(
+        "Average redraw time: "
+        + str(average_redraw_time / (1024 * 1024))
+        + " ms"
+    )
     print("Goodbye, mo3d!")

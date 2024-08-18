@@ -29,7 +29,7 @@ Modular version 2024.8.1517
 ```
 
 
-## progess notes
+## progress notes
 ### 2024-08-11: hello window
 - Basic window rendering on linux (within vscode devcontainer on windows) and mac
 - Basic kernal, however, need to refine the vectorised worker code that sets the pixel stage (tensor `t`)
@@ -40,3 +40,5 @@ Modular version 2024.8.1517
 - Using SIMD [interleaving](https://docs.modular.com/mojo/stdlib/builtin/simd/SIMD#interleave) on the 3rd dimension `channels` in (tensor `t`)
 
 ![image](https://github.com/user-attachments/assets/88cdf3c8-0241-4cf0-bea5-0015fb4795b7)
+
+### 2024-08-18: migrated to mojo nightly!

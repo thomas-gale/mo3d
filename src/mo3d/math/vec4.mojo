@@ -48,7 +48,7 @@ struct Vec4[type: DType](EqualityComparable, Stringable):
         return self / self.length()
 
     fn __str__(self) -> String:
-        """Readable representation of the vector"""
+        """Readable representation of the vector."""
         return (
             str(self.x())
             + ", "
@@ -60,7 +60,7 @@ struct Vec4[type: DType](EqualityComparable, Stringable):
         )
 
     fn __repr__(self) -> String:
-        """Unambiguous representation of the vector (c'tor syntax)"""
+        """Unambiguous representation of the vector (c'tor syntax)."""
         return (
             "Vec4(SIMD[DType."
             + str(type)

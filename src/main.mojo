@@ -43,7 +43,8 @@ fn kernel_SIMD[
     var a = cy / height
 
     # Should be r1, g1, b1, a1, r2, g2, b2, a2, ...
-    # Rebind is required to help the type checker understand the interleaving shape (4 * simd_width == 2 * 2 * simd_width)
+    # Rebind is required to help the type checker understand the interleaving shape equivalence.
+    # Else you get error: cannot implicitly convert 'SIMD[float32, __mul__(2, __mul__(2, simd_width))]' value to 'SIMD[float32, __mul__(4, simd_width)]'
     return rebind[SIMD[float_type, channels * simd_width]](
         (r.interleave(b)).interleave(g.interleave(a))
     )
@@ -55,7 +56,6 @@ fn main() raises:
 
     var t = Tensor[float_type](height, width, channels)
     print("Tensor shape:", t.shape())
-
 
     @parameter
     fn worker(row: Int):
@@ -103,7 +103,6 @@ fn main() raises:
             print("Failed to set render target")
             return
 
-        # Clear the renderer first
         _ = sdl.RenderClear(renderer)
 
         for y in range(height):
@@ -126,29 +125,26 @@ fn main() raises:
     var event = Event()
     var running: Bool = True
 
-    var last_time = now()
+    var start_time = now()
     var alpha = 0.1
     var average_compute_time = 0.0
     var average_redraw_time = 0.0
 
-    while True:
-        if not running:
-            break
-
-        last_time = now()
+    while running:
         while sdl.PollEvent(UnsafePointer[Event].address_of(event)) != 0:
             if event.type == SDL_QUIT:
                 running = False
-            # recompute tensor on event (number of work items, number of workers)
-            parallelize[worker](height, height)
+
+        start_time = now()
+        parallelize[worker](height, height)
         average_compute_time = (1.0 - alpha) * average_compute_time + alpha * (
-            now() - last_time
+            now() - start_time
         )
 
-        last_time = now()
+        start_time = now()
         redraw(sdl, t)
         average_redraw_time = (1.0 - alpha) * average_redraw_time + alpha * (
-            now() - last_time
+            now() - start_time
         )
 
         _ = sdl.Delay((Float32(1000) / Float32(fps)).cast[DType.int32]())
@@ -157,13 +153,13 @@ fn main() raises:
     sdl.Quit()
 
     print(
-        "Average compute time: "
-        + str(average_compute_time / (1024 * 1024))
-        + " ms"
+        "Average compute time:",
+        str(average_compute_time / (1024 * 1024)),
+        " ms",
     )
     print(
-        "Average redraw time: "
-        + str(average_redraw_time / (1024 * 1024))
-        + " ms"
+        "Average redraw time:",
+        str(average_redraw_time / (1024 * 1024)),
+        " ms",
     )
     print("Goodbye, mo3d!")

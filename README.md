@@ -16,6 +16,7 @@ Prototype 3d library for [mojo](https://docs.modular.com/mojo/manual/)
 - devcontainer or mac
 - `make setup-linux-env` or `make setup-mac-env`
 - `make install`
+- Set environment variables as documented https://docs.modular.com/max/install depending on terminal
 - `make run`
 - `make ...` # See `Makefile`
 

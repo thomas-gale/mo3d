@@ -7,7 +7,7 @@
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"modular-mojotools.vscode-mojo"
+				"modular-mojotools.vscode-mojo-nightly"
 			]
 		}
 	},

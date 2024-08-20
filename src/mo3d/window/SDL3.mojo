@@ -4,19 +4,10 @@ from sys import ffi, info
 
 fn get_sdl_lib_path() -> StringLiteral:
     if info.os_is_linux():
-        var lib_path = "/usr/lib/x86_64-linux-gnu/libSDL3.so"
-        try:
-            with open("/etc/os-release", "r") as f:
-                var release = f.read()
-                if release.find("Ubuntu") < 0:
-                    lib_path = "/usr/lib64/libSDL3.so"
-        except:
-            print("Can't detect Linux version")
-        return lib_path
+        return "/usr/local/lib/libSDL3.so"
     if info.os_is_macos():
-        return "/opt/homebrew/lib/libSDL3.dylib"
+        return "TODO"
     return ""
-
 
 
 alias SDL_PIXELTYPE_PACKED32 = 6
@@ -42,8 +33,6 @@ alias SDL_PIXELFORMAT_RGBA8888 = SDL_DEFINE_PIXELFORMAT(
 )
 
 alias SDL_TEXTUREACCESS_TARGET = 2
-
-
 alias SDL_INIT_VIDEO = 0x00000020
 
 
@@ -157,21 +146,30 @@ struct MouseWheelEvent:
     var mouseX: Int32
     var mouseY: Int32
 
-
 @register_passable("trivial")
 struct Event:
-    var type: Int32
-    var _padding: SIMD[DType.uint8, 16]
-    var _padding2: Int64
-    var _padding3: Int64
-    # def __init__(inout self) -> Event:
-    #     return Event { type: 0, _padding: 0, _padding2: 0, _padding3: 0 }
+    var type: UInt32
+    var padding: SIMD[DType.uint8, 128]
 
     fn __init__(inout self):
         self.type = 0
-        self._padding = 0
-        self._padding2 = 0
-        self._padding3 = 0
+        self.padding = 0
+
+
+# @register_passable("trivial")
+# struct Event:
+#     var type: Int32
+#     var _padding: SIMD[DType.uint8, 16]
+#     var _padding2: Int64
+#     var _padding3: Int64
+#     # def __init__(inout self) -> Event:
+#     #     return Event { type: 0, _padding: 0, _padding2: 0, _padding3: 0 }
+
+#     fn __init__(inout self):
+#         self.type = 0
+#         self._padding = 0
+#         self._padding2 = 0
+#         self._padding3 = 0
 
     # def as_keyboard(self: Self) -> Keyevent:
     #     return UnsafePointer.address_of(Reference[Self, True, MutableStaticLifetime](self)).bitcast[Keyevent]().load()
@@ -214,7 +212,7 @@ alias c_SDL_Quit = fn () -> None
 
 # SDL_video.h
 alias c_SDL_CreateWindow = fn (
-    UnsafePointer[UInt8], Int32, Int32, Int32, Int32, Int32
+    UnsafePointer[UInt8], Int32, Int32, Int32
 ) -> UnsafePointer[SDL_Window]
 alias c_SDL_DestroyWindow = fn (UnsafePointer[SDL_Window]) -> None
 alias c_SDL_GetWindowSurface = fn (s: UnsafePointer[Int8]) -> UnsafePointer[
@@ -228,13 +226,15 @@ alias c_SDL_MapRGB = fn (Int32, Int32, Int32, Int32) -> UInt32
 # SDL_timer.h
 alias c_SDL_Delay = fn (Int32) -> UInt32
 
-# SDL_event.h
+# SDL_events.h
 alias c_SDL_PollEvent = fn (UnsafePointer[Event]) -> Int32
 
 # SDL_render.h
 alias c_SDL_CreateRenderer = fn (
-    UnsafePointer[SDL_Window], Int32, UInt32
+    UnsafePointer[SDL_Window], Int32
 ) -> UnsafePointer[SDL_Renderer]
+alias c_SDL_DestroyRenderer = fn (UnsafePointer[SDL_Renderer]) -> None
+
 alias c_SDL_CreateWindowAndRenderer = fn (
     Int32,
     Int32,
@@ -282,7 +282,6 @@ alias c_SDL_CreateTexture = fn (
 
 alias SDL_WINDOWPOS_UNDEFINED = 0x1FFF0000
 alias SDL_WINDOWPOS_CENTERED = 0x2FFF0000
-
 alias SDL_WINDOW_SHOWN = 0x00000004
 
 
@@ -296,6 +295,7 @@ struct SDL:
     var GetWindowSurface: c_SDL_GetWindowSurface
     var UpdateWindowSurface: c_SDL_UpdateWindowSurface
     var CreateRenderer: c_SDL_CreateRenderer
+    var DestroyRenderer: c_SDL_DestroyRenderer
     var CreateWindowAndRenderer: c_SDL_CreateWindowAndRenderer
     var RenderDrawPoint: c_SDL_RenderDrawPoint
     var RenderDrawRect: c_SDL_RenderDrawRect
@@ -313,6 +313,7 @@ struct SDL:
     var PollEvent: c_SDL_PollEvent
 
     fn __init__(inout self):
+        print("Loading SDL3...")
         var lib_path = get_sdl_lib_path()
         var SDL = ffi.DLHandle(lib_path)
 
@@ -336,6 +337,10 @@ struct SDL:
         self.CreateRenderer = SDL.get_function[c_SDL_CreateRenderer](
             "SDL_CreateRenderer"
         )
+        self.DestroyRenderer = SDL.get_function[c_SDL_DestroyRenderer](
+            "SDL_DestroyRenderer"
+        )
+
         self.CreateWindowAndRenderer = SDL.get_function[
             c_SDL_CreateWindowAndRenderer
         ]("SDL_CreateWindowAndRenderer")
@@ -370,3 +375,5 @@ struct SDL:
         self.FillRect = SDL.get_function[c_SDL_FillRect]("SDL_FillRect")
         self.Delay = SDL.get_function[c_SDL_Delay]("SDL_Delay")
         self.PollEvent = SDL.get_function[c_SDL_PollEvent]("SDL_PollEvent")
+
+        print("Loaded SDL3!")

@@ -9,7 +9,7 @@ from tensor import Tensor
 from testing import assert_equal
 from time import now, sleep
 
-from mo3d.window.SDL2 import (
+from mo3d.window.SDL3 import (
     SDL_INIT_VIDEO,
     SDL_PIXELFORMAT_RGBA8888,
     SDL_QUIT,
@@ -17,6 +17,7 @@ from mo3d.window.SDL2 import (
     SDL_WINDOWPOS_CENTERED,
     SDL_WINDOW_SHOWN,
     SDL,
+    SDL_Window,
     Event,
 )
 from mo3d.math.vec4 import Vec4
@@ -77,50 +78,54 @@ fn main() raises:
     if res_code != 0:
         print("Failed to initialize SDL")
         return
+    print("SDL initialized")
 
     var window = sdl.CreateWindow(
         UnsafePointer(StringRef("mo3d").data),
-        SDL_WINDOWPOS_CENTERED,
-        SDL_WINDOWPOS_CENTERED,
         width,
         height,
         SDL_WINDOW_SHOWN,
     )
+    print("Window created")
 
-    var renderer = sdl.CreateRenderer(window, -1, 0)
+    if window == UnsafePointer[SDL_Window]():
+        print("Failed to create SDL window")
+        return
 
-    var display_texture = sdl.CreateTexture(
-        renderer,
-        SDL_PIXELFORMAT_RGBA8888,
-        SDL_TEXTUREACCESS_TARGET,
-        width,
-        height,
-    )
+    var renderer = sdl.CreateRenderer(window, 0)
 
-    fn redraw(sdl: SDL, t: Tensor[float_type]) raises:
-        var target_code = sdl.SetRenderTarget(renderer, display_texture)
-        if target_code != 0:
-            print("Failed to set render target")
-            return
+    # var display_texture = sdl.CreateTexture(
+    #     renderer,
+    #     SDL_PIXELFORMAT_RGBA8888,
+    #     SDL_TEXTUREACCESS_TARGET,
+    #     width,
+    #     height,
+    # )
 
-        _ = sdl.RenderClear(renderer)
+    # fn redraw(sdl: SDL, t: Tensor[float_type]) raises:
+    #     var target_code = sdl.SetRenderTarget(renderer, display_texture)
+    #     if target_code != 0:
+    #         print("Failed to set render target")
+    #         return
 
-        for y in range(height):
-            for x in range(width):
-                var r = (t[y, x, 0] * 255).cast[DType.uint8]()
-                var g = (t[y, x, 1] * 255).cast[DType.uint8]()
-                var b = (t[y, x, 2] * 255).cast[DType.uint8]()
-                var a = (t[y, x, 3] * 255).cast[DType.uint8]()
+    #     _ = sdl.RenderClear(renderer)
 
-                _ = sdl.SetRenderDrawColor(renderer, r, g, b, a)
-                var draw_code = sdl.RenderDrawPoint(renderer, x, y)
-                if draw_code != 0:
-                    print("Failed to draw point at (", x, ", ", y, ")")
-                    return
+    #     for y in range(height):
+    #         for x in range(width):
+    #             var r = (t[y, x, 0] * 255).cast[DType.uint8]()
+    #             var g = (t[y, x, 1] * 255).cast[DType.uint8]()
+    #             var b = (t[y, x, 2] * 255).cast[DType.uint8]()
+    #             var a = (t[y, x, 3] * 255).cast[DType.uint8]()
 
-        _ = sdl.SetRenderTarget(renderer, 0)
-        _ = sdl.RenderCopy(renderer, display_texture, 0, 0)
-        _ = sdl.RenderPresent(renderer)
+    #             _ = sdl.SetRenderDrawColor(renderer, r, g, b, a)
+    #             var draw_code = sdl.RenderDrawPoint(renderer, x, y)
+    #             if draw_code != 0:
+    #                 print("Failed to draw point at (", x, ", ", y, ")")
+    #                 return
+
+    #     _ = sdl.SetRenderTarget(renderer, 0)
+    #     _ = sdl.RenderCopy(renderer, display_texture, 0, 0)
+    #     _ = sdl.RenderPresent(renderer)
 
     var event = Event()
     var running: Bool = True
@@ -130,27 +135,35 @@ fn main() raises:
     var average_compute_time = 0.0
     var average_redraw_time = 0.0
 
+    print("Window", window)
+    print("Renderer", renderer)
+    # print("Display texture", display_texture)
+
     while running:
         while sdl.PollEvent(UnsafePointer[Event].address_of(event)) != 0:
             if event.type == SDL_QUIT:
                 running = False
 
         start_time = now()
-        parallelize[worker](height, height)
+        # parallelize[worker](height, height)
         average_compute_time = (1.0 - alpha) * average_compute_time + alpha * (
             now() - start_time
         )
 
         start_time = now()
-        redraw(sdl, t)
+        # redraw(sdl, t)
         average_redraw_time = (1.0 - alpha) * average_redraw_time + alpha * (
             now() - start_time
         )
 
-        _ = sdl.Delay((Float32(1000) / Float32(fps)).cast[DType.int32]())
+        # _ = sdl.Delay((Float32(1000) / Float32(fps)).cast[DType.int32]())
 
+    sdl.DestroyRenderer(renderer)
+    print("Renderer destroyed")
     sdl.DestroyWindow(window)
+    print("Window destroyed")
     sdl.Quit()
+    print("SDL quit")
 
     print(
         "Average compute time:",

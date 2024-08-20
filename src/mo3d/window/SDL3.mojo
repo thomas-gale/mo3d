@@ -286,12 +286,12 @@ alias c_SDL_DestroyTexture = fn (UnsafePointer[SDL_Texture]) -> None
 alias c_SDL_LockTexture = fn (
     UnsafePointer[SDL_Texture],
     UnsafePointer[SDL_Rect],
-    # inout UnsafePointer[UInt8],
+    inout UnsafePointer[UInt8],
     # inout UnsafePointer[UnsafePointer[UInt8]],
-    inout Int64,
-    # inout UnsafePointer[Int64],
     # inout Int64,
-    inout UnsafePointer[Int64]._mlir_type
+    inout UnsafePointer[Int32],
+    # inout Int64,
+    # inout UnsafePointer[Int64]._mlir_type
 ) -> Int32
 alias c_SDL_UnlockTexture = fn (UnsafePointer[SDL_Texture]) -> None
 

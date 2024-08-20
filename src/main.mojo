@@ -112,23 +112,24 @@ fn main() raises:
 
     # fn redraw_bulk(sdl: SDL, t: Tensor[float_type]) raises:
     fn redraw_bulk(sdl: SDL) raises:
-        # var pixels = UnsafePointer[UInt8]()
+        var pixels = UnsafePointer[UInt8]()
         # var pixels = UnsafePointer[UnsafePointer[UInt8]]()
-        # var pitch = UnsafePointer[Int64]()
-        var pitch: UnsafePointer[Int64]._mlir_type = __mlir_attr[`#interp.pointer<0> : `, UnsafePointer[Int64]._mlir_type]
-        var pixels: Int64 = 0
+        var pitch = UnsafePointer[Int32]()
+        # var pitch: UnsafePointer[Int64]._mlir_type = __mlir_attr[`#interp.pointer<0> : `, UnsafePointer[Int64]._mlir_type]
+        # var pixels: Int64 = 0
         var lock_code = sdl.LockTexture(
             display_texture, UnsafePointer[SDL_Rect](), pixels, pitch
         )
         print("Locked texture")
-        # print("Pitch:", pitch[])
-        # print("Pitch ptr:", pitch)
         print("Pixels ptr:", pixels)
+        print("Pitch ptr:", pitch)
 
-        var pitch_ptr = UnsafePointer[Int64](value=pitch)
-        print("Pitch ptr:", pitch_ptr)
-        print("Pitch:", pitch_ptr[])
+        pixels[] = 169
 
+        print("Pixels 0", (pixels)[])
+
+        _ = pixels
+        _ = pitch
 
         if lock_code != 0:
             print("Failed to lock texture:", lock_code)
@@ -136,11 +137,11 @@ fn main() raises:
             return
 
         # Assuming the Tensor data t is already in the format that matches the texture's format
-        for y in range(height):
+        for y in range(height/2):
             for x in range(width):
-                pass
                 # var offset = y * pitch[] + x * 4  # Assuming 4 bytes per pixel (RGBA8888)
-                # (pixels + offset)[] = 169
+                var offset = y * width + x * 4  # Assuming 4 bytes per pixel (RGBA8888)
+                (pixels + offset)[] = 255
                 # (pixels + offset)[] = (t[y, x, 0] * 255).cast[DType.uint8]()
                 # (pixels + offset + 1)[] = (t[y, x, 1] * 255).cast[DType.uint8]()
                 # (pixels + offset + 2)[] = (t[y, x, 2] * 255).cast[DType.uint8]()

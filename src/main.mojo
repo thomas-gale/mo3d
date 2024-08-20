@@ -13,10 +13,12 @@ from mo3d.window.SDL3 import (
     SDL_INIT_VIDEO,
     SDL_PIXELFORMAT_RGBA8888,
     SDL_QUIT,
-    SDL_TEXTUREACCESS_TARGET,
+    SDL_TEXTUREACCESS_STREAMING,
+    # SDL_TEXTUREACCESS_TARGET,
     SDL_WINDOWPOS_CENTERED,
     SDL_WINDOW_SHOWN,
     SDL,
+    SDL_Rect,
     SDL_Window,
     SDL_Texture,
     Event,
@@ -29,7 +31,8 @@ alias height = 192
 alias channels = Vec4[DType.float32].size
 
 alias float_type = DType.float32
-alias simd_width = 2 * simdwidthof[float_type]()
+alias simd_width = 1
+# alias simd_width = 2 * simdwidthof[float_type]()
 
 
 fn kernel_SIMD[
@@ -74,6 +77,9 @@ fn main() raises:
 
         vectorize[compute, simd_width](width)
 
+    # parallelize[worker](height, height)
+    # parallelize[worker](height, 1)
+
     var sdl = SDL()
     var res_code = sdl.Init(SDL_INIT_VIDEO)
     if res_code != 0:
@@ -98,35 +104,85 @@ fn main() raises:
     var display_texture = sdl.CreateTexture(
         renderer,
         SDL_PIXELFORMAT_RGBA8888,
-        SDL_TEXTUREACCESS_TARGET,
+        SDL_TEXTUREACCESS_STREAMING,
+        # SDL_TEXTUREACCESS_TARGET,
         width,
         height,
     )
 
-    fn redraw(sdl: SDL, t: Tensor[float_type]) raises:
-        var target_code = sdl.SetRenderTarget(renderer, display_texture)
-        if target_code != 0:
-            print("Failed to set render target")
+    # fn redraw_bulk(sdl: SDL, t: Tensor[float_type]) raises:
+    fn redraw_bulk(sdl: SDL) raises:
+        # var pixels = UnsafePointer[UInt8]()
+        # var pixels = UnsafePointer[UnsafePointer[UInt8]]()
+        # var pitch = UnsafePointer[Int64]()
+        var pitch: UnsafePointer[Int64]._mlir_type = __mlir_attr[`#interp.pointer<0> : `, UnsafePointer[Int64]._mlir_type]
+        var pixels: Int64 = 0
+        var lock_code = sdl.LockTexture(
+            display_texture, UnsafePointer[SDL_Rect](), pixels, pitch
+        )
+        print("Locked texture")
+        # print("Pitch:", pitch[])
+        # print("Pitch ptr:", pitch)
+        print("Pixels ptr:", pixels)
+
+        var pitch_ptr = UnsafePointer[Int64](value=pitch)
+        print("Pitch ptr:", pitch_ptr)
+        print("Pitch:", pitch_ptr[])
+
+
+        if lock_code != 0:
+            print("Failed to lock texture:", lock_code)
+            print(sdl.get_sdl_error_as_string())
             return
 
-        _ = sdl.RenderClear(renderer)
-
+        # Assuming the Tensor data t is already in the format that matches the texture's format
         for y in range(height):
             for x in range(width):
-                var r = (t[y, x, 0] * 255).cast[DType.uint8]()
-                var g = (t[y, x, 1] * 255).cast[DType.uint8]()
-                var b = (t[y, x, 2] * 255).cast[DType.uint8]()
-                var a = (t[y, x, 3] * 255).cast[DType.uint8]()
+                pass
+                # var offset = y * pitch[] + x * 4  # Assuming 4 bytes per pixel (RGBA8888)
+                # (pixels + offset)[] = 169
+                # (pixels + offset)[] = (t[y, x, 0] * 255).cast[DType.uint8]()
+                # (pixels + offset + 1)[] = (t[y, x, 1] * 255).cast[DType.uint8]()
+                # (pixels + offset + 2)[] = (t[y, x, 2] * 255).cast[DType.uint8]()
+                # (pixels + offset + 3)[] = (t[y, x, 3] * 255).cast[DType.uint8]()
 
-                _ = sdl.SetRenderDrawColor(renderer, r, g, b, a)
-                var draw_code = sdl.RenderDrawPoint(renderer, x, y)
-                if draw_code != 0:
-                    print("Failed to draw point at (", x, ", ", y, ")")
-                    return
+        sdl.UnlockTexture(display_texture)
+        print("Unlocked texture")
 
         _ = sdl.SetRenderTarget(renderer, UnsafePointer[SDL_Texture]())
-        _ = sdl.RenderCopy(renderer, display_texture, 0, 0)
+        _ = sdl.RenderTexture(
+            renderer,
+            display_texture,
+            UnsafePointer[SDL_Rect](),
+            UnsafePointer[SDL_Rect](),
+        )
+        # _ = sdl.RenderCopy(renderer, display_texture, UnsafePointer[SDL_Rect](), UnsafePointer[SDL_Rect]())
         _ = sdl.RenderPresent(renderer)
+
+    # fn redraw(sdl: SDL, t: Tensor[float_type]) raises:
+    #     var target_code = sdl.SetRenderTarget(renderer, display_texture)
+    #     if target_code != 0:
+    #         print("Failed to set render target")
+    #         return
+
+    #     _ = sdl.RenderClear(renderer)
+
+    #     for y in range(height):
+    #         for x in range(width):
+    #             var r = (t[y, x, 0] * 255).cast[DType.uint8]()
+    #             var g = (t[y, x, 1] * 255).cast[DType.uint8]()
+    #             var b = (t[y, x, 2] * 255).cast[DType.uint8]()
+    #             var a = (t[y, x, 3] * 255).cast[DType.uint8]()
+
+    #             _ = sdl.SetRenderDrawColor(renderer, r, g, b, a)
+    #             var draw_code = sdl.RenderDrawPoint(renderer, x, y)
+    #             if draw_code != 0:
+    #                 print("Failed to draw point at (", x, ", ", y, ")")
+    #                 return
+
+    #     _ = sdl.SetRenderTarget(renderer, UnsafePointer[SDL_Texture]())
+    #     _ = sdl.RenderCopy(renderer, display_texture, 0, 0)
+    #     _ = sdl.RenderPresent(renderer)
 
     var event = Event()
     var running: Bool = True
@@ -153,9 +209,13 @@ fn main() raises:
 
         start_time = now()
         # redraw(sdl, t)
+        redraw_bulk(sdl)
+
         average_redraw_time = (1.0 - alpha) * average_redraw_time + alpha * (
             now() - start_time
         )
+
+        # break
 
         # _ = sdl.Delay((Float32(1000) / Float32(fps)).cast[DType.int32]())
 

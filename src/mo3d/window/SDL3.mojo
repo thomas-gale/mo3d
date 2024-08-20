@@ -32,6 +32,8 @@ alias SDL_PIXELFORMAT_RGBA8888 = SDL_DEFINE_PIXELFORMAT(
     SDL_PIXELTYPE_PACKED32, SDL_PACKEDORDER_RGBA, SDL_PACKEDLAYOUT_8888, 32, 4
 )
 
+alias SDL_TEXTUREACCESS_STATIC = 0
+alias SDL_TEXTUREACCESS_STREAMING = 1
 alias SDL_TEXTUREACCESS_TARGET = 2
 alias SDL_INIT_VIDEO = 0x00000020
 
@@ -262,6 +264,14 @@ alias c_SDL_SetRenderTarget = fn (
     r: UnsafePointer[SDL_Renderer], t: UnsafePointer[SDL_Texture]
 ) -> Int32
 
+alias c_SDL_RenderTexture = fn (
+    r: UnsafePointer[SDL_Renderer],
+    t: UnsafePointer[SDL_Texture],
+    s: UnsafePointer[SDL_Rect],
+    d: UnsafePointer[SDL_Rect],
+) -> Int32
+
+# Depracated?
 alias c_SDL_RenderCopy = fn (
     r: UnsafePointer[SDL_Renderer],
     t: UnsafePointer[SDL_Texture],
@@ -273,6 +283,18 @@ alias c_SDL_CreateTexture = fn (
     UnsafePointer[SDL_Renderer], UInt32, Int32, Int32, Int32
 ) -> UnsafePointer[SDL_Texture]
 alias c_SDL_DestroyTexture = fn (UnsafePointer[SDL_Texture]) -> None
+alias c_SDL_LockTexture = fn (
+    UnsafePointer[SDL_Texture],
+    UnsafePointer[SDL_Rect],
+    # inout UnsafePointer[UInt8],
+    # inout UnsafePointer[UnsafePointer[UInt8]],
+    inout Int64,
+    # inout UnsafePointer[Int64],
+    # inout Int64,
+    inout UnsafePointer[Int64]._mlir_type
+) -> Int32
+alias c_SDL_UnlockTexture = fn (UnsafePointer[SDL_Texture]) -> None
+
 
 # SDL_surface.h
 alias c_SDL_FillRect = fn (UnsafePointer[SDL_Surface], Int64, UInt32) -> Int32
@@ -280,6 +302,9 @@ alias c_SDL_FillRect = fn (UnsafePointer[SDL_Surface], Int64, UInt32) -> Int32
 alias SDL_WINDOWPOS_UNDEFINED = 0x1FFF0000
 alias SDL_WINDOWPOS_CENTERED = 0x2FFF0000
 alias SDL_WINDOW_SHOWN = 0x00000004
+
+# SDL_error.h
+alias c_SDL_GetError = fn () -> UnsafePointer[UInt8]
 
 
 struct SDL:
@@ -301,14 +326,20 @@ struct SDL:
     var RenderClear: c_SDL_RenderClear
     var CreateTexture: c_SDL_CreateTexture
     var DestroyTexture: c_SDL_DestroyTexture
+    var LockTexture: c_SDL_LockTexture
+    var UnlockTexture: c_SDL_UnlockTexture
     var SetRenderDrawBlendMode: c_SDL_SetRenderDrawBlendMode
     var SetRenderTarget: c_SDL_SetRenderTarget
+
+    var RenderTexture: c_SDL_RenderTexture
     var RenderCopy: c_SDL_RenderCopy
 
     var MapRGB: c_SDL_MapRGB
     var FillRect: c_SDL_FillRect
     var Delay: c_SDL_Delay
     var PollEvent: c_SDL_PollEvent
+
+    var GetError: c_SDL_GetError
 
     fn __init__(inout self):
         print("Loading SDL3...")
@@ -363,6 +394,11 @@ struct SDL:
         self.SetRenderTarget = SDL.get_function[c_SDL_SetRenderTarget](
             "SDL_SetRenderTarget"
         )
+
+        self.RenderTexture = SDL.get_function[c_SDL_RenderTexture](
+            "SDL_RenderTexture"
+        )
+        # Deprecated?
         self.RenderCopy = SDL.get_function[c_SDL_RenderCopy]("SDL_RenderCopy")
 
         self.CreateTexture = SDL.get_function[c_SDL_CreateTexture](
@@ -371,10 +407,28 @@ struct SDL:
         self.DestroyTexture = SDL.get_function[c_SDL_DestroyTexture](
             "SDL_DestroyTexture"
         )
+        self.LockTexture = SDL.get_function[c_SDL_LockTexture](
+            "SDL_LockTexture"
+        )
+        self.UnlockTexture = SDL.get_function[c_SDL_UnlockTexture](
+            "SDL_UnlockTexture"
+        )
 
         self.MapRGB = SDL.get_function[c_SDL_MapRGB]("SDL_MapRGB")
         self.FillRect = SDL.get_function[c_SDL_FillRect]("SDL_FillRect")
         self.Delay = SDL.get_function[c_SDL_Delay]("SDL_Delay")
         self.PollEvent = SDL.get_function[c_SDL_PollEvent]("SDL_PollEvent")
 
+        self.GetError = SDL.get_function[c_SDL_GetError]("SDL_GetError")
+
         print("Loaded SDL3!")
+
+    fn get_sdl_error_as_string(self) -> String:
+        var error_ptr = self.GetError()  # Call the function to get the error pointer
+
+        if error_ptr == UnsafePointer[UInt8]():  # Check if the pointer is null
+            return "Unknown error"
+
+        # Convert the C-string to a Mojo String
+        var error_string = String(error_ptr)
+        return error_string

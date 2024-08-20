@@ -31,54 +31,10 @@ alias height = 192
 alias channels = Vec4[DType.float32].size
 
 alias float_type = DType.float32
-alias simd_width = 1
-# alias simd_width = 2 * simdwidthof[float_type]()
-
-
-fn kernel_SIMD[
-    simd_width: Int
-](c: ComplexSIMD[float_type, simd_width]) -> SIMD[
-    float_type, channels * simd_width
-]:
-    var cx = c.re
-    var cy = c.im
-    var r = cx / width
-    var g = cy / height
-    var b = cx / width
-    var a = cy / height
-
-    # Should be r1, g1, b1, a1, r2, g2, b2, a2, ...
-    # Rebind is required to help the type checker understand the interleaving shape equivalence.
-    # Else you get error: cannot implicitly convert 'SIMD[float32, __mul__(2, __mul__(2, simd_width))]' value to 'SIMD[float32, __mul__(4, simd_width)]'
-    return rebind[SIMD[float_type, channels * simd_width]](
-        (r.interleave(b)).interleave(g.interleave(a))
-    )
 
 
 fn main() raises:
     print("Hello, mo3d!")
-    print("SIMD width:", simd_width)
-
-    var t = Tensor[float_type](height, width, channels)
-    print("Tensor shape:", t.shape())
-
-    @parameter
-    fn worker(row: Int):
-        @parameter
-        fn compute[simd_width: Int](col: Int):
-            var cx = (col + iota[float_type, simd_width]())
-            var cy = row
-            var c = ComplexSIMD[float_type, simd_width](cx, cy)
-
-            t.store[channels * simd_width](
-                row * (width * channels) + col * channels,
-                kernel_SIMD[simd_width](c),
-            )
-
-        vectorize[compute, simd_width](width)
-
-    # parallelize[worker](height, height)
-    # parallelize[worker](height, 1)
 
     var sdl = SDL()
     var res_code = sdl.Init(SDL_INIT_VIDEO)
@@ -105,92 +61,41 @@ fn main() raises:
         renderer,
         SDL_PIXELFORMAT_RGBA8888,
         SDL_TEXTUREACCESS_STREAMING,
-        # SDL_TEXTUREACCESS_TARGET,
         width,
         height,
     )
 
-    # fn redraw_bulk(sdl: SDL, t: Tensor[float_type]) raises:
-    fn redraw_bulk(sdl: SDL) raises:
+    @parameter
+    fn redraw_texture_row(row: Int):
         var pixels = UnsafePointer[UInt8]()
-        # var pixels = UnsafePointer[UnsafePointer[UInt8]]()
         var pitch = UnsafePointer[Int32]()
-        # var pitch: UnsafePointer[Int64]._mlir_type = __mlir_attr[`#interp.pointer<0> : `, UnsafePointer[Int64]._mlir_type]
-        # var pixels: Int64 = 0
         var lock_code = sdl.LockTexture(
             display_texture, UnsafePointer[SDL_Rect](), pixels, pitch
         )
-        print("Locked texture")
-        print("Pixels ptr:", pixels)
-        print("Pitch ptr:", pitch)
-
-        pixels[] = 169
-
-        print("Pixels 0", (pixels)[])
-
-        _ = pixels
-        _ = pitch
 
         if lock_code != 0:
             print("Failed to lock texture:", lock_code)
             print(sdl.get_sdl_error_as_string())
             return
 
-        # Assuming the Tensor data t is already in the format that matches the texture's format
-        for y in range(height/2):
+        alias man_pitch = width * 4
+
+        for y in range(height):
             for x in range(width):
-                # var offset = y * pitch[] + x * 4  # Assuming 4 bytes per pixel (RGBA8888)
-                var offset = y * width + x * 4  # Assuming 4 bytes per pixel (RGBA8888)
-                (pixels + offset)[] = 255
-                # (pixels + offset)[] = (t[y, x, 0] * 255).cast[DType.uint8]()
-                # (pixels + offset + 1)[] = (t[y, x, 1] * 255).cast[DType.uint8]()
-                # (pixels + offset + 2)[] = (t[y, x, 2] * 255).cast[DType.uint8]()
-                # (pixels + offset + 3)[] = (t[y, x, 3] * 255).cast[DType.uint8]()
+                var offset = y * man_pitch + x * 4  # Calculate the correct offset using pitch
+                (pixels + offset)[] = (x / width * 255).cast[DType.uint8]()
+                (pixels + offset + 1)[] = (y / width * 255).cast[DType.uint8]()
+                (pixels + offset + 2)[] = (x / width * 255).cast[DType.uint8]()
+                (pixels + offset + 3)[] = (y / height * 255).cast[DType.uint8]()
 
         sdl.UnlockTexture(display_texture)
-        print("Unlocked texture")
 
-        _ = sdl.SetRenderTarget(renderer, UnsafePointer[SDL_Texture]())
-        _ = sdl.RenderTexture(
-            renderer,
-            display_texture,
-            UnsafePointer[SDL_Rect](),
-            UnsafePointer[SDL_Rect](),
-        )
-        # _ = sdl.RenderCopy(renderer, display_texture, UnsafePointer[SDL_Rect](), UnsafePointer[SDL_Rect]())
-        _ = sdl.RenderPresent(renderer)
-
-    # fn redraw(sdl: SDL, t: Tensor[float_type]) raises:
-    #     var target_code = sdl.SetRenderTarget(renderer, display_texture)
-    #     if target_code != 0:
-    #         print("Failed to set render target")
-    #         return
-
-    #     _ = sdl.RenderClear(renderer)
-
-    #     for y in range(height):
-    #         for x in range(width):
-    #             var r = (t[y, x, 0] * 255).cast[DType.uint8]()
-    #             var g = (t[y, x, 1] * 255).cast[DType.uint8]()
-    #             var b = (t[y, x, 2] * 255).cast[DType.uint8]()
-    #             var a = (t[y, x, 3] * 255).cast[DType.uint8]()
-
-    #             _ = sdl.SetRenderDrawColor(renderer, r, g, b, a)
-    #             var draw_code = sdl.RenderDrawPoint(renderer, x, y)
-    #             if draw_code != 0:
-    #                 print("Failed to draw point at (", x, ", ", y, ")")
-    #                 return
-
-    #     _ = sdl.SetRenderTarget(renderer, UnsafePointer[SDL_Texture]())
-    #     _ = sdl.RenderCopy(renderer, display_texture, 0, 0)
-    #     _ = sdl.RenderPresent(renderer)
 
     var event = Event()
     var running: Bool = True
 
     var start_time = now()
     var alpha = 0.1
-    var average_compute_time = 0.0
     var average_redraw_time = 0.0
 
     print("Window", window)
@@ -203,22 +108,23 @@ fn main() raises:
                 running = False
 
         start_time = now()
-        # parallelize[worker](height, height)
-        average_compute_time = (1.0 - alpha) * average_compute_time + alpha * (
-            now() - start_time
-        )
 
-        start_time = now()
-        # redraw(sdl, t)
-        redraw_bulk(sdl)
+        # Core rendering code
+        _ = sdl.RenderClear(renderer)
+        redraw_texture_row(0)
+        _ = sdl.RenderTexture(
+            renderer,
+            display_texture,
+            UnsafePointer[SDL_Rect](),
+            UnsafePointer[SDL_Rect](),
+        )
+        _ = sdl.RenderPresent(renderer)
 
         average_redraw_time = (1.0 - alpha) * average_redraw_time + alpha * (
             now() - start_time
         )
 
-        # break
-
-        # _ = sdl.Delay((Float32(1000) / Float32(fps)).cast[DType.int32]())
+        _ = sdl.Delay((Float32(1000) / Float32(fps)).cast[DType.int32]())
 
     sdl.DestroyTexture(display_texture)
     print("Texture destroyed")
@@ -229,11 +135,6 @@ fn main() raises:
     sdl.Quit()
     print("SDL quit")
 
-    print(
-        "Average compute time:",
-        str(average_compute_time / (1024 * 1024)),
-        " ms",
-    )
     print(
         "Average redraw time:",
         str(average_redraw_time / (1024 * 1024)),

@@ -18,6 +18,7 @@ from mo3d.window.SDL3 import (
     SDL_WINDOW_SHOWN,
     SDL,
     SDL_Window,
+    SDL_Texture,
     Event,
 )
 from mo3d.math.vec4 import Vec4
@@ -94,38 +95,38 @@ fn main() raises:
 
     var renderer = sdl.CreateRenderer(window, 0)
 
-    # var display_texture = sdl.CreateTexture(
-    #     renderer,
-    #     SDL_PIXELFORMAT_RGBA8888,
-    #     SDL_TEXTUREACCESS_TARGET,
-    #     width,
-    #     height,
-    # )
+    var display_texture = sdl.CreateTexture(
+        renderer,
+        SDL_PIXELFORMAT_RGBA8888,
+        SDL_TEXTUREACCESS_TARGET,
+        width,
+        height,
+    )
 
-    # fn redraw(sdl: SDL, t: Tensor[float_type]) raises:
-    #     var target_code = sdl.SetRenderTarget(renderer, display_texture)
-    #     if target_code != 0:
-    #         print("Failed to set render target")
-    #         return
+    fn redraw(sdl: SDL, t: Tensor[float_type]) raises:
+        var target_code = sdl.SetRenderTarget(renderer, display_texture)
+        if target_code != 0:
+            print("Failed to set render target")
+            return
 
-    #     _ = sdl.RenderClear(renderer)
+        _ = sdl.RenderClear(renderer)
 
-    #     for y in range(height):
-    #         for x in range(width):
-    #             var r = (t[y, x, 0] * 255).cast[DType.uint8]()
-    #             var g = (t[y, x, 1] * 255).cast[DType.uint8]()
-    #             var b = (t[y, x, 2] * 255).cast[DType.uint8]()
-    #             var a = (t[y, x, 3] * 255).cast[DType.uint8]()
+        for y in range(height):
+            for x in range(width):
+                var r = (t[y, x, 0] * 255).cast[DType.uint8]()
+                var g = (t[y, x, 1] * 255).cast[DType.uint8]()
+                var b = (t[y, x, 2] * 255).cast[DType.uint8]()
+                var a = (t[y, x, 3] * 255).cast[DType.uint8]()
 
-    #             _ = sdl.SetRenderDrawColor(renderer, r, g, b, a)
-    #             var draw_code = sdl.RenderDrawPoint(renderer, x, y)
-    #             if draw_code != 0:
-    #                 print("Failed to draw point at (", x, ", ", y, ")")
-    #                 return
+                _ = sdl.SetRenderDrawColor(renderer, r, g, b, a)
+                var draw_code = sdl.RenderDrawPoint(renderer, x, y)
+                if draw_code != 0:
+                    print("Failed to draw point at (", x, ", ", y, ")")
+                    return
 
-    #     _ = sdl.SetRenderTarget(renderer, 0)
-    #     _ = sdl.RenderCopy(renderer, display_texture, 0, 0)
-    #     _ = sdl.RenderPresent(renderer)
+        _ = sdl.SetRenderTarget(renderer, UnsafePointer[SDL_Texture]())
+        _ = sdl.RenderCopy(renderer, display_texture, 0, 0)
+        _ = sdl.RenderPresent(renderer)
 
     var event = Event()
     var running: Bool = True
@@ -137,7 +138,7 @@ fn main() raises:
 
     print("Window", window)
     print("Renderer", renderer)
-    # print("Display texture", display_texture)
+    print("Display texture", display_texture)
 
     while running:
         while sdl.PollEvent(UnsafePointer[Event].address_of(event)) != 0:
@@ -158,6 +159,8 @@ fn main() raises:
 
         # _ = sdl.Delay((Float32(1000) / Float32(fps)).cast[DType.int32]())
 
+    sdl.DestroyTexture(display_texture)
+    print("Texture destroyed")
     sdl.DestroyRenderer(renderer)
     print("Renderer destroyed")
     sdl.DestroyWindow(window)

@@ -146,6 +146,7 @@ struct MouseWheelEvent:
     var mouseX: Int32
     var mouseY: Int32
 
+
 @register_passable("trivial")
 struct Event:
     var type: UInt32
@@ -171,17 +172,17 @@ struct Event:
 #         self._padding2 = 0
 #         self._padding3 = 0
 
-    # def as_keyboard(self: Self) -> Keyevent:
-    #     return UnsafePointer.address_of(Reference[Self, True, MutableStaticLifetime](self)).bitcast[Keyevent]().load()
+# def as_keyboard(self: Self) -> Keyevent:
+#     return UnsafePointer.address_of(Reference[Self, True, MutableStaticLifetime](self)).bitcast[Keyevent]().load()
 
-    # def as_mousemotion(self) -> MouseMotionEvent:
-    #     return UnsafePointer.address_of(self).bitcast[MouseMotionEvent]().load()
+# def as_mousemotion(self) -> MouseMotionEvent:
+#     return UnsafePointer.address_of(self).bitcast[MouseMotionEvent]().load()
 
-    # def as_mousebutton(self) -> MouseButtonEvent:
-    #     return UnsafePointer.address_of(self).bitcast[MouseButtonEvent]().load()
+# def as_mousebutton(self) -> MouseButtonEvent:
+#     return UnsafePointer.address_of(self).bitcast[MouseButtonEvent]().load()
 
-    # def as_mousewheel(self) -> MouseWheelEvent:
-    #     return UnsafePointer.address_of(self).bitcast[MouseWheelEvent]().load()
+# def as_mousewheel(self) -> MouseWheelEvent:
+#     return UnsafePointer.address_of(self).bitcast[MouseWheelEvent]().load()
 
 
 @register_passable("trivial")
@@ -258,27 +259,23 @@ alias c_SDL_SetRenderDrawBlendMode = fn (
     UnsafePointer[SDL_Renderer], SDL_BlendMode
 ) -> Int32
 alias c_SDL_SetRenderTarget = fn (
-    r: UnsafePointer[SDL_Renderer],
-    # t: UnsafePointer[SDL_Texture]) -> Int32
-    t: Int64,
+    r: UnsafePointer[SDL_Renderer], t: UnsafePointer[SDL_Texture]
 ) -> Int32
 
 alias c_SDL_RenderCopy = fn (
     r: UnsafePointer[SDL_Renderer],
-    t: Int64,  # t: UnsafePointer[SDL_Texture],
+    t: UnsafePointer[SDL_Texture],
     s: Int64,
     d: Int64,
 ) -> Int32
 
-# SDL_surface.h
-alias c_SDL_FillRect = fn (UnsafePointer[SDL_Surface], Int64, UInt32) -> Int32
-
-
-# texture
 alias c_SDL_CreateTexture = fn (
     UnsafePointer[SDL_Renderer], UInt32, Int32, Int32, Int32
-) -> Int64  # UnsafePointer[SDL_Texture]
+) -> UnsafePointer[SDL_Texture]
+alias c_SDL_DestroyTexture = fn (UnsafePointer[SDL_Texture]) -> None
 
+# SDL_surface.h
+alias c_SDL_FillRect = fn (UnsafePointer[SDL_Surface], Int64, UInt32) -> Int32
 
 alias SDL_WINDOWPOS_UNDEFINED = 0x1FFF0000
 alias SDL_WINDOWPOS_CENTERED = 0x2FFF0000
@@ -303,6 +300,7 @@ struct SDL:
     var RenderPresent: c_SDL_RenderPresent
     var RenderClear: c_SDL_RenderClear
     var CreateTexture: c_SDL_CreateTexture
+    var DestroyTexture: c_SDL_DestroyTexture
     var SetRenderDrawBlendMode: c_SDL_SetRenderDrawBlendMode
     var SetRenderTarget: c_SDL_SetRenderTarget
     var RenderCopy: c_SDL_RenderCopy
@@ -369,6 +367,9 @@ struct SDL:
 
         self.CreateTexture = SDL.get_function[c_SDL_CreateTexture](
             "SDL_CreateTexture"
+        )
+        self.DestroyTexture = SDL.get_function[c_SDL_DestroyTexture](
+            "SDL_DestroyTexture"
         )
 
         self.MapRGB = SDL.get_function[c_SDL_MapRGB]("SDL_MapRGB")

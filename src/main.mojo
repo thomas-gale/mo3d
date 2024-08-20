@@ -2,7 +2,6 @@ from algorithm import parallelize, vectorize
 from complex import ComplexSIMD, ComplexFloat64
 from math import iota
 
-# from memory.unsafe import LegacyPointer, DTypePointer
 from memory import UnsafePointer
 from sys import simdwidthof
 from tensor import Tensor
@@ -14,7 +13,6 @@ from mo3d.window.SDL3 import (
     SDL_PIXELFORMAT_RGBA8888,
     SDL_QUIT,
     SDL_TEXTUREACCESS_STREAMING,
-    # SDL_TEXTUREACCESS_TARGET,
     SDL_WINDOWPOS_CENTERED,
     SDL_WINDOW_SHOWN,
     SDL,
@@ -27,7 +25,7 @@ from mo3d.math.vec4 import Vec4
 
 alias fps = 120
 alias width = 256
-alias height = 192
+alias height = 256
 alias channels = Vec4[DType.float32].size
 
 alias float_type = DType.float32
@@ -65,8 +63,7 @@ fn main() raises:
         height,
     )
 
-    @parameter
-    fn redraw_texture_row(row: Int):
+    fn redraw_texture(sdl: SDL):
         var pixels = UnsafePointer[UInt8]()
         var pitch = UnsafePointer[Int32]()
         var lock_code = sdl.LockTexture(
@@ -90,7 +87,6 @@ fn main() raises:
 
         sdl.UnlockTexture(display_texture)
 
-
     var event = Event()
     var running: Bool = True
 
@@ -111,7 +107,9 @@ fn main() raises:
 
         # Core rendering code
         _ = sdl.RenderClear(renderer)
-        redraw_texture_row(0)
+        # BIG Blocker - SDL is not thread safe :'(
+        # So can't use parallelize here - that was the plan over regions of texture...
+        redraw_texture(sdl)
         _ = sdl.RenderTexture(
             renderer,
             display_texture,

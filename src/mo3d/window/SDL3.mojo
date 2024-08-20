@@ -43,8 +43,9 @@ struct SDL_Window:
     pass
 
 
+@value
 @register_passable("trivial")
-struct SDL_Rect:
+struct SDL_Rect(Movable):
     var x: Int32
     var y: Int32
     var w: Int32

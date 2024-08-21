@@ -39,7 +39,6 @@ install:
 install-magic:
 	curl -ssL https://modul.ar/magic-alpha | bash
 
-
 run: 
 	# magic run mojo run src/main.mojo
 	mojo run src/main.mojo

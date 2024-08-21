@@ -160,34 +160,6 @@ struct Event:
         self.padding = 0
 
 
-# @register_passable("trivial")
-# struct Event:
-#     var type: Int32
-#     var _padding: SIMD[DType.uint8, 16]
-#     var _padding2: Int64
-#     var _padding3: Int64
-#     # def __init__(inout self) -> Event:
-#     #     return Event { type: 0, _padding: 0, _padding2: 0, _padding3: 0 }
-
-#     fn __init__(inout self):
-#         self.type = 0
-#         self._padding = 0
-#         self._padding2 = 0
-#         self._padding3 = 0
-
-# def as_keyboard(self: Self) -> Keyevent:
-#     return UnsafePointer.address_of(Reference[Self, True, MutableStaticLifetime](self)).bitcast[Keyevent]().load()
-
-# def as_mousemotion(self) -> MouseMotionEvent:
-#     return UnsafePointer.address_of(self).bitcast[MouseMotionEvent]().load()
-
-# def as_mousebutton(self) -> MouseButtonEvent:
-#     return UnsafePointer.address_of(self).bitcast[MouseButtonEvent]().load()
-
-# def as_mousewheel(self) -> MouseWheelEvent:
-#     return UnsafePointer.address_of(self).bitcast[MouseWheelEvent]().load()
-
-
 @register_passable("trivial")
 struct Keyevent:
     var type: UInt32
@@ -272,14 +244,6 @@ alias c_SDL_RenderTexture = fn (
     d: UnsafePointer[SDL_Rect],
 ) -> Int32
 
-# Depracated?
-alias c_SDL_RenderCopy = fn (
-    r: UnsafePointer[SDL_Renderer],
-    t: UnsafePointer[SDL_Texture],
-    s: Int64,
-    d: Int64,
-) -> Int32
-
 alias c_SDL_CreateTexture = fn (
     UnsafePointer[SDL_Renderer], UInt32, Int32, Int32, Int32
 ) -> UnsafePointer[SDL_Texture]
@@ -288,11 +252,7 @@ alias c_SDL_LockTexture = fn (
     UnsafePointer[SDL_Texture],
     UnsafePointer[SDL_Rect],
     inout UnsafePointer[UInt8],
-    # inout UnsafePointer[UnsafePointer[UInt8]],
-    # inout Int64,
     inout UnsafePointer[Int32],
-    # inout Int64,
-    # inout UnsafePointer[Int64]._mlir_type
 ) -> Int32
 alias c_SDL_UnlockTexture = fn (UnsafePointer[SDL_Texture]) -> None
 
@@ -333,7 +293,6 @@ struct SDL:
     var SetRenderTarget: c_SDL_SetRenderTarget
 
     var RenderTexture: c_SDL_RenderTexture
-    var RenderCopy: c_SDL_RenderCopy
 
     var MapRGB: c_SDL_MapRGB
     var FillRect: c_SDL_FillRect
@@ -399,8 +358,6 @@ struct SDL:
         self.RenderTexture = SDL.get_function[c_SDL_RenderTexture](
             "SDL_RenderTexture"
         )
-        # Deprecated?
-        self.RenderCopy = SDL.get_function[c_SDL_RenderCopy]("SDL_RenderCopy")
 
         self.CreateTexture = SDL.get_function[c_SDL_CreateTexture](
             "SDL_CreateTexture"
@@ -430,6 +387,5 @@ struct SDL:
         if error_ptr == UnsafePointer[UInt8]():  # Check if the pointer is null
             return "Unknown error"
 
-        # Convert the C-string to a Mojo String
         var error_string = String(error_ptr)
         return error_string

@@ -8,7 +8,7 @@ from tensor import Tensor
 from testing import assert_equal
 from time import now, sleep
 
-from mo3d.window.SDL3 import (
+from mo3d.window.SDL2 import (
     SDL_INIT_VIDEO,
     SDL_PIXELFORMAT_RGBA8888,
     SDL_QUIT,
@@ -92,7 +92,7 @@ fn main() raises:
                 ]()
 
         # We get errors if the number of workers is greater than 1
-        parallelize[draw_row](height, 1)
+        parallelize[draw_row](height, 4)
 
         sdl.UnlockTexture(display_texture)
 

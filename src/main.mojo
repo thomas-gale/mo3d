@@ -8,7 +8,7 @@ from tensor import Tensor
 from testing import assert_equal
 from time import now, sleep
 
-from mo3d.window.SDL3 import (
+from mo3d.window.SDL2 import (
     SDL_INIT_VIDEO,
     SDL_PIXELFORMAT_RGBA8888,
     SDL_QUIT,
@@ -43,6 +43,8 @@ fn main() raises:
 
     var window = sdl.CreateWindow(
         UnsafePointer(StringRef("mo3d").data),
+        SDL_WINDOWPOS_CENTERED,
+        SDL_WINDOWPOS_CENTERED,
         width,
         height,
         SDL_WINDOW_SHOWN,
@@ -53,7 +55,7 @@ fn main() raises:
         print("Failed to create SDL window")
         return
 
-    var renderer = sdl.CreateRenderer(window, 0)
+    var renderer = sdl.CreateRenderer(window, -1, 0)
 
     var display_texture = sdl.CreateTexture(
         renderer,
@@ -117,12 +119,7 @@ fn main() raises:
         # Core rendering code
         _ = sdl.RenderClear(renderer)
         redraw_texture(sdl)
-        _ = sdl.RenderTexture(
-            renderer,
-            display_texture,
-            UnsafePointer[SDL_Rect](),
-            UnsafePointer[SDL_Rect](),
-        )
+        _ = sdl.RenderCopy(renderer, display_texture, 0, 0)
         _ = sdl.RenderPresent(renderer)
 
         average_redraw_time = (1.0 - alpha) * average_redraw_time + alpha * (

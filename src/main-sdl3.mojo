@@ -92,7 +92,7 @@ fn main() raises:
                 ]()
 
         # We get errors if the number of workers is greater than 1
-        parallelize[draw_row](height, 4)
+        parallelize[draw_row](height, 1)
 
         sdl.UnlockTexture(display_texture)
 

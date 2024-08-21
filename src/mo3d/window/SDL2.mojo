@@ -238,6 +238,8 @@ alias c_SDL_PollEvent = fn (UnsafePointer[Event]) -> Int32
 alias c_SDL_CreateRenderer = fn (
     UnsafePointer[SDL_Window], Int32, UInt32
 ) -> UnsafePointer[SDL_Renderer]
+alias c_SDL_DestroyRenderer = fn (UnsafePointer[SDL_Renderer]) -> None
+
 alias c_SDL_CreateWindowAndRenderer = fn (
     Int32,
     Int32,
@@ -268,7 +270,7 @@ alias c_SDL_SetRenderTarget = fn (
 
 alias c_SDL_RenderCopy = fn (
     r: UnsafePointer[SDL_Renderer],
-    t: Int64,  # t: UnsafePointer[SDL_Texture],
+    t: UnsafePointer[SDL_Texture],
     s: Int64,
     d: Int64,
 ) -> Int32
@@ -280,13 +282,24 @@ alias c_SDL_FillRect = fn (UnsafePointer[SDL_Surface], Int64, UInt32) -> Int32
 # texture
 alias c_SDL_CreateTexture = fn (
     UnsafePointer[SDL_Renderer], UInt32, Int32, Int32, Int32
-) -> Int64  # UnsafePointer[SDL_Texture]
+) -> UnsafePointer[SDL_Texture]
+alias c_SDL_DestroyTexture = fn (UnsafePointer[SDL_Texture]) -> None
+alias c_SDL_LockTexture = fn (
+    UnsafePointer[SDL_Texture],
+    UnsafePointer[SDL_Rect],
+    inout UnsafePointer[UInt8],
+    inout UnsafePointer[Int32],
+) -> Int32
+alias c_SDL_UnlockTexture = fn (UnsafePointer[SDL_Texture]) -> None
 
 
 alias SDL_WINDOWPOS_UNDEFINED = 0x1FFF0000
 alias SDL_WINDOWPOS_CENTERED = 0x2FFF0000
 
 alias SDL_WINDOW_SHOWN = 0x00000004
+
+# SDL_error.h
+alias c_SDL_GetError = fn () -> UnsafePointer[UInt8]
 
 
 struct SDL:
@@ -299,6 +312,7 @@ struct SDL:
     var GetWindowSurface: c_SDL_GetWindowSurface
     var UpdateWindowSurface: c_SDL_UpdateWindowSurface
     var CreateRenderer: c_SDL_CreateRenderer
+    var DestroyRenderer: c_SDL_DestroyRenderer
     var CreateWindowAndRenderer: c_SDL_CreateWindowAndRenderer
     var RenderDrawPoint: c_SDL_RenderDrawPoint
     var RenderDrawRect: c_SDL_RenderDrawRect
@@ -306,6 +320,10 @@ struct SDL:
     var RenderPresent: c_SDL_RenderPresent
     var RenderClear: c_SDL_RenderClear
     var CreateTexture: c_SDL_CreateTexture
+    var DestroyTexture: c_SDL_DestroyTexture
+
+    var LockTexture: c_SDL_LockTexture
+    var UnlockTexture: c_SDL_UnlockTexture
     var SetRenderDrawBlendMode: c_SDL_SetRenderDrawBlendMode
     var SetRenderTarget: c_SDL_SetRenderTarget
     var RenderCopy: c_SDL_RenderCopy
@@ -314,6 +332,8 @@ struct SDL:
     var FillRect: c_SDL_FillRect
     var Delay: c_SDL_Delay
     var PollEvent: c_SDL_PollEvent
+
+    var GetError: c_SDL_GetError
 
     fn __init__(inout self):
         var lib_path = get_sdl_lib_path()
@@ -338,6 +358,9 @@ struct SDL:
 
         self.CreateRenderer = SDL.get_function[c_SDL_CreateRenderer](
             "SDL_CreateRenderer"
+        )
+        self.DestroyRenderer = SDL.get_function[c_SDL_DestroyRenderer](
+            "SDL_DestroyRenderer"
         )
         self.CreateWindowAndRenderer = SDL.get_function[
             c_SDL_CreateWindowAndRenderer
@@ -368,8 +391,28 @@ struct SDL:
         self.CreateTexture = SDL.get_function[c_SDL_CreateTexture](
             "SDL_CreateTexture"
         )
+        self.DestroyTexture = SDL.get_function[c_SDL_DestroyTexture](
+            "SDL_DestroyTexture"
+        )
+        self.LockTexture = SDL.get_function[c_SDL_LockTexture](
+            "SDL_LockTexture"
+        )
+        self.UnlockTexture = SDL.get_function[c_SDL_UnlockTexture](
+            "SDL_UnlockTexture"
+        )
 
         self.MapRGB = SDL.get_function[c_SDL_MapRGB]("SDL_MapRGB")
         self.FillRect = SDL.get_function[c_SDL_FillRect]("SDL_FillRect")
         self.Delay = SDL.get_function[c_SDL_Delay]("SDL_Delay")
         self.PollEvent = SDL.get_function[c_SDL_PollEvent]("SDL_PollEvent")
+
+        self.GetError = SDL.get_function[c_SDL_GetError]("SDL_GetError")
+
+    fn get_sdl_error_as_string(self) -> String:
+        var error_ptr = self.GetError()  # Call the function to get the error pointer
+
+        if error_ptr == UnsafePointer[UInt8]():  # Check if the pointer is null
+            return "Unknown error"
+
+        var error_string = String(error_ptr)
+        return error_string

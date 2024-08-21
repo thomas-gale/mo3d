@@ -8,8 +8,8 @@ from tensor import Tensor
 from testing import assert_equal
 from time import now, sleep
 
-from mo3d.window.SDL2 import (
-# from mo3d.window.SDL3 import (
+# from mo3d.window.SDL2 import (
+from mo3d.window.SDL3 import (
     SDL_INIT_VIDEO,
     SDL_PIXELFORMAT_RGBA8888,
     SDL_QUIT,
@@ -44,8 +44,8 @@ fn main() raises:
 
     var window = sdl.CreateWindow(
         UnsafePointer(StringRef("mo3d").data),
-        SDL_WINDOWPOS_CENTERED,
-        SDL_WINDOWPOS_CENTERED,
+        # SDL_WINDOWPOS_CENTERED, # SDL2
+        # SDL_WINDOWPOS_CENTERED, # SDL2
         width,
         height,
         SDL_WINDOW_SHOWN,
@@ -56,8 +56,10 @@ fn main() raises:
         print("Failed to create SDL window")
         return
 
-    var renderer = sdl.CreateRenderer(window, -1, 0)
-    # var renderer = sdl.CreateRenderer(window, 0)
+    # SDL2
+    # var renderer = sdl.CreateRenderer(window, -1, 0)
+    # SDL3
+    var renderer = sdl.CreateRenderer(window, 0)
 
     var display_texture = sdl.CreateTexture(
         renderer,
@@ -94,6 +96,7 @@ fn main() raises:
                 (pixels + offset + 3)[] = (row / height * 255).cast[
                     DType.uint8
                 ]()
+                # (pixels + offset + 3)[] = 255
 
         # We get errors if the number of workers is greater than 1
         parallelize[draw_row](height, 1)
@@ -121,13 +124,15 @@ fn main() raises:
         # Core rendering code
         _ = sdl.RenderClear(renderer)
         redraw_texture(sdl)
-        _ = sdl.RenderCopy(renderer, display_texture, 0, 0)
-        # _ = sdl.RenderTexture(
-        #     renderer,
-        #     display_texture,
-        #     UnsafePointer[SDL_Rect](),
-        #     UnsafePointer[SDL_Rect](),
-        # )
+        # SDL2
+        # _ = sdl.RenderCopy(renderer, display_texture, 0, 0)
+        # SDL3
+        _ = sdl.RenderTexture(
+            renderer,
+            display_texture,
+            UnsafePointer[SDL_Rect](),
+            UnsafePointer[SDL_Rect](),
+        )
         _ = sdl.RenderPresent(renderer)
 
         average_redraw_time = (1.0 - alpha) * average_redraw_time + alpha * (
@@ -146,7 +151,7 @@ fn main() raises:
     print("SDL quit")
 
     print(
-        "Average redraw time:",
+        "Average redraw time: ",
         str(average_redraw_time / (1024 * 1024)),
         " ms",
     )

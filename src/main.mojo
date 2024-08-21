@@ -64,6 +64,7 @@ fn main() raises:
     )
 
     fn redraw_texture(sdl: SDL):
+        # These pixels are in GPU memory
         var pixels = UnsafePointer[UInt8]()
         var pitch = UnsafePointer[Int32]()
         var lock_code = sdl.LockTexture(
@@ -77,13 +78,21 @@ fn main() raises:
 
         alias man_pitch = width * 4
 
-        for y in range(height):
+        @parameter
+        fn draw_row(row: Int):
             for x in range(width):
-                var offset = y * man_pitch + x * 4  # Calculate the correct offset using pitch
+                var offset = row * man_pitch + x * 4  # Calculate the correct offset using pitch
                 (pixels + offset)[] = (x / width * 255).cast[DType.uint8]()
-                (pixels + offset + 1)[] = (y / width * 255).cast[DType.uint8]()
+                (pixels + offset + 1)[] = (row / width * 255).cast[
+                    DType.uint8
+                ]()
                 (pixels + offset + 2)[] = (x / width * 255).cast[DType.uint8]()
-                (pixels + offset + 3)[] = (y / height * 255).cast[DType.uint8]()
+                (pixels + offset + 3)[] = (row / height * 255).cast[
+                    DType.uint8
+                ]()
+
+        # We get errors if the number of workers is greater than 1
+        parallelize[draw_row](height, 4)
 
         sdl.UnlockTexture(display_texture)
 
@@ -107,8 +116,6 @@ fn main() raises:
 
         # Core rendering code
         _ = sdl.RenderClear(renderer)
-        # BIG Blocker - SDL is not thread safe :'(
-        # So can't use parallelize here - that was the plan over regions of texture...
         redraw_texture(sdl)
         _ = sdl.RenderTexture(
             renderer,

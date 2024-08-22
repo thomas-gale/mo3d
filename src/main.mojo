@@ -2,14 +2,13 @@ from algorithm import parallelize, vectorize
 from complex import ComplexSIMD, ComplexFloat64
 from math import iota
 
-from memory import UnsafePointer
+from memory import UnsafePointer, bitcast
 from sys import simdwidthof
 from tensor import Tensor
 from testing import assert_equal
 from time import now, sleep
 
 from mo3d.window.SDL2 import (
-    # from mo3d.window.SDL3 import (
     SDL_INIT_VIDEO,
     SDL_PIXELFORMAT_RGBA8888,
     SDL_QUIT,
@@ -25,8 +24,8 @@ from mo3d.window.SDL2 import (
 from mo3d.math.vec4 import Vec4
 
 alias fps = 120
-alias width = 1024
-alias height = 768
+alias width = 512
+alias height = 512
 alias channels = Vec4[DType.float32].size
 
 alias float_type = DType.float32
@@ -44,8 +43,8 @@ fn main() raises:
 
     var window = sdl.CreateWindow(
         UnsafePointer(StringRef("mo3d").data),
-        SDL_WINDOWPOS_CENTERED,  # SDL2
-        SDL_WINDOWPOS_CENTERED,  # SDL2
+        SDL_WINDOWPOS_CENTERED,
+        SDL_WINDOWPOS_CENTERED,
         width,
         height,
         SDL_WINDOW_SHOWN,
@@ -56,10 +55,7 @@ fn main() raises:
         print("Failed to create SDL window")
         return
 
-    # SDL2
     var renderer = sdl.CreateRenderer(window, -1, 0)
-    # SDL3
-    # var renderer = sdl.CreateRenderer(window, 0)
 
     var display_texture = sdl.CreateTexture(
         renderer,
@@ -69,9 +65,12 @@ fn main() raises:
         height,
     )
 
-    fn redraw_texture(sdl: SDL):
+    @parameter
+    fn redraw():
+        _ = sdl.RenderClear(renderer)
+
         # These pixels are in GPU memory
-        var pixels = UnsafePointer[UInt8]()
+        var pixels = UnsafePointer[SIMD[DType.uint8, 1]]()
         # This value doesn't seem to be at a sensible address - 0x400 (Is this SDL2's null pointer?)
         var pitch = UnsafePointer[Int32]()
         # Manually set the pitch to the width * 4 (4 channels)
@@ -86,22 +85,33 @@ fn main() raises:
             print(sdl.get_sdl_error_as_string())
             return
 
-
         @parameter
-        fn draw_row(row: Int):
-            for x in range(width):
-                var offset = row * manual_pitch + x * channels # Calculate the correct offset using pitch
-                # Hack, the pixel orders are not as expected ^^ TODO check above format.
+        fn draw_row(y: Int):
+            # TODO: Can we cast this row of data into a SIMD type? and then perform a vectorized operation on it?
+
+            @parameter
+            fn draw_row_vectorize[simd_width: Int](x: Int):
+                # var offset = y * manual_pitch + x * 2  # Calculate the correct offset using pitch
+                var offset = y * manual_pitch + x * channels  # Calculate the correct offset using pitch
+                # var offset = y * manual_pitch + x  # Calculate the correct offset using pitch
+                # (pixels + offset)[] = 255 
+
+                # (pixels + offset)[] = bitcast[DType.uint8, 1, DType.uint8, 4](
+                #     SIMD[DType.uint8, 4](255, 255, 255, 255)
+                # )  # ABGR
+
                 (pixels + offset)[] = 255  # A
                 (pixels + offset + 1)[] = 0  # B
-                (pixels + offset + 2)[] = (row / (height - 1) * 255.999).cast[
-                    DType.uint8
-                ]()  # G
-                (pixels + offset + 3)[] = (x / (width - 1) * 255.999).cast[
-                    DType.uint8
-                ]()  # R
-            # Simulate work on this worker
-            # sleep(0.001)
+                (pixels + offset + 2)[] = 255 # G
+                # (pixels + offset + 2)[] = (y / (height - 1) * 255.999).cast[
+                #     DType.uint8
+                # ]()  # G
+                (pixels + offset + 3)[] = 255 # R
+                # (pixels + offset + 3)[] = (x / (width - 1) * 255.999).cast[
+                #     DType.uint8
+                # ]()  # R
+
+            vectorize[draw_row_vectorize, 1](width)
 
         # We get errors if the number of workers is greater than 1 when inside the main loop
         parallelize[draw_row](height, height)
@@ -109,9 +119,12 @@ fn main() raises:
 
         sdl.UnlockTexture(display_texture)
 
-        # Convince mojo not to free these pointers (which don't even belong to us!) prematurely before we've unlocked the texture
+        # Convince mojo not to mess with these pointers (which don't even belong to us!) before we've unlocked the texture
         _ = pixels
         _ = pitch
+
+        _ = sdl.RenderCopy(renderer, display_texture, 0, 0)
+        _ = sdl.RenderPresent(renderer)
 
     var event = Event()
     var running: Bool = True
@@ -130,21 +143,7 @@ fn main() raises:
                 running = False
 
         start_time = now()
-
-        # Core rendering code
-        _ = sdl.RenderClear(renderer)
-        redraw_texture(sdl)
-        # SDL2
-        _ = sdl.RenderCopy(renderer, display_texture, 0, 0)
-        # SDL3
-        # _ = sdl.RenderTexture(
-        #     renderer,
-        #     display_texture,
-        #     UnsafePointer[SDL_Rect](),
-        #     UnsafePointer[SDL_Rect](),
-        # )
-        _ = sdl.RenderPresent(renderer)
-
+        redraw()
         average_redraw_time = (1.0 - alpha) * average_redraw_time + alpha * (
             now() - start_time
         )
@@ -162,7 +161,7 @@ fn main() raises:
 
     print(
         "Average redraw time: ",
-        str(average_redraw_time / (1024 * 1024)),
+        str(average_redraw_time / (1000 * 1000)),
         " ms",
     )
     print("Goodbye, mo3d!")

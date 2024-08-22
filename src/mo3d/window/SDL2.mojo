@@ -2,7 +2,7 @@
 # WIP: Upgrading for mojo nightly 2024.8.1517 (ee6ccd9a)
 
 from memory import UnsafePointer
-from sys import ffi, info
+from sys import ffi, info, simdwidthof
 
 
 fn get_sdl_lib_path() -> StringLiteral:
@@ -272,7 +272,8 @@ alias c_SDL_DestroyTexture = fn (UnsafePointer[SDL_Texture]) -> None
 alias c_SDL_LockTexture = fn (
     UnsafePointer[SDL_Texture],
     UnsafePointer[SDL_Rect],
-    inout UnsafePointer[UInt8],
+    inout UnsafePointer[SIMD[DType.uint8, 1]],
+    # inout UnsafePointer[SIMD[DType.uint8, simdwidthof[DType.uint8]()]],
     inout UnsafePointer[Int32],
 ) -> Int32
 alias c_SDL_UnlockTexture = fn (UnsafePointer[SDL_Texture]) -> None

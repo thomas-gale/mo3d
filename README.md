@@ -43,3 +43,9 @@ Modular version 2024.8.1517
 ![image](https://github.com/user-attachments/assets/88cdf3c8-0241-4cf0-bea5-0015fb4795b7)
 
 ### 2024-08-18: migrated to mojo nightly!
+### 2024-08-22: working directly on the raw texture data from SDL_LockTexture
+- Had to remove the SIMD stuff as we can't be sure of byte alignment of the texture data which is managed from SDL2.
+- Had to ensure that Mojo didn't attempt to tidy up the UnsafePointers before SDL_UnlockTexture was called (using `_ = ptr` pattern/hack)
+- We have Mojo CPU parallelized (for each row) operations directly on the SDL2 texture data (STREAMING type)
+- Redraw time down to ~1.5 ms (~4 ms without `parallelized`)
+- We can use this approach to quickly move (in the future) a Mojo managed Tensor (hopefully on GPU) which contains our view of the world into SDL2's texture which is being rendered (e.g. in ~1.5ms)

@@ -87,8 +87,6 @@ fn main() raises:
 
         @parameter
         fn draw_row(y: Int):
-            # TODO: Can we cast this row of data into a SIMD type? and then perform a vectorized operation on it?
-
             @parameter
             fn draw_row_vectorize[simd_width: Int](x: Int):
                 var offset = y * manual_pitch + x * channels  # Calculate the correct offset using pitch
@@ -101,6 +99,7 @@ fn main() raises:
                     DType.uint8
                 ]()  # R
 
+            # This vectorize is kinda pointless (using a simd_width of 1). But it's here to show that, if we could ensure the texture is aligned (e.g. use a library ), we can use SIMD here.
             vectorize[draw_row_vectorize, 1](width)
 
         # We get errors if the number of workers is greater than 1 when inside the main loop

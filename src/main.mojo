@@ -69,7 +69,7 @@ fn main() raises:
     fn redraw():
         _ = sdl.RenderClear(renderer)
 
-        # These pixels are in GPU memory
+        # These pixels are in GPU memory - we cant use SIMD as we don't know if SDL2 has aligned them
         var pixels = UnsafePointer[SIMD[DType.uint8, 1]]()
         # This value doesn't seem to be at a sensible address - 0x400 (Is this SDL2's null pointer?)
         var pitch = UnsafePointer[Int32]()
@@ -91,31 +91,20 @@ fn main() raises:
 
             @parameter
             fn draw_row_vectorize[simd_width: Int](x: Int):
-                # var offset = y * manual_pitch + x * 2  # Calculate the correct offset using pitch
                 var offset = y * manual_pitch + x * channels  # Calculate the correct offset using pitch
-                # var offset = y * manual_pitch + x  # Calculate the correct offset using pitch
-                # (pixels + offset)[] = 255 
-
-                # (pixels + offset)[] = bitcast[DType.uint8, 1, DType.uint8, 4](
-                #     SIMD[DType.uint8, 4](255, 255, 255, 255)
-                # )  # ABGR
-
                 (pixels + offset)[] = 255  # A
                 (pixels + offset + 1)[] = 0  # B
-                (pixels + offset + 2)[] = 255 # G
-                # (pixels + offset + 2)[] = (y / (height - 1) * 255.999).cast[
-                #     DType.uint8
-                # ]()  # G
-                (pixels + offset + 3)[] = 255 # R
-                # (pixels + offset + 3)[] = (x / (width - 1) * 255.999).cast[
-                #     DType.uint8
-                # ]()  # R
+                (pixels + offset + 2)[] = (y / (height - 1) * 255.999).cast[
+                    DType.uint8
+                ]()  # G
+                (pixels + offset + 3)[] = (x / (width - 1) * 255.999).cast[
+                    DType.uint8
+                ]()  # R
 
             vectorize[draw_row_vectorize, 1](width)
 
         # We get errors if the number of workers is greater than 1 when inside the main loop
         parallelize[draw_row](height, height)
-        # parallelize[draw_row](height, 1)
 
         sdl.UnlockTexture(display_texture)
 

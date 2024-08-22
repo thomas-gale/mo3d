@@ -77,6 +77,9 @@ fn main() raises:
             display_texture, UnsafePointer[SDL_Rect](), pixels, pitch
         )
 
+        print("pixels ptr: ", pixels)
+        print("pitch ptr: ", pitch)
+
         if lock_code != 0:
             print("Failed to lock texture:", lock_code)
             print(sdl.get_sdl_error_as_string())
@@ -86,58 +89,80 @@ fn main() raises:
 
         @parameter
         fn draw_row(row: Int):
-            for x in range(width):
-                var offset = row * man_pitch + x * 4  # Calculate the correct offset using pitch
-                (pixels + offset)[] = (x / width * 255).cast[DType.uint8]()
-                (pixels + offset + 1)[] = (row / width * 255).cast[
-                    DType.uint8
-                ]()
-                (pixels + offset + 2)[] = (x / width * 255).cast[DType.uint8]()
-                (pixels + offset + 3)[] = (row / height * 255).cast[
-                    DType.uint8
-                ]()
-                # (pixels + offset + 3)[] = 255
+            for y in range(row * 64, row * 64 + 32):
+                for x in range(width):
+                    var offset = y * man_pitch + x * 4  # Calculate the correct offset using pitch
+
+                    (pixels + offset)[] = 255
+                    (pixels + offset + 1)[] = 255
+                    (pixels + offset + 2)[] = 255
+                    (pixels + offset + 3)[] = 255
+
+                    # (pixels + offset)[] = (x / width * 255).cast[DType.uint8]()
+                    # (pixels + offset + 1)[] = (row / width * 255).cast[
+                    #     DType.uint8
+                    # ]()
+                    # (pixels + offset + 2)[] = (x / width * 255).cast[DType.uint8]()
+                    # (pixels + offset + 3)[] = (row / height * 255).cast[
+                    #     DType.uint8
+                    # ]()
+                    # (pixels + offset + 3)[] = 255
 
         # We get errors if the number of workers is greater than 1
-        parallelize[draw_row](height, 1)
+        parallelize[draw_row](2, 2)
 
         sdl.UnlockTexture(display_texture)
 
     var event = Event()
     var running: Bool = True
 
-    var start_time = now()
-    var alpha = 0.1
-    var average_redraw_time = 0.0
+    # var start_time = now()
+    # var alpha = 0.1
+    # var average_redraw_time = 0.0
 
     print("Window", window)
     print("Renderer", renderer)
     print("Display texture", display_texture)
+
+    # Single Redraw
+    # Core rendering code
+    _ = sdl.RenderClear(renderer)
+    redraw_texture(sdl)
+    # SDL2
+    _ = sdl.RenderCopy(renderer, display_texture, 0, 0)
+    # SDL3
+    # _ = sdl.RenderTexture(
+    #     renderer,
+    #     display_texture,
+    #     UnsafePointer[SDL_Rect](),
+    #     UnsafePointer[SDL_Rect](),
+    # )
+    _ = sdl.RenderPresent(renderer)
 
     while running:
         while sdl.PollEvent(UnsafePointer[Event].address_of(event)) != 0:
             if event.type == SDL_QUIT:
                 running = False
 
-        start_time = now()
+        # start_time = now()
 
-        # Core rendering code
-        _ = sdl.RenderClear(renderer)
-        redraw_texture(sdl)
-        # SDL2
-        _ = sdl.RenderCopy(renderer, display_texture, 0, 0)
-        # SDL3
-        # _ = sdl.RenderTexture(
-        #     renderer,
-        #     display_texture,
-        #     UnsafePointer[SDL_Rect](),
-        #     UnsafePointer[SDL_Rect](),
+        # # Core rendering code
+        # _ = sdl.RenderClear(renderer)
+        # redraw_texture(sdl)
+        # # SDL2
+        # _ = sdl.RenderCopy(renderer, display_texture, 0, 0)
+        # # SDL3
+        # # _ = sdl.RenderTexture(
+        # #     renderer,
+        # #     display_texture,
+        # #     UnsafePointer[SDL_Rect](),
+        # #     UnsafePointer[SDL_Rect](),
+        # # )
+        # _ = sdl.RenderPresent(renderer)
+
+        # average_redraw_time = (1.0 - alpha) * average_redraw_time + alpha * (
+        #     now() - start_time
         # )
-        _ = sdl.RenderPresent(renderer)
-
-        average_redraw_time = (1.0 - alpha) * average_redraw_time + alpha * (
-            now() - start_time
-        )
 
         _ = sdl.Delay((Float32(1000) / Float32(fps)).cast[DType.int32]())
 
@@ -150,9 +175,9 @@ fn main() raises:
     sdl.Quit()
     print("SDL quit")
 
-    print(
-        "Average redraw time: ",
-        str(average_redraw_time / (1024 * 1024)),
-        " ms",
-    )
+    # print(
+    #     "Average redraw time: ",
+    #     str(average_redraw_time / (1024 * 1024)),
+    #     " ms",
+    # )
     print("Goodbye, mo3d!")

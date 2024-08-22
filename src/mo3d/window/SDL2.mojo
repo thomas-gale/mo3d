@@ -1,7 +1,6 @@
 # Attribution: https://github.com/msteele/mojo-sdl/tree/main
-# WIP: Upgrading for mojo 24.4.0
+# WIP: Upgrading for mojo nightly 2024.8.1517 (ee6ccd9a)
 
-# from memory.unsafe import UnsafePointer
 from memory import UnsafePointer
 from sys import ffi, info
 
@@ -167,26 +166,12 @@ struct Event:
     var _padding: SIMD[DType.uint8, 16]
     var _padding2: Int64
     var _padding3: Int64
-    # def __init__(inout self) -> Event:
-    #     return Event { type: 0, _padding: 0, _padding2: 0, _padding3: 0 }
 
     fn __init__(inout self):
         self.type = 0
         self._padding = 0
         self._padding2 = 0
         self._padding3 = 0
-
-    # def as_keyboard(self: Self) -> Keyevent:
-    #     return UnsafePointer.address_of(Reference[Self, True, MutableStaticLifetime](self)).bitcast[Keyevent]().load()
-
-    # def as_mousemotion(self) -> MouseMotionEvent:
-    #     return UnsafePointer.address_of(self).bitcast[MouseMotionEvent]().load()
-
-    # def as_mousebutton(self) -> MouseButtonEvent:
-    #     return UnsafePointer.address_of(self).bitcast[MouseButtonEvent]().load()
-
-    # def as_mousewheel(self) -> MouseWheelEvent:
-    #     return UnsafePointer.address_of(self).bitcast[MouseWheelEvent]().load()
 
 
 @register_passable("trivial")
@@ -295,7 +280,6 @@ alias c_SDL_UnlockTexture = fn (UnsafePointer[SDL_Texture]) -> None
 
 alias SDL_WINDOWPOS_UNDEFINED = 0x1FFF0000
 alias SDL_WINDOWPOS_CENTERED = 0x2FFF0000
-
 alias SDL_WINDOW_SHOWN = 0x00000004
 
 # SDL_error.h

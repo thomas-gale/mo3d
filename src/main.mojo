@@ -1,50 +1,71 @@
 from algorithm import parallelize, vectorize
 from complex import ComplexSIMD, ComplexFloat64
 from math import iota
-
 from memory import UnsafePointer, bitcast
 from sys import simdwidthof
-from tensor import Tensor
 from testing import assert_equal
 from time import now, sleep
+from utils import StaticIntTuple
 
-from mo3d.window.sdl2_window import SDL2Window
+from max.tensor import Tensor
+from max.extensibility import empty_tensor
 
-# from mo3d.window.sdl2 import (
-#     SDL_INIT_VIDEO,
-#     SDL_PIXELFORMAT_RGBA8888,
-#     SDL_QUIT,
-#     SDL_TEXTUREACCESS_STREAMING,
-#     SDL_WINDOWPOS_CENTERED,
-#     SDL_WINDOW_SHOWN,
-#     SDL,
-#     SDL_Rect,
-#     SDL_Window,
-#     SDL_Texture,
-#     Event,
-# )
 from mo3d.math.vec4 import Vec4
-
-alias fps = 120
-alias width = 512
-alias height = 512
-alias channels = Vec4[DType.float32].size
-
-alias float_type = DType.float32
+from mo3d.window.sdl2_window import SDL2Window
 
 
 fn main() raises:
     print("Hello, mo3d!")
 
-    # Create our own state of the window
-    var t = Tensor[float_type](width, height, channels)
+    # Settings
+    alias fps = 120
+    alias width = 800
+    alias height = 450
+    alias aspect_ratio = width / height
+    alias channels = Vec4[DType.float32].size
+    alias float_type = DType.float32
 
-    # Basic compute
+    # Camera
+    alias focal_length = 1.0
+    alias viewport_height = 2.0
+    alias viewport_width = viewport_height * aspect_ratio
+    alias camera_center = Vec4(SIMD[float_type, 4](0.0, 0.0, 0.0, 0.0))
+
+    # Calculate the vectors across the horizontal and down the vertical viewport edges.
+    alias viewport_u = Vec4(
+        SIMD[float_type, 4](viewport_width.cast[float_type](), 0.0, 0.0, 0.0)
+    )
+    alias viewport_v = Vec4(
+        SIMD[float_type, 4](0.0, -viewport_height, 0.0, 0.0)
+    )
+
+    # Calculate the horizontal and vertical delta vectors from pixel to pixel.
+    alias pixel_delta_u = viewport_u / width
+    alias pixel_delta_v = viewport_v / height
+
+    # Calculate the location of the upper left pixel.
+    var viewport_upper_left = camera_center - Vec4(
+        SIMD[float_type, 4](0, 0, focal_length)
+    ) - viewport_u / 2 - viewport_v / 2
+    var pixel00_loc = viewport_upper_left + (
+        pixel_delta_u + pixel_delta_v
+    ) * 0.5
+    print("Pixel 00 location: ", str(pixel00_loc))
+
+    # Create the window 
+    var window = SDL2Window.create("mo3d", width, height)
+
+    # Create our own state of the window texture
+    var t = Tensor[float_type](height, width, channels)
+
+    # Basic compute Kernel 
     # Populate the tensor with a colour gradient
     @parameter
     fn compute_row(y: Int):
         @parameter
         fn compute_row_vectorize[simd_width: Int](x: Int):
+            # Send a ray into the scene
+
             t.store[4](
                 y * (width * channels) + x * channels,
                 SIMD[float_type, 4](
@@ -54,7 +75,9 @@ fn main() raises:
                     (x / (width - 1)).cast[float_type](),  # R
                 ),
             )
+
         vectorize[compute_row_vectorize, 1](width)
+
     # Inital values
     parallelize[compute_row](height, height)
 
@@ -64,8 +87,7 @@ fn main() raises:
     var average_compute_time = 0.0
     var average_redraw_time = 0.0
 
-    # Create the window and start the main loop
-    var window = SDL2Window.create("mo3d", width, height)
+    # Start the main loop
     while not window.should_close():
         start_time = now()
         parallelize[compute_row](height, height)
@@ -78,6 +100,8 @@ fn main() raises:
             now() - start_time
         )
         sleep(1.0 / Float64(fps))
+
+    
 
     # Print stats
     print(

@@ -148,14 +148,14 @@ struct Vec4[type: DType](EqualityComparable, Stringable):
     fn __isub__(inout self, rhs: Self):
         self.e -= rhs.e
 
-    fn __mul__(self, rhs: Self) -> Self:
-        return Self(self.e * rhs.e)
+    fn __mul__(self, rhs: SIMD[type, 1]) -> Self:
+        return Self(self.e * rhs)
 
-    fn __imul__(inout self, rhs: Self):
-        self.e *= rhs.e
+    fn __imul__(inout self, rhs: SIMD[type, 1]):
+        self.e *= rhs
 
-    fn __truediv__(self, rhs: Self) -> Self:
-        return Self(self.e / rhs.e)
+    fn __truediv__(self, rhs: SIMD[type, 1]) -> Self:
+        return Self(self.e / rhs)
 
-    fn __itruediv__(inout self, rhs: Self):
-        self.e /= rhs.e
+    fn __itruediv__(inout self, rhs: SIMD[type, 1]):
+        self.e /= rhs

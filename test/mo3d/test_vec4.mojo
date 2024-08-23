@@ -20,6 +20,45 @@ fn test_create_vec4_float32() raises:
     assert_equal(v.z(), 44.0)
     assert_equal(v.w(), 1.0)
 
+fn test_mul() raises:
+    var v = Vec4(SIMD[DType.float32, 4](1.0, 2.0, 3.0, 4.0))
+    var scalar: Float32 = 2.0
+    var result = v * scalar
+
+    assert_equal(result.x(), 2.0)
+    assert_equal(result.y(), 4.0)
+    assert_equal(result.z(), 6.0)
+    assert_equal(result.w(), 8.0)
+
+fn test_imul() raises:
+    var v = Vec4(SIMD[DType.float32, 4](1.0, 2.0, 3.0, 4.0))
+    var scalar: Float32 = 2.0
+    v *= scalar
+
+    assert_equal(v.x(), 2.0)
+    assert_equal(v.y(), 4.0)
+    assert_equal(v.z(), 6.0)
+    assert_equal(v.w(), 8.0)
+
+fn test_div() raises:
+    var v = Vec4(SIMD[DType.float32, 4](1.0, 2.0, 3.0, 4.0))
+    var scalar: Float32 = 2.0
+    var result = v / scalar
+
+    assert_equal(result.x(), 0.5)
+    assert_equal(result.y(), 1.0)
+    assert_equal(result.z(), 1.5)
+    assert_equal(result.w(), 2.0)
+
+fn test_idiv() raises:
+    var v = Vec4(SIMD[DType.float32, 4](1.0, 2.0, 3.0, 4.0))
+    var scalar: Float32 = 2.0
+    v /= scalar
+
+    assert_equal(v.x(), 0.5)
+    assert_equal(v.y(), 1.0)
+    assert_equal(v.z(), 1.5)
+    assert_equal(v.w(), 2.0)
 
 fn test_length_squared() raises:
     var v = Vec4(SIMD[DType.float32, 4](1.0, 2.0, 3.0, 4.0))

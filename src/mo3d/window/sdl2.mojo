@@ -272,8 +272,12 @@ alias c_SDL_DestroyTexture = fn (UnsafePointer[SDL_Texture]) -> None
 alias c_SDL_LockTexture = fn (
     UnsafePointer[SDL_Texture],
     UnsafePointer[SDL_Rect],
-    inout UnsafePointer[SIMD[DType.uint8, 1]], # Pixel data: We can't increase this from 1 as we don't know if SDL will guarantee that the bytes are aligned
-    inout UnsafePointer[Int32], # Pitch (this value doesn't seem to be working - returning ptr to 0x400 which is not valid)
+    inout UnsafePointer[
+        SIMD[DType.uint8, 1]
+    ],  # Pixel data: We can't increase this from 1 as we don't know if SDL will guarantee that the bytes are aligned
+    inout UnsafePointer[
+        Int32
+    ],  # Pitch (this value doesn't seem to be working - returning ptr to 0x400 which is not valid)
 ) -> Int32
 alias c_SDL_UnlockTexture = fn (UnsafePointer[SDL_Texture]) -> None
 

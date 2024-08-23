@@ -8,7 +8,7 @@ from tensor import Tensor
 from testing import assert_equal
 from time import now, sleep
 
-from mo3d.window.SDL2 import (
+from mo3d.window.sdl2 import (
     SDL_INIT_VIDEO,
     SDL_PIXELFORMAT_RGBA8888,
     SDL_QUIT,
@@ -33,6 +33,25 @@ alias float_type = DType.float32
 
 fn main() raises:
     print("Hello, mo3d!")
+
+    # Create our own state of the window
+    var t = Tensor[float_type](width, height, channels)
+
+    # Test populate the tensor with some data
+    for y in range(height):
+        for x in range(width):
+            t.store[4](
+                y * (width * channels) + x * channels,
+                SIMD[float_type, 4](
+                    1.0, # A
+                    0.0, # B
+                    (y / (height - 1)).cast[float_type](), # G
+                    (x / (width - 1)).cast[float_type](), # R
+                ),
+            )
+
+    print(t.shape())
+    print(t)
 
     var sdl = SDL()
     var res_code = sdl.Init(SDL_INIT_VIDEO)
@@ -66,7 +85,7 @@ fn main() raises:
     )
 
     @parameter
-    fn redraw():
+    fn redraw(t: Tensor[float_type]):
         _ = sdl.RenderClear(renderer)
 
         # These pixels are in GPU memory - we cant use SIMD as we don't know if SDL2 has aligned them
@@ -90,20 +109,33 @@ fn main() raises:
             @parameter
             fn draw_row_vectorize[simd_width: Int](x: Int):
                 var offset = y * manual_pitch + x * channels  # Calculate the correct offset using pitch
-                (pixels + offset)[] = 255  # A
-                (pixels + offset + 1)[] = 0  # B
-                (pixels + offset + 2)[] = (y / (height - 1) * 255.999).cast[
-                    DType.uint8
-                ]()  # G
-                (pixels + offset + 3)[] = (x / (width - 1) * 255.999).cast[
-                    DType.uint8
-                ]()  # R
+                (pixels + offset)[] = (t[y, x, 0] * 255.999).cast[DType.uint8]()  # A
+                (pixels + offset + 1)[] = (t[y, x, 1] * 255.999).cast[DType.uint8]()  # B
+                (pixels + offset + 2)[] = (t[y, x, 2] * 255.999).cast[DType.uint8]()  # G
+                (pixels + offset + 3)[] = (t[y, x, 3] * 255.999).cast[DType.uint8]()  # R
+                # (pixels + offset + 1)[] = 0  # B
+                # (pixels + offset + 2)[] = (y / (height - 1) * 255.999).cast[
+                #     DType.uint8
+                # ]()  # G
+                # (pixels + offset + 3)[] = (x / (width - 1) * 255.999).cast[
+                #     DType.uint8
+                # ]()  # R
+
+                # (pixels + offset)[] = 255  # A
+                # (pixels + offset + 1)[] = 0  # B
+                # (pixels + offset + 2)[] = (y / (height - 1) * 255.999).cast[
+                #     DType.uint8
+                # ]()  # G
+                # (pixels + offset + 3)[] = (x / (width - 1) * 255.999).cast[
+                #     DType.uint8
+                # ]()  # R
 
             # This vectorize is kinda pointless (using a simd_width of 1). But it's here to show that, if we could ensure the texture is aligned (e.g. use a library ), we can use SIMD here.
             vectorize[draw_row_vectorize, 1](width)
 
         # We get errors if the number of workers is greater than 1 when inside the main loop
         parallelize[draw_row](height, height)
+        # parallelize[draw_row](height, 1)
 
         sdl.UnlockTexture(display_texture)
 
@@ -131,7 +163,7 @@ fn main() raises:
                 running = False
 
         start_time = now()
-        redraw()
+        redraw(t)
         average_redraw_time = (1.0 - alpha) * average_redraw_time + alpha * (
             now() - start_time
         )

@@ -73,7 +73,7 @@ fn main() raises:
     fn compute_row(y: Int):
         @parameter
         fn compute_row_vectorize[simd_width: Int](x: Int):
-            # Send a ray into the scene
+            # Send a ray into the scene from this x, y coordinate
             var pixel_center = pixel00_loc + (x * pixel_delta_u) + (
                 y * pixel_delta_v
             )

@@ -31,8 +31,13 @@ fn main() raises:
     # alias S4 = SIMD[float_type, 4]
     alias channels = 4
 
+    # Create our own state of the window texture
+    # HACK: It's critical that these are allocated first my Mojo before the @parameter functions later, as we get strange segfaults otherwise...
+    var window = SDL2Window.create("mo3d", width, height)
+    var t = Tensor[float_type](height, width, channels)
+
     # Camera
-    var focal_length: Scalar[float_type] = 1.0
+    alias focal_length: Scalar[float_type] = 1.0
     var viewport_height: Scalar[float_type] = 2.0
     var viewport_width: Scalar[float_type] = viewport_height * Scalar[
         float_type
@@ -63,8 +68,6 @@ fn main() raises:
     )
     print("Pixel 00 location: ", str(pixel00_loc))
 
-    # Create our own state of the window texture
-    var t = Tensor[float_type](height, width, channels)
 
     # Basic ray coloring
     @parameter
@@ -79,8 +82,9 @@ fn main() raises:
     # Populate the tensor with a colour gradient
     @parameter
     fn compute_row(y: Int):
-        @parameter
-        fn compute_row_vectorize[simd_width: Int](x: Int):
+        for x in range(width):
+        # @parameter
+        # fn compute_row_vectorize[simd_width: Int](x: Int):
             # Send a ray into the scene
             var pixel_center = pixel00_loc + (x * pixel_delta_u) + (
                 y * pixel_delta_v
@@ -104,7 +108,7 @@ fn main() raises:
                 ),
             )
 
-        vectorize[compute_row_vectorize, 1](width)
+        # vectorize[compute_row_vectorize, 1](width)
 
     # Inital values
     parallelize[compute_row](height, height)
@@ -116,12 +120,11 @@ fn main() raises:
     var average_redraw_time = 0.0
 
     # Create the window
-    var window = SDL2Window.create("mo3d", width, height)
 
     # Start the main loop
     while not window.should_close():
         start_time = now()
-        # parallelize[compute_row](height, height)
+        parallelize[compute_row](height, height)
         average_compute_time = (1.0 - alpha) * average_compute_time + alpha * (
             now() - start_time
         )
@@ -134,11 +137,13 @@ fn main() raises:
 
 
     # WIP: Convince the compiler that we are using these variables
+    # _ = compute_row
+    # _ = height
     _ = pixel00_loc
     _ = pixel_delta_u
     _ = pixel_delta_v   
     _ = camera_center
-    _ = t
+    # _ = t
 
     # Print stats
     print(

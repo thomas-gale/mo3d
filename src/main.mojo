@@ -79,7 +79,6 @@ fn main() raises:
             )
             var ray_direction = pixel_center - camera_center
             var r = Ray4(camera_center, ray_direction)
-
             var pixel_color = ray_color(r)
 
             t.store[4](
@@ -110,7 +109,7 @@ fn main() raises:
     # Start the main loop
     while not window.should_close():
         start_time = now()
-        parallelize[compute_row](height, height)
+        parallelize[compute_row](height, height) # We see a 4x speedup over 1 worker on my machine
         average_compute_time = (1.0 - alpha) * average_compute_time + alpha * (
             now() - start_time
         )
@@ -121,7 +120,7 @@ fn main() raises:
         )
         sleep(1.0 / Float64(fps))
 
-    # WIP: Convince the compiler that we are using these variables
+    # WIP: Convince the mojo compiler that we are using these variables while the loop is running...
     _ = pixel00_loc
     _ = pixel_delta_u
     _ = pixel_delta_v

@@ -39,6 +39,13 @@ Modular version 2024.8.1517
 
 ## progress notes
 
+### 2024-08-23: wrapping sdl2 in a window trait and battling with over eager resource freeing by mojo
+- Took longer that I would have liked to track down the mysterious/non-deterministic corrupted data being rendered in the main loop
+- The solution was to signal to mojo that variables captured/referenced within the render kernel should not be deleted till after the main loop
+- Finally have the basic ray shooting background from Ray Tracing in One Weekend
+
+![image](https://github.com/user-attachments/assets/48a30f5f-254f-4ace-bf46-82d7c6a94427)
+
 ### 2024-08-22: working directly on the raw texture data from SDL_LockTexture
 - Had to remove the SIMD stuff from redrew as we can't be sure of byte alignment of the texture data which is managed memory from SDL2.
 - Had to ensure that Mojo didn't attempt to tidy up/mess with the UnsafePointers before SDL_UnlockTexture was called (using `_ = ptr` pattern/hack)

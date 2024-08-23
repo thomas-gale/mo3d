@@ -6,7 +6,7 @@
 </p>
 
 > [!WARNING]  
-> Under active development/unstable
+> Under [active](#progress-notes) development/unstable
 
 
 - [x] Cross platform SDL window with [`ffi`](https://docs.modular.com/mojo/stdlib/sys/ffi/) bindings directly to `mojo` (based on [mojo-sdl](https://github.com/msteele/mojo-sdl/))

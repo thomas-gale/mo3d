@@ -24,7 +24,6 @@ struct SDL2Window(Window):
     var _width: Int
 
     var _sdl: SDL
-    var _window_title_ptr: UnsafePointer[UInt8]
     var _window: UnsafePointer[SDL_Window]
     var _renderer: UnsafePointer[SDL_Renderer]
     var _display_texture: UnsafePointer[SDL_Texture]
@@ -36,7 +35,7 @@ struct SDL2Window(Window):
         self._name = name
         self._width = width
         self._height = height
-        print("Creating SDL2 window '" + name + "' of size ", width, "x", height)
+        print("Creating SDL2 window '" + name + "' of size", width, "x", height)
 
         self._sdl = SDL()
         var res_code = self._sdl.Init(SDL_INIT_VIDEO)
@@ -44,12 +43,8 @@ struct SDL2Window(Window):
             raise Error("Failed to initialize SDL")
         print("SDL initialized")
 
-        # We don't own this memory so don't free it
-        self._window_title_ptr = UnsafePointer[UInt8](StringRef("TODO").data)
-        # UnsafePointer(StringRef("mo3d").data)
-
         self._window = self._sdl.CreateWindow(
-            self._window_title_ptr,
+            self._name.unsafe_ptr(),
             SDL_WINDOWPOS_CENTERED,
             SDL_WINDOWPOS_CENTERED,
             self._width,
@@ -151,6 +146,10 @@ struct SDL2Window(Window):
         # Convince mojo not to mess with these pointers (which don't even belong to us!) before we've unlocked the texture
         _ = pixels
         _ = pitch
+        _ = manual_pitch # This is here to convince mojo not to delete this prematurely and break the parallelized redraw (spooky)
 
         _ = self._sdl.RenderCopy(self._renderer, self._display_texture, 0, 0)
         _ = self._sdl.RenderPresent(self._renderer)
+
+    fn delay(self, ms: Int32) -> None:
+        _ = self._sdl.Delay(ms)

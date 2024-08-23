@@ -395,7 +395,7 @@ struct SDL:
         self.PollEvent = SDL.get_function[c_SDL_PollEvent]("SDL_PollEvent")
 
         self.GetError = SDL.get_function[c_SDL_GetError]("SDL_GetError")
-
+    
     fn get_sdl_error_as_string(self) -> String:
         var error_ptr = self.GetError()  # Call the function to get the error pointer
 

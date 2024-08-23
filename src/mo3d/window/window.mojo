@@ -13,6 +13,3 @@ trait Window:
         float_type: DType
     ](self, t: Tensor[float_type], channels: Int) raises -> None:
         ...
-    
-    fn delay(self, ms: Int32) -> None:
-        ...

@@ -146,10 +146,7 @@ struct SDL2Window(Window):
         # Convince mojo not to mess with these pointers (which don't even belong to us!) before we've unlocked the texture
         _ = pixels
         _ = pitch
-        _ = manual_pitch # This is here to convince mojo not to delete this prematurely and break the parallelized redraw (spooky)
+        _ = manual_pitch  # This is here to convince mojo not to delete this prematurely and break the parallelized redraw (spooky)
 
         _ = self._sdl.RenderCopy(self._renderer, self._display_texture, 0, 0)
         _ = self._sdl.RenderPresent(self._renderer)
-
-    fn delay(self, ms: Int32) -> None:
-        _ = self._sdl.Delay(ms)

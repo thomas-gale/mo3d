@@ -65,8 +65,8 @@ fn main() raises:
         average_redraw_time = (1.0 - alpha) * average_redraw_time + alpha * (
             now() - start_time
         )
-        window.delay((Float32(1000) / Float32(fps)).cast[DType.int32]())
- 
+        sleep(1.0 / Float64(fps))
+
     # Print stats
     print(
         "Average redraw time: ",

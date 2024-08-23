@@ -7,6 +7,13 @@ struct Ray[type: DType]:
     var orig: Point4[type]
     var dir: Point4[type]
 
-    def __init__(inout self):
+    fn __init__(inout self):
         self.orig = Point4[type]()
         self.dir = Vec4[type]()
+
+    fn __init__(inout self, orig: Point4[type], dir: Vec4[type]):
+        self.orig = orig
+        self.dir = dir
+
+    fn at(self, t: Scalar[type]) -> Point4[type]:
+        return self.orig + self.dir * t

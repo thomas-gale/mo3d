@@ -2,7 +2,6 @@
 
 from math import sqrt
 
-
 @value
 struct Vec4[type: DType](EqualityComparable, Stringable):
     alias size = 4
@@ -150,6 +149,9 @@ struct Vec4[type: DType](EqualityComparable, Stringable):
 
     fn __mul__(self, rhs: SIMD[type, 1]) -> Self:
         return Self(self.e * rhs)
+
+    fn __rmul__(self, lhs: SIMD[type, 1]) -> Self:
+        return Self(self.e * lhs)
 
     fn __imul__(inout self, rhs: SIMD[type, 1]):
         self.e *= rhs

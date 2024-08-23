@@ -43,7 +43,7 @@ Modular version 2024.8.1517
 - Took longer that I would have liked to track down the mysterious/non-deterministic corrupted data being rendered in the main loop
 - The solution was to signal to mojo that variables captured/referenced within the render kernel should not be deleted till after the main loop
 - Finally have the basic ray shooting background from Ray Tracing in One Weekend
-- Stats `CPU`:`Ryzen 7 5800X 8-Core` `Window Size`:`800x450` has an Average compute time: `0.80 ms` & Average redraw time: `3.03 ms`
+- Stats `CPU`:`Ryzen 7 5800X 8-Core` `Window Size`:`800x450` has an Average compute time (shoot rays): `0.80 ms` & Average redraw time (copy tensor to gpu texture): `3.03 ms`
 
 ![image](https://github.com/user-attachments/assets/48a30f5f-254f-4ace-bf46-82d7c6a94427)
 

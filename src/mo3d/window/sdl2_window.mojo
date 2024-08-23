@@ -31,11 +31,12 @@ struct SDL2Window(Window):
     var _event: Event
 
     fn __init__(
-        inout self, name: String, height: Int, width: Int
+        inout self, name: String, width: Int, height: Int
     ) raises -> None:
         self._name = name
-        self._height = height
         self._width = width
+        self._height = height
+        print("Creating SDL2 window '" + name + "' of size ", width, "x", height)
 
         self._sdl = SDL()
         var res_code = self._sdl.Init(SDL_INIT_VIDEO)
@@ -43,6 +44,7 @@ struct SDL2Window(Window):
             raise Error("Failed to initialize SDL")
         print("SDL initialized")
 
+        # We don't own this memory so don't free it
         self._window_title_ptr = UnsafePointer[UInt8](StringRef("TODO").data)
         # UnsafePointer(StringRef("mo3d").data)
 
@@ -54,7 +56,7 @@ struct SDL2Window(Window):
             self._height,
             SDL_WINDOW_SHOWN,
         )
-        print("Window created")
+        print("SDL window created")
 
         if self._window == UnsafePointer[SDL_Window]():
             raise Error("Failed to create SDL window")
@@ -70,6 +72,10 @@ struct SDL2Window(Window):
         )
 
         self._event = Event()
+
+        print("Window", self._window)
+        print("Renderer", self._renderer)
+        print("Display texture", self._display_texture)
 
     fn __del__(owned self) -> None:
         self._sdl.DestroyTexture(self._display_texture)

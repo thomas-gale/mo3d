@@ -8,9 +8,8 @@ Prototype 3d library for [mojo](https://docs.modular.com/mojo/manual/)
 
 ## attribution and inspiration
 - [mojo-sdl](https://github.com/msteele/mojo-sdl/)
-- [magnum-graphics](https://magnum.graphics/)
-- [bevy](https://bevyengine.org/)
 - [ray tracing in weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.html)
+- [magnum-graphics](https://magnum.graphics/)
 
 ## dev
 - devcontainer or mac
@@ -28,7 +27,6 @@ $ max --version
 max 2024.8.1517 (ee6ccd9a)
 Modular version 2024.8.1517
 ```
-
 
 ## progress notes
 ### 2024-08-11: hello window

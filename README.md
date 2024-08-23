@@ -1,13 +1,10 @@
+![image](https://github.com/user-attachments/assets/39e934ae-1aeb-434a-af8f-5986b348e1cc) 
 # mo3d
-### graphics library for [mojo](https://docs.modular.com/mojo/manual/)
-
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/39e934ae-1aeb-434a-af8f-5986b348e1cc" />
-</p>
 
 > [!WARNING]  
 > Under [active](#progress-notes) development/unstable
 
+### graphics library for [mojo](https://docs.modular.com/mojo/manual/)
 
 - [x] Cross platform SDL window with [`ffi`](https://docs.modular.com/mojo/stdlib/sys/ffi/) bindings directly to `mojo` (based on [mojo-sdl](https://github.com/msteele/mojo-sdl/))
 - [ ] Basic `3D` primitives and behaviours (vectors/rays with dot/cross products etc.)

@@ -39,9 +39,12 @@ fn main() raises:
     # Create our own state of the window
     var t = Tensor[float_type](width, height, channels)
 
+    # Basic compute
     # Populate the tensor with a colour gradient
-    for y in range(height):
-        for x in range(width):
+    @parameter
+    fn compute_row(y: Int):
+        @parameter
+        fn compute_row_vectorize[simd_width: Int](x: Int):
             t.store[4](
                 y * (width * channels) + x * channels,
                 SIMD[float_type, 4](
@@ -51,15 +54,24 @@ fn main() raises:
                     (x / (width - 1)).cast[float_type](),  # R
                 ),
             )
+        vectorize[compute_row_vectorize, 1](width)
+    # Inital values
+    parallelize[compute_row](height, height)
 
     # Collect timing stats
     var start_time = now()
     var alpha = 0.1
+    var average_compute_time = 0.0
     var average_redraw_time = 0.0
 
     # Create the window and start the main loop
     var window = SDL2Window.create("mo3d", width, height)
     while not window.should_close():
+        start_time = now()
+        parallelize[compute_row](height, height)
+        average_compute_time = (1.0 - alpha) * average_compute_time + alpha * (
+            now() - start_time
+        )
         start_time = now()
         window.redraw(t, channels)
         average_redraw_time = (1.0 - alpha) * average_redraw_time + alpha * (
@@ -68,6 +80,11 @@ fn main() raises:
         sleep(1.0 / Float64(fps))
 
     # Print stats
+    print(
+        "Average compute time: ",
+        str(average_compute_time / (1000 * 1000)),
+        " ms",
+    )
     print(
         "Average redraw time: ",
         str(average_redraw_time / (1000 * 1000)),

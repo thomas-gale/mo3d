@@ -19,7 +19,6 @@ struct Camera[
     width: Int,
     height: Int,
     channels: Int,
-    samples_per_pixel: Int,
     max_depth: Int,
 ]:
     alias S4 = SIMD[float_type, 4]
@@ -30,7 +29,6 @@ struct Camera[
     var _pixel_delta_u: Vec4[float_type]  # Offset to pixel to the right
     var _pixel_delta_v: Vec4[float_type]  # Offset to pixel below
 
-    # var _t: Tensor[float_type]
     var _t: UnsafePointer[Scalar[float_type]]
     var _samples: Int
 
@@ -70,7 +68,6 @@ struct Camera[
         )
 
         # Initialize the render state
-        # self._t = Tensor[float_type](height, width, channels)
         self._t = UnsafePointer[Scalar[float_type]].alloc(
             height * width * channels
         )
@@ -85,7 +82,7 @@ struct Camera[
     fn get_state(self) -> UnsafePointer[Scalar[float_type]]:
         return self._t
 
-    fn render(inout self, world: HittableList):
+    fn render(inout self, world: HittableList, num_samples: Int = 1):
         """
         Parallelize render, one row for each thread.
         TODO: Switch to one thread per pixel and compare performance (one we're running on GPU).
@@ -98,9 +95,9 @@ struct Camera[
             @parameter
             fn compute_row_vectorize[simd_width: Int](x: Int):
                 # Send a ray into the scene from this x, y coordinate
-                alias pixel_samples_scale = 1.0 / samples_per_pixel
+                var pixel_samples_scale = 1.0 / Scalar[float_type](num_samples)
                 var pixel_color = Color4(Self.S4(0, 0, 0, 0))
-                for _ in range(samples_per_pixel):
+                for _ in range(num_samples):
                     var r = self.get_ray(x, y)
                     pixel_color += Self._ray_color(r, max_depth, world)
                 pixel_color *= pixel_samples_scale.cast[float_type]()

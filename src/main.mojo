@@ -61,8 +61,10 @@ fn main() raises:
     # Basic ray coloring
     @parameter
     fn ray_color(r: Ray4[float_type]) -> Color4[float_type]:
-        if hit_sphere(Point4(S4(0, 0, -1, 0)), 0.5, r):
-            return Color4(S4(1, 0, 0))
+        var t = hit_sphere(Point4(S4(0, 0, -1, 0)), 0.5, r)
+        if t > 0.0:
+            var N = (r.at(t) - Vec4(S4(0, 0, -1, 0))).unit()
+            return 0.5 * Color4(S4(N.x() + 1, N.y() + 1, N.z() + 1))
 
         var unit_direction = Vec4.unit(r.dir)
         var a = 0.5 * (unit_direction.y() + 1.0)

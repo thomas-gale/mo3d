@@ -24,8 +24,10 @@ fn main() raises:
     alias fps = 120
     alias width = 800
     alias height = 450
-    # var aspect_ratio = width / height
     alias float_type = DType.float32
+    alias aspect_ratio = Scalar[
+        float_type
+    ](width) / Scalar[float_type](height)
     alias S4 = SIMD[float_type, 4]
     alias channels = 4
 
@@ -37,9 +39,7 @@ fn main() raises:
     # Camera
     alias focal_length: Scalar[float_type] = 1.0
     var viewport_height: Scalar[float_type] = 2.0
-    var viewport_width: Scalar[float_type] = viewport_height * Scalar[
-        float_type
-    ](width) / Scalar[float_type](height)
+    var viewport_width: Scalar[float_type] = viewport_height * aspect_ratio
     var camera_center = Vec4(S4(0.0, 0.0, 0.0, 0.0))
 
     # Calculate the vectors across the horizontal and down the vertical viewport edges.
@@ -109,7 +109,9 @@ fn main() raises:
     # Start the main loop
     while not window.should_close():
         start_time = now()
-        parallelize[compute_row](height, height) # We see a 4x speedup over 1 worker on my machine
+        parallelize[compute_row](
+            height, height
+        )  # We see a 4x speedup over 1 worker on my machine
         average_compute_time = (1.0 - alpha) * average_compute_time + alpha * (
             now() - start_time
         )

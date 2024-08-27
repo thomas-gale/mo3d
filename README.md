@@ -36,6 +36,13 @@ Modular version 2024.8.2617
 
 ## progress notes
 
+### 2024-08-27: refactoring ray and adding hittables
+- Struggling to get a proper generic/runtime polymorhpic hittable implementation working.
+- Couple of concrete/leaky dependencies in the ray_colour/HittableList implementations.
+- Added SIMD/generic Interval implementation
+
+
+
 ### 2024-08-23: wrapping sdl2 in a window trait and battling with over eager resource freeing by mojo
 - Took longer that I would have liked to track down the mysterious/non-deterministic corrupted data being rendered in the main loop
 - The solution was to signal to mojo that variables captured/referenced within the render kernel should not be deleted till after the main loop

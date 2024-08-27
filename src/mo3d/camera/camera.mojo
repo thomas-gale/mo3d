@@ -75,9 +75,11 @@ struct Camera[
             (self._t + i)[] = 1.0
 
         self._samples = 0
+        print("Camera initialized")
 
     fn __del__(owned self):
         self._t.free()
+        print("Camera destroyed")
 
     fn get_state(self) -> UnsafePointer[Scalar[float_type]]:
         return self._t

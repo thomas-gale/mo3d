@@ -11,6 +11,7 @@ from utils import StaticIntTuple
 from max.tensor import Tensor
 from max.extensibility import empty_tensor
 
+from mo3d.precision import float_type
 from mo3d.math.vec4 import Vec4
 from mo3d.math.point4 import Point4
 from mo3d.math.color4 import Color4
@@ -26,7 +27,6 @@ fn main() raises:
     alias fps = 120
     alias width = 800
     alias height = 450
-    alias float_type = DType.float32
     alias aspect_ratio = Scalar[float_type](width) / Scalar[float_type](height)
     alias S4 = SIMD[float_type, 4]
     alias channels = 4

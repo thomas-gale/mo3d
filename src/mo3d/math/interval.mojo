@@ -31,3 +31,10 @@ struct Interval[T: DType, simd_size: Int = 1]:
 
     fn surrounds(self, x: Self.S) -> SIMD[DType.bool, simd_size]:
         return (self.min < x) and (x < self.max)
+
+    fn clamp(self, x: Self.S) -> Self.S:
+        if x < self.min:
+            return self.min
+        if x > self.max:
+            return self.max
+        return x

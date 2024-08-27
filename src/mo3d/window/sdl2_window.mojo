@@ -1,6 +1,7 @@
 from algorithm import parallelize, vectorize
 from tensor import Tensor
 
+from mo3d.math.interval import Interval
 from mo3d.window.window import Window
 from mo3d.window.sdl2 import (
     SDL_INIT_VIDEO,
@@ -122,16 +123,24 @@ struct SDL2Window(Window):
             @parameter
             fn draw_row_vectorize[simd_width: Int](x: Int):
                 var offset = y * manual_pitch + x * channels  # Calculate the correct offset using pitch
-                (pixels + offset)[] = (t[y, x, 0] * 255.999).cast[
+                # Translate all 0-1 values to 0-255 and cast to uint8
+                var intensity = Interval[float_type](0.000, 0.999)
+                (pixels + offset)[] = (intensity.clamp(t[y, x, 0]) * 256).cast[
                     DType.uint8
                 ]()  # A
-                (pixels + offset + 1)[] = (t[y, x, 1] * 255.999).cast[
+                (pixels + offset + 1)[] = (
+                    intensity.clamp(t[y, x, 1]) * 256
+                ).cast[
                     DType.uint8
                 ]()  # B
-                (pixels + offset + 2)[] = (t[y, x, 2] * 255.999).cast[
+                (pixels + offset + 2)[] = (
+                    intensity.clamp(t[y, x, 2]) * 256
+                ).cast[
                     DType.uint8
                 ]()  # G
-                (pixels + offset + 3)[] = (t[y, x, 3] * 255.999).cast[
+                (pixels + offset + 3)[] = (
+                    intensity.clamp(t[y, x, 3]) * 256
+                ).cast[
                     DType.uint8
                 ]()  # R
 

@@ -26,17 +26,15 @@ fn main() raises:
     print("-- Hello, mo3d! --")
 
     # Settings
-    alias fps = 120
+    alias max_fps = 60
     alias width = 800
     alias height = 450
     alias aspect_ratio = Scalar[float_type](width) / Scalar[float_type](height)
     alias S4 = SIMD[float_type, 4]
     alias channels = 4
-    alias samples_per_pixel = 2
+    alias samples_per_pixel = 1
     alias max_depth = 8
 
-    # Render state (texture to render to)
-    var t = Tensor[float_type](height, width, channels)
 
     # World
     var world = HittableList()
@@ -44,11 +42,14 @@ fn main() raises:
     world.add_sphere(Sphere(Point4(S4(0, -100.5, -1, 0)), 100))
 
     # Camera
+    # Render state (texture to render to)
+    # var t = Tensor[float_type](height, width, channels)
     var camera = Camera[width, height, channels, samples_per_pixel, max_depth]()
 
-    # Collect timing stats
+    # Collect timing stats - TODO: Tidy and move
     var start_time = now()
     var alpha = 0.1
+    var frame_duration = 0.0
     var average_compute_time = 0.0
     var average_redraw_time = 0.0
 
@@ -56,21 +57,24 @@ fn main() raises:
     var window = SDL2Window.create("mo3d", width, height)
     while not window.should_close():
         start_time = now()
-        camera.render(t, world)
+        camera.render(world)
         average_compute_time = (1.0 - alpha) * average_compute_time + alpha * (
             now() - start_time
         )
+        frame_duration = now() - start_time
         start_time = now()
-        window.redraw(t, channels)
+        window.redraw[float_type](camera.get_state(), channels)
         average_redraw_time = (1.0 - alpha) * average_redraw_time + alpha * (
             now() - start_time
         )
-        sleep(1.0 / Float64(fps))
+        frame_duration += now() - start_time
+        frame_duration = frame_duration / 10**9
+        if frame_duration < 1.0 / Float64(max_fps):
+            sleep(1.0 / Float64(max_fps) - frame_duration)
 
     # WIP: Convince the mojo compiler that we are using these variables (from the kernal @parameter closure) while the loop is running...
     _ = camera
     _ = world
-    _ = t
 
     # Print stats
     print(

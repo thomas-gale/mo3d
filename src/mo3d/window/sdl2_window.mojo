@@ -99,7 +99,8 @@ struct SDL2Window(Window):
 
     fn redraw[
         float_type: DType
-    ](self, t: Tensor[float_type], channels: Int = 4) raises -> None:
+    ](self, t: UnsafePointer[Scalar[float_type]], channels: Int = 4) raises -> None:
+    # ](self, t: Tensor[float_type], channels: Int = 4) raises -> None:
         _ = self._sdl.RenderClear(self._renderer)
 
         # These pixels are in GPU memory - we cant use SIMD as we don't know if SDL2 has aligned them
@@ -127,10 +128,16 @@ struct SDL2Window(Window):
                 var offset = y * manual_pitch + x * channels
 
                 # Apply a linear to gamma transform for gamma 2
-                var r = linear_to_gamma(t[y, x, 3])
-                var g = linear_to_gamma(t[y, x, 2])
-                var b = linear_to_gamma(t[y, x, 1])
-                var a = linear_to_gamma(t[y, x, 0])
+                # var r = linear_to_gamma(t[y, x, 3])
+                # var g = linear_to_gamma(t[y, x, 2])
+                # var b = linear_to_gamma(t[y, x, 1])
+                # var a = linear_to_gamma(t[y, x, 0])
+
+                var r = linear_to_gamma((t + offset + 3)[])
+                var g = linear_to_gamma((t + offset + 2)[])
+                var b = linear_to_gamma((t + offset + 1)[])
+                var a = linear_to_gamma((t + offset )[])
+
 
                 # Translate all 0-1 values to 0-255 and cast to uint8
                 var intensity = Interval[float_type](0.000, 0.999)

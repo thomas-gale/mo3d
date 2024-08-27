@@ -1,5 +1,5 @@
 from algorithm import parallelize, vectorize
-from math import inf
+from math import inf, iota
 from random import random_float64
 
 from max.tensor import Tensor
@@ -29,6 +29,10 @@ struct Camera[
     var _pixel00_loc: Point4[float_type]  # Location of pixel 0, 0
     var _pixel_delta_u: Vec4[float_type]  # Offset to pixel to the right
     var _pixel_delta_v: Vec4[float_type]  # Offset to pixel below
+
+    # var _t: Tensor[float_type]
+    var _t: UnsafePointer[Scalar[float_type]]
+    var _samples: Int
 
     fn __init__(
         inout self,
@@ -65,7 +69,20 @@ struct Camera[
             self._pixel_delta_u + self._pixel_delta_v
         )
 
-    fn render(self, inout t: Tensor[float_type], world: HittableList):
+        # Initialize the render state
+        # self._t = Tensor[float_type](height, width, channels)
+        self._t = UnsafePointer[Scalar[float_type]].alloc(
+            height * width * channels
+        )
+        self._samples = 0
+
+    fn __del__(owned self):
+        self._t.free()
+
+    fn get_state(self) -> UnsafePointer[Scalar[float_type]]:
+        return self._t
+
+    fn render(inout self, world: HittableList):
         """
         Parallelize render, one row for each thread.
         TODO: Switch to one thread per pixel and compare performance (one we're running on GPU).
@@ -76,11 +93,6 @@ struct Camera[
             @parameter
             fn compute_row_vectorize[simd_width: Int](x: Int):
                 # Send a ray into the scene from this x, y coordinate
-                # var pixel_center = self._pixel00_loc + (
-                #     x * self._pixel_delta_u
-                # ) + (y * self._pixel_delta_v)
-                # var ray_direction = pixel_center - self._center
-                # var r = Ray4(self._center, ray_direction)
                 alias pixel_samples_scale = 1.0 / samples_per_pixel
                 var pixel_color = Color4(Self.S4(0, 0, 0, 0))
                 for _ in range(samples_per_pixel):
@@ -88,15 +100,33 @@ struct Camera[
                     pixel_color += Self._ray_color(r, max_depth, world)
                 pixel_color *= pixel_samples_scale.cast[float_type]()
 
-                t.store[4](
-                    y * (width * channels) + x * channels,
-                    SIMD[float_type, 4](
-                        pixel_color.w(),  # A
-                        pixel_color.z(),  # B
-                        pixel_color.y(),  # G
-                        pixel_color.x(),  # R
-                    ),
-                )
+                # Get the current color in the render state
+                # var curr = self._t.load[4](
+                #     iota[Int32, 4](y * (width * channels) + x * channels)
+                # )
+
+                # Store the color in the render state
+                # self._t.store[4](
+                #     y * (width * channels) + x * channels,
+                #     SIMD[float_type, 4](
+                #         pixel_color.w(),  # A
+                #         pixel_color.z(),  # B
+                #         pixel_color.y(),  # G
+                #         pixel_color.x(),  # R
+                #     ),
+                # )
+                (
+                    self._t + (y * (width * channels) + x * channels)
+                )[] = pixel_color.w()
+                (
+                    self._t + (y * (width * channels) + x * channels + 1)
+                )[] = pixel_color.z()
+                (
+                    self._t + (y * (width * channels) + x * channels + 2)
+                )[] = pixel_color.y()
+                (
+                    self._t + (y * (width * channels) + x * channels + 3)
+                )[] = pixel_color.x()
 
             vectorize[compute_row_vectorize, 1](width)
 

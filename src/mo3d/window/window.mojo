@@ -1,6 +1,5 @@
 from tensor import Tensor
 
-
 trait Window:
     @staticmethod
     fn create(name: String, height: Int, width: Int) raises -> Self:
@@ -9,7 +8,9 @@ trait Window:
     fn should_close(self) -> Bool:
         ...
 
+    # ](self, t: Tensor[float_type], channels: Int) raises -> None:
+    
     fn redraw[
         float_type: DType
-    ](self, t: Tensor[float_type], channels: Int) raises -> None:
+    ](self, t: UnsafePointer[Scalar[float_type]], channels: Int) raises -> None:
         ...

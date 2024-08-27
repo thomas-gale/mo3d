@@ -46,7 +46,7 @@ Modular version 2024.8.2617
 - Added camera implementation.
 - Adding basic diffuse lambertian material
 - Replaced the Tensor with my own UnsafePointer texture state implementation.
-- Progressive rendering to the texture state, so rather than multiple samples in a single pass, the image samples and re-renders, this keeps the frame time at around 10ms on mac m3.
+- Progressive rendering to the texture state, so rather than multiple samples in a single pass, the image samples and re-renders, this keeps the frame time at around `10ms` on mac m3.
 
 <img width="795" alt="Screenshot 2024-08-27 at 22 59 29" src="https://github.com/user-attachments/assets/fab7211a-2841-49f5-9e93-dfcd07fb05d4">
 

@@ -18,6 +18,7 @@
 ## attribution and inspiration
 - [mojo-sdl](https://github.com/msteele/mojo-sdl/)
 - [ray tracing in one weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.html)
+- [three.js](https://github.com/mrdoob/three.js/)
 - [magnum-graphics](https://magnum.graphics/)
 
 ## dev

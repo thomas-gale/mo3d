@@ -10,12 +10,12 @@ fn hit_sphere[
     center: Point4[float_type], radius: Scalar[float_type], r: Ray4[float_type]
 ) -> Scalar[float_type]:
     var oc = center - r.orig
-    var a = r.dir.dot(r.dir)
-    var b = -2.0 * r.dir.dot(oc)
-    var c = oc.dot(oc) - radius * radius
-    var discriminant = b * b - 4 * a * c
+    var a = r.dir.length_squared()
+    var h = r.dir.dot(oc)
+    var c = oc.length_squared() - radius * radius
+    var discriminant = h * h - a * c
 
     if discriminant < 0:
         return -1.0
     else:
-        return (-b - sqrt(discriminant)) / (2.0 * a)
+        return (h - sqrt(discriminant)) / a

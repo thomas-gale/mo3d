@@ -68,6 +68,7 @@ struct Camera[
     fn render(self, inout t: Tensor[float_type], world: HittableList):
         """
         Parallelize render, one row for each thread.
+        TODO: Switch to one thread per pixel and compare performance (one we're running on GPU).
         """
 
         @parameter
@@ -75,11 +76,11 @@ struct Camera[
             @parameter
             fn compute_row_vectorize[simd_width: Int](x: Int):
                 # Send a ray into the scene from this x, y coordinate
-                var pixel_center = self._pixel00_loc + (
-                    x * self._pixel_delta_u
-                ) + (y * self._pixel_delta_v)
-                var ray_direction = pixel_center - self._center
-                var r = Ray4(self._center, ray_direction)
+                # var pixel_center = self._pixel00_loc + (
+                #     x * self._pixel_delta_u
+                # ) + (y * self._pixel_delta_v)
+                # var ray_direction = pixel_center - self._center
+                # var r = Ray4(self._center, ray_direction)
                 alias pixel_samples_scale = 1.0 / samples_per_pixel
                 var pixel_color = Color4(Self.S4(0, 0, 0, 0))
                 for _ in range(samples_per_pixel):
@@ -94,16 +95,11 @@ struct Camera[
                         pixel_color.z(),  # B
                         pixel_color.y(),  # G
                         pixel_color.x(),  # R
-                        # 1.0,  # A
-                        # 0.0,  # B
-                        # (y / (height - 1)).cast[float_type](),  # G
-                        # (x / (width - 1)).cast[float_type](),  # R
                     ),
                 )
 
             vectorize[compute_row_vectorize, 1](width)
 
-        # Inital values
         parallelize[compute_row](height, height)
 
     fn get_ray(
@@ -150,7 +146,7 @@ struct Camera[
         var rec = HitRecord[float_type]()
 
         if world.hit(r, Interval[float_type](0.001, inf[float_type]()), rec):
-            var direction = Vec4.random_on_hemisphere(rec.normal)
+            var direction = rec.normal + Vec4[float_type].random_unit_vector()
             return 0.5 * Self._ray_color(
                 Ray4[float_type](rec.p, direction), depth - 1, world
             )

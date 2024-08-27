@@ -44,8 +44,11 @@ Modular version 2024.8.2617
 - Couple of concrete/leaky dependencies in the ray_colour/HittableList implementations.
 - Added SIMD/generic Interval implementation.
 - Added camera implementation.
-- Adding basic diffuse lambertian material.
+- Adding basic diffuse lambertian material
+- We are now taking 1000-2000ms per frame on CPU only for 32 samples - looking forward to trying the Max GPU implementation soon (it will be release in September)
+- For now, I will continue with the CPU parallelized implementation with limited bounces and samples for a small window.
 
+![image](https://github.com/user-attachments/assets/2533b815-9e5a-401d-ae7c-544f90bec008)
 ![image](https://github.com/user-attachments/assets/554cdccb-77a0-47d6-ba3e-74991aa8180a)
 
 ### 2024-08-23: wrapping sdl2 in a window trait and battling with over eager resource freeing by mojo

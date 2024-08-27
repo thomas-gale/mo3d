@@ -23,7 +23,7 @@ from mo3d.window.sdl2_window import SDL2Window
 
 
 fn main() raises:
-    print("Hello, mo3d!")
+    print("-- Hello, mo3d! --")
 
     # Settings
     alias fps = 120
@@ -32,11 +32,6 @@ fn main() raises:
     alias aspect_ratio = Scalar[float_type](width) / Scalar[float_type](height)
     alias S4 = SIMD[float_type, 4]
     alias channels = 4
-
-    # Create our own state of the window texture
-    # HACK: It's critical that these are allocated first my Mojo before the @parameter functions later, as we get strange segfaults otherwise...
-    var window = SDL2Window.create("mo3d", width, height)
-    var t = Tensor[float_type](height, width, channels)
 
     # World
     var world = HittableList()
@@ -83,6 +78,9 @@ fn main() raises:
             S4(0.5, 0.7, 1.0, 1.0)
         )
 
+    # State of the world
+    var t = Tensor[float_type](height, width, channels)
+
     # Basic compute Kernel
     # Populate the tensor with a colour gradient
     @parameter
@@ -122,7 +120,8 @@ fn main() raises:
     var average_compute_time = 0.0
     var average_redraw_time = 0.0
 
-    # Start the main loop
+    # Create window and start the main loop
+    var window = SDL2Window.create("mo3d", width, height)
     while not window.should_close():
         start_time = now()
         parallelize[compute_row](
@@ -144,6 +143,7 @@ fn main() raises:
     _ = pixel_delta_v
     _ = camera_center
     _ = world
+    _ = t
 
     # Print stats
     print(

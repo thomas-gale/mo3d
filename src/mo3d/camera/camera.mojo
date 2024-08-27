@@ -20,6 +20,7 @@ struct Camera[
     height: Int,
     channels: Int,
     max_depth: Int,
+    max_samples: Int,
 ]:
     alias S4 = SIMD[float_type, 4]
 
@@ -91,6 +92,8 @@ struct Camera[
         """
 
         self._samples += 1
+        if self._samples > max_samples:
+            return
 
         @parameter
         fn compute_row(y: Int):

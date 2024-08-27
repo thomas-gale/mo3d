@@ -33,6 +33,7 @@ fn main() raises:
     alias S4 = SIMD[float_type, 4]
     alias channels = 4
     alias max_depth = 8
+    alias max_samples = 1024
 
     # World
     var world = HittableList()
@@ -40,7 +41,7 @@ fn main() raises:
     world.add_sphere(Sphere(Point4(S4(0, -100.5, -1, 0)), 100))
 
     # Camera
-    var camera = Camera[width, height, channels, max_depth]()
+    var camera = Camera[width, height, channels, max_depth, max_samples]()
 
     # Collect timing stats - TODO: Tidy and move
     var start_time = now()

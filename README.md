@@ -9,6 +9,7 @@
 - [x] Cross platform SDL window with [`ffi`](https://docs.modular.com/mojo/stdlib/sys/ffi/) bindings directly to `mojo` (based on [mojo-sdl](https://github.com/msteele/mojo-sdl/))
 - [x] Basic `3D` primitives and behaviours (vectors/rays with dot/cross products etc.)
 - [ ] Basic ray/path tracer based 'ray tracing in one weekend'
+	- [x] Antialiasing
 - [ ] Mouse interaction for orcball orbit controls (e.g. https://asliceofrendering.com/camera/2019/11/30/ArcballCamera/)
 - [ ] Basic shader replacement pattern (however no need to use actual graphics shaders - as the idea is that mojo optimized compute can perform the same function directly)
 - [ ] Mesh rendering (using bvh or other similar acceleration structure)

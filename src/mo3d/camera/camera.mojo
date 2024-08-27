@@ -15,7 +15,13 @@ from mo3d.ray.hittable import HitRecord
 
 
 @value
-struct Camera[width: Int, height: Int, channels: Int, samples_per_pixel: Int]:
+struct Camera[
+    width: Int,
+    height: Int,
+    channels: Int,
+    samples_per_pixel: Int,
+    max_depth: Int,
+]:
     alias S4 = SIMD[float_type, 4]
 
     var _aspect_ratio: Scalar[float_type]  # Aspect ratio of the camera
@@ -78,7 +84,7 @@ struct Camera[width: Int, height: Int, channels: Int, samples_per_pixel: Int]:
                 var pixel_color = Color4(Self.S4(0, 0, 0, 0))
                 for _ in range(samples_per_pixel):
                     var r = self.get_ray(x, y)
-                    pixel_color += Self._ray_color(r, world)
+                    pixel_color += Self._ray_color(r, max_depth, world)
                 pixel_color *= pixel_samples_scale.cast[float_type]()
 
                 t.store[4](
@@ -131,17 +137,22 @@ struct Camera[width: Int, height: Int, channels: Int, samples_per_pixel: Int]:
     @staticmethod
     @parameter
     fn _ray_color(
-        r: Ray4[float_type], world: HittableList
+        r: Ray4[float_type], depth: Scalar[int_type], world: HittableList
     ) -> Color4[float_type]:
         """
         Sadly can't get the generic hittable trait as argument type to work :(.
         """
+        if depth <= 0:
+            return Color4(
+                Self.S4(0, 0, 0, 0)
+            )  # TODO: What should be alpha here?
+
         var rec = HitRecord[float_type]()
 
-        if world.hit(r, Interval[float_type](0.0, inf[float_type]()), rec):
+        if world.hit(r, Interval[float_type](0.001, inf[float_type]()), rec):
             var direction = Vec4.random_on_hemisphere(rec.normal)
             return 0.5 * Self._ray_color(
-                Ray4[float_type](rec.p, direction), world
+                Ray4[float_type](rec.p, direction), depth - 1, world
             )
 
         var unit_direction = Vec4.unit(r.dir)

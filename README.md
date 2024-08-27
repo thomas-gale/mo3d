@@ -39,17 +39,16 @@ Modular version 2024.8.2617
 
 ## progress notes
 
-### 2024-08-27: refactoring ray, adding hittables and basic bouncing
+### 2024-08-27: refactoring ray, adding hittables, basic ray multi-sampling to update a progressive texture
 - Struggling to get a proper generic/runtime polymorhpic hittable implementation working.
 - Couple of concrete/leaky dependencies in the ray_colour/HittableList implementations.
 - Added SIMD/generic Interval implementation.
 - Added camera implementation.
 - Adding basic diffuse lambertian material
-- We are now taking 1000-2000ms per frame on CPU only for 32 samples - looking forward to trying the Max GPU implementation soon (it will be release in September)
-- For now, I will continue with the CPU parallelized implementation with limited bounces and samples for a small window.
+- Replaced the Tensor with my own UnsafePointer texture state implementation.
+- Progressive rendering to the texture state, so rather than multiple samples in a single pass, the image samples and re-renders, this keeps the frame time at around 10ms on mac m3.
 
-![image](https://github.com/user-attachments/assets/2533b815-9e5a-401d-ae7c-544f90bec008)
-![image](https://github.com/user-attachments/assets/554cdccb-77a0-47d6-ba3e-74991aa8180a)
+<img width="795" alt="Screenshot 2024-08-27 at 22 59 29" src="https://github.com/user-attachments/assets/fab7211a-2841-49f5-9e93-dfcd07fb05d4">
 
 ### 2024-08-23: wrapping sdl2 in a window trait and battling with over eager resource freeing by mojo
 - Took longer that I would have liked to track down the mysterious/non-deterministic corrupted data being rendered in the main loop

@@ -32,8 +32,8 @@ fn main() raises:
     alias aspect_ratio = Scalar[float_type](width) / Scalar[float_type](height)
     alias S4 = SIMD[float_type, 4]
     alias channels = 4
-    alias samples_per_pixel = 16
-    alias max_depth = 10
+    alias samples_per_pixel = 2
+    alias max_depth = 8
 
     # Render state (texture to render to)
     var t = Tensor[float_type](height, width, channels)

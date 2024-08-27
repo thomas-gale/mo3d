@@ -40,8 +40,8 @@ struct SDL2Window(Window):
         self._sdl = SDL()
         var res_code = self._sdl.Init(SDL_INIT_VIDEO)
         if res_code != 0:
-            raise Error("Failed to initialize SDL")
-        print("SDL initialized")
+            raise Error("Failed to initialize SDL2")
+        print("SDL2 initialized")
 
         self._window = self._sdl.CreateWindow(
             self._name.unsafe_ptr(),
@@ -51,7 +51,7 @@ struct SDL2Window(Window):
             self._height,
             SDL_WINDOW_SHOWN,
         )
-        print("SDL window created")
+        print("SDL2 window created")
 
         if self._window == UnsafePointer[SDL_Window]():
             raise Error("Failed to create SDL window")
@@ -80,7 +80,7 @@ struct SDL2Window(Window):
         self._sdl.DestroyWindow(self._window)
         print("Window destroyed")
         self._sdl.Quit()
-        print("SDL quit")
+        print("SDL2 quit")
 
     @staticmethod
     fn create(name: String, height: Int, width: Int) raises -> Self:

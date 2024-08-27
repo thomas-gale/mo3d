@@ -74,6 +74,9 @@ struct Camera[
         self._t = UnsafePointer[Scalar[float_type]].alloc(
             height * width * channels
         )
+        for i in range(height * width * channels):
+            (self._t + i)[] = 1.0
+
         self._samples = 0
 
     fn __del__(owned self):
@@ -88,6 +91,8 @@ struct Camera[
         TODO: Switch to one thread per pixel and compare performance (one we're running on GPU).
         """
 
+        self._samples += 1
+
         @parameter
         fn compute_row(y: Int):
             @parameter
@@ -100,33 +105,34 @@ struct Camera[
                     pixel_color += Self._ray_color(r, max_depth, world)
                 pixel_color *= pixel_samples_scale.cast[float_type]()
 
-                # Get the current color in the render state
-                # var curr = self._t.load[4](
-                #     iota[Int32, 4](y * (width * channels) + x * channels)
-                # )
-
-                # Store the color in the render state
-                # self._t.store[4](
-                #     y * (width * channels) + x * channels,
-                #     SIMD[float_type, 4](
-                #         pixel_color.w(),  # A
-                #         pixel_color.z(),  # B
-                #         pixel_color.y(),  # G
-                #         pixel_color.x(),  # R
-                #     ),
-                # )
+                # Progressivelh store the color in the render state
                 (
                     self._t + (y * (width * channels) + x * channels)
-                )[] = pixel_color.w()
+                )[] *= Scalar[float_type](self._samples-1) / Scalar[float_type](self._samples)
+                (
+                    self._t + (y * (width * channels) + x * channels)
+                )[] += pixel_color.w() / Scalar[float_type](self._samples)
+
                 (
                     self._t + (y * (width * channels) + x * channels + 1)
-                )[] = pixel_color.z()
+                )[] *= Scalar[float_type](self._samples-1) / Scalar[float_type](self._samples)
+                (
+                    self._t + (y * (width * channels) + x * channels + 1)
+                )[] += pixel_color.z() / Scalar[float_type](self._samples)
+
                 (
                     self._t + (y * (width * channels) + x * channels + 2)
-                )[] = pixel_color.y()
+                )[] *= Scalar[float_type](self._samples-1) / Scalar[float_type](self._samples)
+                (
+                    self._t + (y * (width * channels) + x * channels + 2)
+                )[] += pixel_color.y() / Scalar[float_type](self._samples)
+
                 (
                     self._t + (y * (width * channels) + x * channels + 3)
-                )[] = pixel_color.x()
+                )[] *= Scalar[float_type](self._samples-1) / Scalar[float_type](self._samples)
+                (
+                    self._t + (y * (width * channels) + x * channels + 3)
+                )[] += pixel_color.x() / Scalar[float_type](self._samples)
 
             vectorize[compute_row_vectorize, 1](width)
 

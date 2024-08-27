@@ -12,8 +12,10 @@ from max.tensor import Tensor
 from max.extensibility import empty_tensor
 
 from mo3d.math.vec4 import Vec4
+from mo3d.math.point4 import Point4
 from mo3d.math.color4 import Color4
-from mo3d.math.ray4 import Ray4
+from mo3d.ray.ray4 import Ray4
+from mo3d.ray.sphere import hit_sphere
 from mo3d.window.sdl2_window import SDL2Window
 
 
@@ -25,9 +27,7 @@ fn main() raises:
     alias width = 800
     alias height = 450
     alias float_type = DType.float32
-    alias aspect_ratio = Scalar[
-        float_type
-    ](width) / Scalar[float_type](height)
+    alias aspect_ratio = Scalar[float_type](width) / Scalar[float_type](height)
     alias S4 = SIMD[float_type, 4]
     alias channels = 4
 
@@ -61,6 +61,9 @@ fn main() raises:
     # Basic ray coloring
     @parameter
     fn ray_color(r: Ray4[float_type]) -> Color4[float_type]:
+        if hit_sphere(Point4(S4(0, 0, -1, 0)), 0.5, r):
+            return Color4(S4(1, 0, 0))
+
         var unit_direction = Vec4.unit(r.dir)
         var a = 0.5 * (unit_direction.y() + 1.0)
         return (1.0 - a) * Color4(S4(1.0, 1.0, 1.0, 1.0)) + a * Color4(

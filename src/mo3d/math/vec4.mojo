@@ -1,11 +1,15 @@
 # TODO: Initial impl based on https://raytracing.github.io/books/RayTracingInOneWeekend.html#outputanimage
 
 from math import sqrt
+from random import random_float64
+
 
 @value
 struct Vec4[type: DType](EqualityComparable, Stringable):
     alias size = 4
-    var e: SIMD[type, size = Self.size]
+    alias S4 = SIMD[type, Self.size]
+
+    var e: Self.S4
 
     fn __init__(inout self):
         self.e = SIMD[type, 4](0)
@@ -45,6 +49,50 @@ struct Vec4[type: DType](EqualityComparable, Stringable):
 
     fn unit(self) -> Self:
         return self / self.length()
+
+    @staticmethod
+    fn random_in_unit_sphere() -> Self:
+        while True:
+            var p = Self.random(-1, 1)
+            if p.length_squared() < 1:
+                return p
+
+    @staticmethod
+    fn random_unit_vector() -> Self:
+        return Self.random_in_unit_sphere().unit()
+
+    @staticmethod
+    fn random_on_hemisphere(normal: Self) -> Self:
+        var on_unit_sphere = Self.random_unit_vector()
+        if on_unit_sphere.dot(normal) > 0:
+            # In the same hemisphere as the normal
+            return on_unit_sphere
+        else:
+            return -on_unit_sphere
+
+    @staticmethod
+    fn random() -> Self:
+        return Self(
+            Self.S4(
+                random_float64().cast[type](),
+                random_float64().cast[type](),
+                random_float64().cast[type](),
+                random_float64().cast[type](),
+            )
+        )
+
+    @staticmethod
+    fn random(min: Scalar[type], max: Scalar[type]) -> Self:
+        var min_64 = min.cast[DType.float64]()
+        var max_64 = max.cast[DType.float64]()
+        return Self(
+            Self.S4(
+                random_float64(min_64, max_64).cast[type](),
+                random_float64(min_64, max_64).cast[type](),
+                random_float64(min_64, max_64).cast[type](),
+                random_float64(min_64, max_64).cast[type](),
+            )
+        )
 
     fn __str__(self) -> String:
         """Readable representation of the vector."""

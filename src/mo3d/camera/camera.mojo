@@ -137,8 +137,12 @@ struct Camera[width: Int, height: Int, channels: Int, samples_per_pixel: Int]:
         Sadly can't get the generic hittable trait as argument type to work :(.
         """
         var rec = HitRecord[float_type]()
+
         if world.hit(r, Interval[float_type](0.0, inf[float_type]()), rec):
-            return 0.5 * (rec.normal + Vec4(Self.S4(1, 1, 1, 0)))
+            var direction = Vec4.random_on_hemisphere(rec.normal)
+            return 0.5 * Self._ray_color(
+                Ray4[float_type](rec.p, direction), world
+            )
 
         var unit_direction = Vec4.unit(r.dir)
         var a = 0.5 * (unit_direction.y() + 1.0)

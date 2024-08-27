@@ -39,10 +39,12 @@ Modular version 2024.8.2617
 
 ## progress notes
 
-### 2024-08-27: refactoring ray and adding hittables
+### 2024-08-27: refactoring ray, adding hittables and basic bouncing
 - Struggling to get a proper generic/runtime polymorhpic hittable implementation working.
 - Couple of concrete/leaky dependencies in the ray_colour/HittableList implementations.
-- Added SIMD/generic Interval implementation
+- Added SIMD/generic Interval implementation.
+- Added camera implementation.
+- Adding basic diffuse lambertian material.
 
 ![image](https://github.com/user-attachments/assets/554cdccb-77a0-47d6-ba3e-74991aa8180a)
 

@@ -1,6 +1,7 @@
 from collections import List
 
 from mo3d.precision import float_type
+from mo3d.math.interval import Interval
 from mo3d.ray.hittable import Hittable, HitRecord
 from mo3d.ray.ray4 import Ray4
 from mo3d.ray.sphere import Sphere
@@ -30,16 +31,15 @@ struct HittableList(Hittable):
     fn hit(
         self,
         r: Ray4[float_type],
-        ray_tmin: Scalar[float_type],
-        ray_tmax: Scalar[float_type],
+        ray_t: Interval[float_type],
         inout rec: HitRecord[float_type],
     ) -> Bool:
+        var temp_rec = HitRecord[float_type]()
         var hit_anything = False
-        var closest_so_far = ray_tmax
+        var closest_so_far = ray_t.max
 
         for sphere in self._sphere_list:
-            var temp_rec = HitRecord[float_type]()
-            if sphere[].hit(r, ray_tmin, closest_so_far, temp_rec):
+            if sphere[].hit(r, Interval(ray_t.min, closest_so_far), temp_rec):
                 hit_anything = True
                 closest_so_far = temp_rec.t
                 rec = temp_rec

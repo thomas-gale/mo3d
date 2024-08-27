@@ -11,6 +11,7 @@ from utils import StaticIntTuple
 from max.tensor import Tensor
 
 from mo3d.precision import float_type
+from mo3d.math.interval import Interval
 from mo3d.math.vec4 import Vec4
 from mo3d.math.point4 import Point4
 from mo3d.math.color4 import Color4
@@ -73,7 +74,7 @@ fn main() raises:
         Sadly can't get the generic hittable trait as argument type to work :(.
         """
         var rec = HitRecord[float_type]()
-        if world.hit(r, 0.0, inf[float_type](), rec):
+        if world.hit(r, Interval[float_type](0.0, inf[float_type]()), rec):
             return 0.5 * (rec.normal + Vec4(S4(1, 1, 1, 0)))
 
         var unit_direction = Vec4.unit(r.dir)

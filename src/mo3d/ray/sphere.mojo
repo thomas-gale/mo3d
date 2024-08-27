@@ -1,6 +1,7 @@
 from math import sqrt
 
 from mo3d.precision import float_type
+from mo3d.math.interval import Interval
 from mo3d.math.point4 import Point4
 from mo3d.ray.ray4 import Ray4
 from mo3d.ray.hittable import HitRecord, Hittable
@@ -20,8 +21,7 @@ struct Sphere(Hittable):
     fn hit(
         self,
         r: Ray4[float_type],
-        ray_tmin: Scalar[float_type],
-        ray_tmax: Scalar[float_type],
+        ray_t: Interval[float_type],
         inout rec: HitRecord[float_type],
     ) -> Bool:
         var oc = self._center - r.orig
@@ -37,9 +37,9 @@ struct Sphere(Hittable):
 
         # Find the nearest root that lies in the acceptable range.
         var root = (h - sqrtd) / a
-        if root <= ray_tmin or ray_tmax <= root:
+        if not ray_t.surrounds(root):
             root = (h + sqrtd) / a
-            if root <= ray_tmin or ray_tmax <= root:
+            if not ray_t.surrounds(root):
                 return False
 
         rec.t = root

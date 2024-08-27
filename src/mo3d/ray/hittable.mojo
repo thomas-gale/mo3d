@@ -1,4 +1,5 @@
 from mo3d.precision import float_type
+from mo3d.math.interval import Interval
 from mo3d.math.vec4 import Vec4
 from mo3d.math.point4 import Point4
 from mo3d.ray.ray4 import Ray4
@@ -32,8 +33,7 @@ trait Hittable:
     fn hit(
         self,
         r: Ray4[float_type],
-        ray_tmin: Scalar[float_type],
-        ray_tmax: Scalar[float_type],
+        ray_t: Interval[float_type],
         inout rec: HitRecord[float_type],
     ) -> Bool:
         ...

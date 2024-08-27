@@ -34,15 +34,12 @@ fn main() raises:
     alias channels = 4
     alias max_depth = 8
 
-
     # World
     var world = HittableList()
     world.add_sphere(Sphere(Point4(S4(0, 0, -1, 0)), 0.5))
     world.add_sphere(Sphere(Point4(S4(0, -100.5, -1, 0)), 100))
 
     # Camera
-    # Render state (texture to render to)
-    # var t = Tensor[float_type](height, width, channels)
     var camera = Camera[width, height, channels, max_depth]()
 
     # Collect timing stats - TODO: Tidy and move
@@ -70,10 +67,6 @@ fn main() raises:
         frame_duration = frame_duration / 10**9
         if frame_duration < 1.0 / Float64(max_fps):
             sleep(1.0 / Float64(max_fps) - frame_duration)
-
-    # WIP: Convince the mojo compiler that we are using these variables (from the kernal @parameter closure) while the loop is running...
-    _ = camera
-    _ = world
 
     # Print stats
     print(

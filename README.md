@@ -7,14 +7,16 @@
 ### graphics library for [mojo](https://docs.modular.com/mojo/manual/)
 
 - [x] Cross platform SDL window with [`ffi`](https://docs.modular.com/mojo/stdlib/sys/ffi/) bindings directly to `mojo` (based on [mojo-sdl](https://github.com/msteele/mojo-sdl/))
-- [ ] Basic `3D` primitives and behaviours (vectors/rays with dot/cross products etc.)
+- [x] Basic `3D` primitives and behaviours (vectors/rays with dot/cross products etc.)
+- [ ] Basic ray/path tracer based 'ray tracing in one weekend'
+- [ ] Mouse interaction for orbit controls
 - [ ] Basic shader replacement pattern (however no need to use actual graphics shaders - as the idea is that mojo optimized compute can perform the same function directly)
 - [ ] Mesh rendering (using bvh or other similar acceleration structure)
 - [ ] ...
 
 ## attribution and inspiration
 - [mojo-sdl](https://github.com/msteele/mojo-sdl/)
-- [ray tracing in weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.html)
+- [ray tracing in one weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.html)
 - [magnum-graphics](https://magnum.graphics/)
 
 ## dev
@@ -41,7 +43,7 @@ Modular version 2024.8.2617
 - Couple of concrete/leaky dependencies in the ray_colour/HittableList implementations.
 - Added SIMD/generic Interval implementation
 
-
+![image](https://github.com/user-attachments/assets/554cdccb-77a0-47d6-ba3e-74991aa8180a)
 
 ### 2024-08-23: wrapping sdl2 in a window trait and battling with over eager resource freeing by mojo
 - Took longer that I would have liked to track down the mysterious/non-deterministic corrupted data being rendered in the main loop

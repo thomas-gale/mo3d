@@ -32,6 +32,7 @@ fn main() raises:
     alias aspect_ratio = Scalar[float_type](width) / Scalar[float_type](height)
     alias S4 = SIMD[float_type, 4]
     alias channels = 4
+    alias samples_per_pixel = 8
 
     # Render state (texture to render to)
     var t = Tensor[float_type](height, width, channels)
@@ -42,7 +43,7 @@ fn main() raises:
     world.add_sphere(Sphere(Point4(S4(0, -100.5, -1, 0)), 100))
 
     # Camera
-    var camera = Camera[width, height, channels]()
+    var camera = Camera[width, height, channels, samples_per_pixel]()
 
     # Collect timing stats
     var start_time = now()

@@ -4,11 +4,18 @@ from mo3d.math.point4 import Point4
 from mo3d.ray.ray4 import Ray4
 
 
+@value
 struct HitRecord[T: DType]:
     var p: Point4[T]
     var normal: Vec4[T]
     var t: Scalar[T]
     var front_face: Bool
+
+    fn __init__(inout self):
+        self.p = Point4[T]()
+        self.normal = Vec4[T]()
+        self.t = Scalar[T]()
+        self.front_face = False
 
     fn set_face_normal(inout self, r: Ray4[T], outward_normal: Vec4[T]):
         """
@@ -21,7 +28,7 @@ struct HitRecord[T: DType]:
 
 
 # We have to bake in the float_type here, because mojo doesn't support generic traits yet.q
-trait Hittable(CollectionElement):
+trait Hittable:
     fn hit(
         self,
         r: Ray4[float_type],

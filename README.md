@@ -25,13 +25,13 @@
 - `make run`
 - `make ...` # See `Makefile`
 
-### experimenting with nightly
+### using nightly version
 ```
 $ mojo --version
-mojo 2024.8.1517 (ee6ccd9a)
+mojo 2024.8.2617 (d505bcbe)
 $ max --version
-max 2024.8.1517 (ee6ccd9a)
-Modular version 2024.8.1517
+max 2024.8.2617 (d505bcbe)
+Modular version 2024.8.2617
 ```
 
 ## progress notes

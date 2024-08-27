@@ -1,6 +1,6 @@
 from algorithm import parallelize, vectorize
 from complex import ComplexSIMD, ComplexFloat64
-from math import iota
+from math import iota, inf
 from memory import UnsafePointer, bitcast
 from pathlib import Path
 from sys import simdwidthof
@@ -9,14 +9,15 @@ from time import now, sleep
 from utils import StaticIntTuple
 
 from max.tensor import Tensor
-from max.extensibility import empty_tensor
 
 from mo3d.precision import float_type
 from mo3d.math.vec4 import Vec4
 from mo3d.math.point4 import Point4
 from mo3d.math.color4 import Color4
 from mo3d.ray.ray4 import Ray4
-from mo3d.ray.sphere import hit_sphere
+from mo3d.ray.hittable import Hittable, HitRecord
+from mo3d.ray.hittable_list import HittableList
+from mo3d.ray.sphere import Sphere
 from mo3d.window.sdl2_window import SDL2Window
 
 
@@ -35,6 +36,11 @@ fn main() raises:
     # HACK: It's critical that these are allocated first my Mojo before the @parameter functions later, as we get strange segfaults otherwise...
     var window = SDL2Window.create("mo3d", width, height)
     var t = Tensor[float_type](height, width, channels)
+
+    # World
+    var world = HittableList()
+    world.add_sphere(Sphere(Point4(S4(0, 0, -1, 0)), 0.5))
+    world.add_sphere(Sphere(Point4(S4(0, -100.5, -1, 0)), 100))
 
     # Camera
     alias focal_length: Scalar[float_type] = 1.0
@@ -60,11 +66,15 @@ fn main() raises:
 
     # Basic ray coloring
     @parameter
-    fn ray_color(r: Ray4[float_type]) -> Color4[float_type]:
-        var t = hit_sphere(Point4(S4(0, 0, -1, 0)), 0.5, r)
-        if t > 0.0:
-            var N = (r.at(t) - Vec4(S4(0, 0, -1, 0))).unit()
-            return 0.5 * Color4(S4(N.x() + 1, N.y() + 1, N.z() + 1))
+    fn ray_color(
+        r: Ray4[float_type], world: HittableList
+    ) -> Color4[float_type]:
+        """
+        Sadly can't get the generic hittable trait as argument type to work :(.
+        """
+        var rec = HitRecord[float_type]()
+        if world.hit(r, 0.0, inf[float_type](), rec):
+            return 0.5 * (rec.normal + Vec4(S4(1, 1, 1, 0)))
 
         var unit_direction = Vec4.unit(r.dir)
         var a = 0.5 * (unit_direction.y() + 1.0)
@@ -84,7 +94,7 @@ fn main() raises:
             )
             var ray_direction = pixel_center - camera_center
             var r = Ray4(camera_center, ray_direction)
-            var pixel_color = ray_color(r)
+            var pixel_color = ray_color(r, world)
 
             t.store[4](
                 y * (width * channels) + x * channels,
@@ -127,11 +137,12 @@ fn main() raises:
         )
         sleep(1.0 / Float64(fps))
 
-    # WIP: Convince the mojo compiler that we are using these variables while the loop is running...
+    # WIP: Convince the mojo compiler that we are using these variables (from the kernal @parameter closure) while the loop is running...
     _ = pixel00_loc
     _ = pixel_delta_u
     _ = pixel_delta_v
     _ = camera_center
+    _ = world
 
     # Print stats
     print(

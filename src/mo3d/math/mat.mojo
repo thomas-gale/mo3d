@@ -7,26 +7,27 @@ from mo3d.math.vec import Vec
 
 @value
 struct Mat[T: DType, dim: Int]:
-    var _data: UnsafePointer[Vec[T, dim]]
+    var _data: UnsafePointer[Scalar[T]]
 
     fn __init__(inout self):
-        self._data = UnsafePointer[Vec[T, dim]].alloc(dim)
+        self._data = UnsafePointer[Scalar[T]].alloc(dim * dim)
         for i in range(dim):
-            (self._data + i)[] = Vec[T, dim]()
+            for j in range(dim):
+                (self._data + i * dim + j)[] = Scalar[T](0)
 
     fn __init__(inout self, *args: Vec[T, dim]):
-        self._data = UnsafePointer[Vec[T, dim]].alloc(dim)
+        self._data = UnsafePointer[Scalar[T]].alloc(dim * dim)
         var i = 0
         for arg in args:
-            (self._data + i)[] = arg[].clone()
+            for j in range(dim):
+                (self._data + i * dim + j)[] = arg[][j]
             i += 1
 
     fn __del__(owned self):
         """
         Mojo's lifetime management is over eager, disabling for now.
         """
-        pass
-        # self._data.free()
+        self._data.free()
 
     @staticmethod
     fn eye() -> Self:
@@ -40,10 +41,14 @@ struct Mat[T: DType, dim: Int]:
         return result
 
     fn __getitem__(self, index: Int) -> Vec[T, dim]:
-        return (self._data + index)[]
+        var result = Vec[T, dim]()
+        for i in range(dim):
+            result[i] = (self._data + dim * index + i)[]
+        return result
 
     fn __setitem__(inout self, index: Int, value: Vec[T, dim]):
-        (self._data + index)[] = value.clone()
+        for i in range(dim):
+            (self._data + dim * index + i)[] = value[i]
 
     fn __str__(self) -> String:
         var result = String("")

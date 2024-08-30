@@ -40,8 +40,8 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
         """
         Mojo's lifetime management is over eager, disabling for now.
         """
-        pass
-        # self._data.free()
+        # pass
+        self._data.free()
 
     fn __getitem__(self, index: Int) -> Scalar[T]:
         return (self._data + index)[]
@@ -182,7 +182,7 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
     fn __add__(self, rhs: Self) -> Self:
         var result = Self()
         for i in range(size):
-            result._data[i] += rhs._data[i]
+            result._data[i] = self._data[i] + rhs._data[i]
         return result
 
     fn __iadd__(inout self, rhs: Self):
@@ -198,7 +198,7 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
     fn __sub__(self, rhs: Self) -> Self:
         var result = Self()
         for i in range(size):
-            result._data[i] -= rhs._data[i]
+            result._data[i] = self._data[i] - rhs._data[i]
         return result
 
     fn __isub__(inout self, rhs: Self):

@@ -59,6 +59,11 @@ struct Camera[
         self._look_at = Point[T, dim](0, 0, 0)
         self._vup = Vec[T, dim](0, 1, 0)
 
+        print("look_from: " + str(self._look_from))
+        print("look_at: " + str(self._look_at))
+        print("vup: " + str(self._vup))
+
+
         # Determine viewport dimensions
         self._focal_length = 1.0
         var theta: Scalar[T] = degrees_to_radians(self._vfov)
@@ -70,12 +75,12 @@ struct Camera[
 
         # Calculate the u,v,w basis vectors for the camera orientation. - TODO: somehow refactor the code to use update view matrix (however)
         var w = Vec.unit(self._look_from - self._look_at)
-        print(str(w))
-        print(str(self._vup))
+        # print(str(w))
+        # print(str(self._vup))
         var u = Vec.cross_3(self._vup, w)
-        print(str(u))
+        # print(str(u))
         var v = Vec.cross_3(w, u)
-        print(str(v))
+        # print(str(v))
         self._rot = Mat[T, dim](u, v, w)
         # print(str(self._rot))
 
@@ -109,7 +114,10 @@ struct Camera[
         self._last_y = 0
 
         # Do a final update of the view matrix
-        # self.update_view_matrix()
+        print("FInal update")
+        print(str(self._rot))
+        self.update_view_matrix()
+        print(str(self._rot))
 
         print("Camera initialized")
 

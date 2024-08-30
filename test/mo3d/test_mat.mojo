@@ -40,3 +40,22 @@ fn test_set_vec_mat_size_3_float32() raises:
         assert_almost_equal(m[0][i], v1[i])
         assert_almost_equal(m[1][i], v2[i])
         assert_almost_equal(m[2][i], v3[i])
+
+fn test_rotate_mat_size_3_float32() raises:
+    var m = Mat[DType.float32, 3].eye()
+    var angle = Float32(3.14159 / 2.0)
+    var axis = Vec[DType.float32, 3](0.0, 0.0, 1.0)
+
+    var rotated = Mat[DType.float32, 3].rotate_3(m, angle, axis)
+
+    assert_almost_equal(rotated[0][0], Float32(0.0), atol=1e-4)
+    assert_almost_equal(rotated[0][1], Float32(1.0), atol=1e-4)
+    assert_almost_equal(rotated[0][2], Float32(0.0), atol=1e-4)
+
+    assert_almost_equal(rotated[1][0], Float32(-1.0), atol=1e-4)
+    assert_almost_equal(rotated[1][1], Float32(0.0), atol=1e-4)
+    assert_almost_equal(rotated[1][2], Float32(0.0), atol=1e-4)
+
+    assert_almost_equal(rotated[2][0], Float32(0.0), atol=1e-4)
+    assert_almost_equal(rotated[2][1], Float32(0.0), atol=1e-4)
+    assert_almost_equal(rotated[2][2], Float32(1.0), atol=1e-4)

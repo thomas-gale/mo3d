@@ -28,38 +28,6 @@ fn main() raises:
     # Settings
     alias float_type = DType.float32
 
-    # TESt
-    var v1 = Vec[DType.float32, 3](1, 2, 3)
-    var v2 = Vec[DType.float32, 3](11, 22, 33)
-    var v3 = Vec[DType.float32, 3](111, 222, 333)
-
-    var m = Mat[DType.float32, 3](v1, v2, v3)
-
-    print(str(m))
-
-fn main2() raises:
-    print("-- Hello, mo3d! --")
-
-    # Settings
-    alias float_type = DType.float32
-
-    # TESt
-    var v1 = Vec[DType.float32, 3](1, 2, 3)
-    print(str(v1))
-    var v2 = Vec[DType.float32, 3](11, 22, 33)
-    print(str(v2))
-    var v3 = Vec[DType.float32, 3](111, 222, 333)
-    print(str(v3))
-
-    var m = Mat[DType.float32, 3](v1, v2, v3)
-    print(str(m))
-    # print(str(m[0]))
-
-    _ = m
-    _ = v1
-    _ = v2
-    _ = v3
-
     alias max_fps = 60
     alias width = 800
     alias height = 450
@@ -77,7 +45,7 @@ fn main2() raises:
     world.add_sphere(Sphere(Point[float_type, 3](0, -100.5, 0), 100))
 
     # Camera
-    # r camera = Camera[float_type, width, height, channels, max_depth, max_samples]()
+    var camera = Camera[float_type, width, height, channels, max_depth, max_samples]()
 
     # Collect timing stats - TODO: Tidy and move
     var start_time = now()
@@ -87,24 +55,24 @@ fn main2() raises:
     var average_redraw_time = 0.0
 
     # Create window and start the main loop
-    # var window = SDL2Window.create("mo3d", width, height)
+    var window = SDL2Window.create("mo3d", width, height)
 
-    # while window.process_events(camera):
-    #     start_time = now()
-    #     camera.render(world)
-    #     average_compute_time = (1.0 - alpha) * average_compute_time + alpha * (
-    #         now() - start_time
-    #     )
-    #     frame_duration = now() - start_time
-    #     start_time = now()
-    #     window.redraw[float_type](camera.get_state(), channels)
-    #     average_redraw_time = (1.0 - alpha) * average_redraw_time + alpha * (
-    #         now() - start_time
-    #     )
-    #     frame_duration += now() - start_time
-    #     frame_duration = frame_duration / 10**9
-    #     if frame_duration < 1.0 / Float64(max_fps):
-    #         sleep(1.0 / Float64(max_fps) - frame_duration)
+    while window.process_events(camera):
+        start_time = now()
+        camera.render(world)
+        average_compute_time = (1.0 - alpha) * average_compute_time + alpha * (
+            now() - start_time
+        )
+        frame_duration = now() - start_time
+        start_time = now()
+        window.redraw[float_type](camera.get_state(), channels)
+        average_redraw_time = (1.0 - alpha) * average_redraw_time + alpha * (
+            now() - start_time
+        )
+        frame_duration += now() - start_time
+        frame_duration = frame_duration / 10**9
+        if frame_duration < 1.0 / Float64(max_fps):
+            sleep(1.0 / Float64(max_fps) - frame_duration)
 
     # Print stats
     print(

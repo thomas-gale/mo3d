@@ -28,9 +28,9 @@ struct Camera[
 
     var _center: Point4[float_type]  # Camera center
     var _vfov: Scalar[float_type]  # Vertical field of view
-    var _look_from: Point4[float_type]  # Point camera is looking from
-    var _look_at: Point4[float_type]  # Point camera is looking at
-    var _vup: Vec4[float_type]  # Camera relative 'up' vector
+    # var _look_from: Point4[float_type]  # Point camera is looking from
+    # var _look_at: Point4[float_type]  # Point camera is looking at
+    # var _vup: Vec4[float_type]  # Camera relative 'up' vector
 
     var _u: Vec4[float_type]  # Camera u vector
     var _v: Vec4[float_type]  # Camera v vector
@@ -49,11 +49,14 @@ struct Camera[
         # Set default camera center and field of view
         self._center = Point4(Self.S4(0, 0, 0, 0))
         self._vfov = Scalar[float_type](90.0)
-        self._look_from = Point4(Self.S4(0, 0, 0, 0))
-        self._look_at = Point4(Self.S4(0, 0, -1, 0))
-        self._vup = Vec4(Self.S4(0, 1, 0, 0))
+        # self._look_from = Point4(Self.S4(0, 0, 0, 0))
+        # self._look_at = Point4(Self.S4(0, 0, -1, 0))
+        # self._vup = Vec4(Self.S4(0, 1, 0, 0))
 
-        var camera_center = self._look_from
+        var look_from = Point4(Self.S4(0, 0, 0, 0))
+        var look_at = Point4(Self.S4(0, 0, -1, 0))
+        var vup = Vec4(Self.S4(0, 1, 0, 0))
+        # var camera_center = self._look_from
 
         # Determine viewport dimensions
         alias focal_length: Scalar[float_type] = 1.0
@@ -64,9 +67,9 @@ struct Camera[
             Scalar[float_type](width) / Scalar[float_type](height)
         )
 
-        # Calculate the u,v,w basis vectors for the camera orientation.
-        self._w = Vec4.unit(self._look_from - self._look_at)
-        self._u = Vec4.cross(self._vup, self._w)
+        # Calculate the u,v,w basis vectors for the camera orientation. - TODO: somehow refactor the code to use update view matrix (however)
+        self._w = Vec4.unit(look_from - look_at)
+        self._u = Vec4.cross(vup, self._w)
         self._v = Vec4.cross(self._w, self._u)
 
         # Calculate the vectors across the horizontal and down the vertical viewport edges.
@@ -78,7 +81,9 @@ struct Camera[
         self._pixel_delta_v = viewport_v / Scalar[float_type](height)
 
         # Calculate the location of the upper left pixel.
-        var viewport_upper_left = camera_center - (focal_length * self._w) - viewport_u / 2 - viewport_v / 2
+        var viewport_upper_left = self._center - (
+            focal_length * self._w
+        ) - viewport_u / 2 - viewport_v / 2
         self._pixel00_loc = viewport_upper_left + 0.5 * (
             self._pixel_delta_u + self._pixel_delta_v
         )
@@ -96,6 +101,22 @@ struct Camera[
     fn __del__(owned self):
         self._t.free()
         print("Camera destroyed")
+
+    fn update_view_matrix(
+        inout self,
+        look_from: Point4[float_type],
+        look_at: Point4[float_type],
+        vup: Vec4[float_type],
+    ) -> None:
+        self._w = Vec4.unit(look_from - look_at)
+        self._u = Vec4.cross(vup, self._w)
+        self._v = Vec4.cross(self._w, self._u)
+
+    fn arcball(inout self) -> None:
+        """
+        Rotate the camera around the center of the scene.
+        """
+        pass
 
     fn get_state(self) -> UnsafePointer[Scalar[float_type]]:
         return self._t
@@ -170,7 +191,7 @@ struct Camera[
     fn get_ray(
         self, i: Scalar[int_type], j: Scalar[int_type]
     ) -> Ray4[float_type]:
-        var offset = Self.sample_square()
+        var offset = Self._sample_square()
 
         var pixel_sample = self._pixel00_loc + (
             (i.cast[float_type]() + offset.x()) * self._pixel_delta_u
@@ -182,7 +203,7 @@ struct Camera[
         return Ray4(ray_origin, ray_direction)
 
     @staticmethod
-    fn sample_square() -> Vec4[float_type]:
+    fn _sample_square() -> Vec4[float_type]:
         """
         Returns the vector to a random point in the [-.5,-.5]-[+.5,+.5] unit square.
         """

@@ -3,6 +3,7 @@ from tensor import Tensor
 
 from mo3d.math.interval import Interval
 from mo3d.ray.color4 import linear_to_gamma
+from mo3d.camera.camera import Camera
 from mo3d.window.window import Window
 from mo3d.window.sdl2 import (
     SDL_INIT_VIDEO,
@@ -93,9 +94,9 @@ struct SDL2Window(Window):
     fn create(name: String, height: Int, width: Int) raises -> Self:
         return SDL2Window(name, height, width)
 
-    fn process_events(inout self) -> Bool:
+    fn process_events(inout self, inout camera: Camera) -> Bool:
         """
-        Process all SDL2 events and return True if the window should remain open.
+        Process all SDL2 events, setting state on the camera (TODO: should this be decoupled?) and return True if the window should remain open.
         """
         while (
             self._sdl.PollEvent(UnsafePointer[Event].address_of(self._event))
@@ -107,25 +108,12 @@ struct SDL2Window(Window):
             try:
                 if self._event.type == SDL_MOUSEBUTTONDOWN:
                     var button = self._event.as_mousebutton()
-                    print(
-                        "Button: ",
-                        button[].button,
-                        "down at",
-                        button[].x,
-                        button[].y,
-                    )
+                    camera.start_dragging(button[].x, button[].y)
                 if self._event.type == SDL_MOUSEBUTTONUP:
-                    var button = self._event.as_mousebutton()
-                    print(
-                        "Button: ",
-                        button[].button,
-                        "up at",
-                        button[].x,
-                        button[].y,
-                    )
+                    camera.stop_dragging()
                 if self._event.type == SDL_MOUSEMOTION:
                     var motion = self._event.as_mousemotion()
-                    print("X: ", motion[].x, "Y: ", motion[].y)
+                    camera.arcball(motion[].x, motion[].y)
             except Error:
                 print("Failed to cast event")
 

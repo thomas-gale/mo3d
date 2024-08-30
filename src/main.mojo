@@ -37,8 +37,10 @@ fn main() raises:
 
     # World
     var world = HittableList()
-    world.add_sphere(Sphere(Point4(S4(0, 0, -1, 0)), 0.5))
-    world.add_sphere(Sphere(Point4(S4(0, -100.5, -1, 0)), 100))
+    world.add_sphere(Sphere(Point4(S4(0, 0, 0, 0)), 0.5))
+    world.add_sphere(Sphere(Point4(S4(1, 0, 0, 0)), 0.5))
+    world.add_sphere(Sphere(Point4(S4(-1, 0, 0, 0)), 0.5))
+    world.add_sphere(Sphere(Point4(S4(0, -100.5, 0, 0)), 100))
 
     # Camera
     var camera = Camera[width, height, channels, max_depth, max_samples]()
@@ -52,7 +54,7 @@ fn main() raises:
 
     # Create window and start the main loop
     var window = SDL2Window.create("mo3d", width, height)
-    while window.process_events():
+    while window.process_events(camera):
         start_time = now()
         camera.render(world)
         average_compute_time = (1.0 - alpha) * average_compute_time + alpha * (

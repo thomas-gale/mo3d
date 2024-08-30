@@ -6,10 +6,11 @@
 > Under [active](#progress-notes) development/unstable
 
 - [x] Cross platform SDL window with [`ffi`](https://docs.modular.com/mojo/stdlib/sys/ffi/) bindings directly to `mojo` (based on [mojo-sdl](https://github.com/msteele/mojo-sdl/))
-- [x] Basic `3D` primitives and behaviours (vectors/rays with dot/cross products etc.)
+- [x] Basic `3D` primitives and behaviors (vectors/rays with dot/cross products etc.)
 - [ ] Basic ray/path tracer based 'ray tracing in one weekend'
-	- [x] Antialiasing
-- [ ] Mouse interaction for orcball orbit controls (e.g. https://asliceofrendering.com/camera/2019/11/30/ArcballCamera/)
+	- [x] Antialias
+	- [ ] Use Mojo Variant in place of abstract hittables/materials.
+- [ ] Mouse interaction for arcball orbit controls (e.g. https://asliceofrendering.com/camera/2019/11/30/ArcballCamera/)
 - [ ] Basic shader replacement pattern (however no need to use actual graphics shaders - as the idea is that mojo optimized compute can perform the same function directly)
 - [ ] Mesh rendering (using bvh or other similar acceleration structure)
 - [ ] ...
@@ -37,8 +38,8 @@ mojo 2024.8.2916 (1e9c68e6)
 ## progress notes
 
 ### 2024-08-27: refactoring ray, adding hittables, basic ray multi-sampling to update a progressive texture
-- Struggling to get a proper generic/runtime polymorhpic hittable implementation working.
-- Couple of concrete/leaky dependencies in the ray_colour/HittableList implementations.
+- Struggling to get a proper generic/runtime polymorphic hittable implementation working.
+- Couple of concrete/leaky dependencies in the ray_color/HittableList implementations.
 - Added SIMD/generic Interval implementation.
 - Added camera implementation.
 - Adding basic diffuse lambertian material
@@ -71,6 +72,6 @@ mojo 2024.8.2916 (1e9c68e6)
 
 ### 2024-08-11: hello window
 - Basic window rendering on linux (within vscode devcontainer on windows) and mac
-- Basic kernal, however, need to refine the vectorised worker code that sets the pixel stage (tensor `t`)
+- Basic kernel, however, need to refine the vectorized worker code that sets the pixel stage (tensor `t`)
 
 ![image](https://github.com/user-attachments/assets/13f3c360-2ba6-441a-aebf-ed7507e45c3b)

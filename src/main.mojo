@@ -33,7 +33,7 @@ fn main() raises:
     alias S4 = SIMD[float_type, 4]
     alias channels = 4
     alias max_depth = 8
-    alias max_samples = 1024
+    alias max_samples = 1024 * 1024
 
     # World
     var world = HittableList()

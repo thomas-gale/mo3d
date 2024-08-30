@@ -115,7 +115,7 @@ struct Camera[
     fn update_view_matrix(
         inout self,
     ) raises -> None:
-        self._rot[2] = Vec.unit(self._look_from - self._look_at)
+        self._rot[2] = (self._look_from - self._look_at).unit()
         self._rot[0] = Vec.cross_3(self._vup, self._rot[2]).unit()
         self._rot[1] = Vec.cross_3(self._rot[2], self._rot[0]).unit()
 

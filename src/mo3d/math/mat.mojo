@@ -24,9 +24,6 @@ struct Mat[T: DType, dim: Int]:
             i += 1
 
     fn __del__(owned self):
-        """
-        Mojo's lifetime management is over eager, disabling for now.
-        """
         self._data.free()
 
     @staticmethod

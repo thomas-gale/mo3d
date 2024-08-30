@@ -96,6 +96,7 @@ struct Mat4[type: DType]:
             rotation_matrix * self._u,
             rotation_matrix * self._v,
             rotation_matrix * self._w,
+            # Vec4(Self.S4(0, 0, 0, 1)),
             rotation_matrix * self._t,
         )
 

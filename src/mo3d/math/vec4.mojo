@@ -44,6 +44,7 @@ struct Vec4[type: DType](EqualityComparable, Stringable):
                 self.e[1] * rhs.e[2] - self.e[2] * rhs.e[1],
                 self.e[2] * rhs.e[0] - self.e[0] * rhs.e[2],
                 self.e[0] * rhs.e[1] - self.e[1] * rhs.e[0],
+                0
             )
         )
 
@@ -77,7 +78,8 @@ struct Vec4[type: DType](EqualityComparable, Stringable):
                 random_float64().cast[type](),
                 random_float64().cast[type](),
                 random_float64().cast[type](),
-                random_float64().cast[type](),
+                0
+                # random_float64().cast[type](),
             )
         )
 
@@ -90,7 +92,8 @@ struct Vec4[type: DType](EqualityComparable, Stringable):
                 random_float64(min_64, max_64).cast[type](),
                 random_float64(min_64, max_64).cast[type](),
                 random_float64(min_64, max_64).cast[type](),
-                random_float64(min_64, max_64).cast[type](),
+                0
+                # random_float64(min_64, max_64).cast[type](),
             )
         )
 

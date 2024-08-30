@@ -78,7 +78,7 @@ struct Camera[
         var v = Vec4.cross(w, u)
         print(str(v))
         self._rot = Mat4[float_type](
-            u, v, w, Point4[float_type](Self.S4(0, 0, 0, 1))
+            u, v, w, Point4[float_type](Self.S4(0, 0, 0, 0))
         )
         print(str(self._rot))
 

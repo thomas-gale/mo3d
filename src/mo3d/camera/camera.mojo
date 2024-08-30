@@ -71,15 +71,20 @@ struct Camera[
 
         # Calculate the u,v,w basis vectors for the camera orientation. - TODO: somehow refactor the code to use update view matrix (however)
         var w = Vec4.unit(self._look_from - self._look_at)
+        print(str(w))
+        print(str(self._vup))
         var u = Vec4.cross(self._vup, w)
+        print(str(u))
         var v = Vec4.cross(w, u)
+        print(str(v))
         self._rot = Mat4[float_type](
             u, v, w, Point4[float_type](Self.S4(0, 0, 0, 1))
         )
+        print(str(self._rot))
 
         # Calculate the vectors across the horizontal and down the vertical viewport edges.
-        var viewport_u = self._viewport_width * self._rot.u
-        var viewport_v = self._viewport_height * -self._rot.v
+        var viewport_u = self._viewport_width * self._rot.u()
+        var viewport_v = self._viewport_height * -self._rot.v()
 
         # Calculate the horizontal and vertical delta vectors from pixel to pixel.
         self._pixel_delta_u = viewport_u / Scalar[float_type](width)
@@ -87,7 +92,7 @@ struct Camera[
 
         # Calculate the location of the upper left pixel.
         var viewport_upper_left = self._look_from - (
-            self._focal_length * self._rot.w
+            self._focal_length * self._rot.w()
         ) - viewport_u / 2 - viewport_v / 2
         self._pixel00_loc = viewport_upper_left + 0.5 * (
             self._pixel_delta_u + self._pixel_delta_v
@@ -106,21 +111,26 @@ struct Camera[
         self._last_x = 0
         self._last_y = 0
 
+        # Do a final update of the view matrix
+        # self.update_view_matrix()
+
         print("Camera initialized")
 
     fn __del__(owned self):
+        # print(str(self._rot))
+        # _ = self._rot
         self._sensor_state.free()
         print("Camera destroyed")
 
     fn update_view_matrix(
         inout self,
     ) -> None:
-        self._rot.w = Vec4.unit(self._look_from - self._look_at)
-        self._rot.u = Vec4.cross(self._vup, self._rot.w).unit()
-        self._rot.v = Vec4.cross(self._rot.w, self._rot.u).unit()
+        self._rot._w = Vec4.unit(self._look_from - self._look_at)
+        self._rot._u = Vec4.cross(self._vup, self._rot.w())
+        self._rot._v = Vec4.cross(self._rot.w(), self._rot.u())
 
-        var viewport_u = self._viewport_width * self._rot.u
-        var viewport_v = self._viewport_height * -self._rot.v
+        var viewport_u = self._viewport_width * self._rot.u()
+        var viewport_v = self._viewport_height * -self._rot.v()
 
         # Calculate the horizontal and vertical delta vectors from pixel to pixel.
         self._pixel_delta_u = viewport_u / Scalar[float_type](width)
@@ -128,7 +138,7 @@ struct Camera[
 
         # Calculate the location of the upper left pixel.
         var viewport_upper_left = self._look_from - (
-            self._focal_length * self._rot.w
+            self._focal_length * self._rot.w()
         ) - viewport_u / 2 - viewport_v / 2
         self._pixel00_loc = viewport_upper_left + 0.5 * (
             self._pixel_delta_u + self._pixel_delta_v
@@ -162,28 +172,25 @@ struct Camera[
         var x_angle = (self._last_x - x).cast[float_type]() * -delta_angle_x
         var y_angle = (self._last_y - y).cast[float_type]() * -delta_angle_y
 
-        print("X angle: " + str(x_angle))
-        print("Y angle: " + str(y_angle))
-
         # Extra step to handle the problem when the camera direction is the same as the up vector
-        var cos_angle = Vec4.dot(self._rot.w, self._vup)
-        if (
-            cos_angle
-            * (
-                (Scalar[float_type](0.0) < y_angle).cast[float_type]()
-                - (y_angle < Scalar[float_type](0.0)).cast[float_type]()
-            )
-        ) > 0.99:
-            y_angle = 0
+        # var cos_angle = Vec4.dot(self._rot.w, self._vup)
+        # if (
+        #     cos_angle
+        #     * (
+        #         (Scalar[float_type](0.0) < y_angle).cast[float_type]()
+        #         - (y_angle < Scalar[float_type](0.0)).cast[float_type]()
+        #     )
+        # ) > 0.99:
+        #     y_angle = 0
 
         # Step 2: Rotate the camera around the pivot point on the first axis.
         var rotation_matrix_x = Mat4[float_type].eye()
-        rotation_matrix_x = rotation_matrix_x.rotate(x_angle, self._rot.v)
+        rotation_matrix_x = rotation_matrix_x.rotate(x_angle, self._rot.v())
         position = (rotation_matrix_x * (position - pivot)) + pivot
 
         # Step 3: Rotate the camera around the pivot point on the second axis.
         var rotation_matrix_y = Mat4[float_type].eye()
-        rotation_matrix_y = rotation_matrix_y.rotate(y_angle, self._rot.u)
+        rotation_matrix_y = rotation_matrix_y.rotate(y_angle, self._rot.u())
         var final_position = (rotation_matrix_y * (position - pivot)) + pivot
 
         # Update the camera view (we keep the same lookat and the same up vector)

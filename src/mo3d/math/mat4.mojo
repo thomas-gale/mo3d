@@ -9,10 +9,10 @@ struct Mat4[type: DType]:
     alias size = 4
     alias S4 = SIMD[type, Self.size]
 
-    var u: Vec4[type]
-    var v: Vec4[type]
-    var w: Vec4[type]
-    var t: Vec4[type]
+    var _u: Vec4[type]
+    var _v: Vec4[type]
+    var _w: Vec4[type]
+    var _t: Vec4[type]
 
     @staticmethod
     fn eye() -> Self:
@@ -23,9 +23,35 @@ struct Mat4[type: DType]:
             Vec4(Self.S4(0, 0, 0, 1)),
         )
 
-    fn rotate(
-        self, angle_rads: Scalar[type], axis: Vec4[type]
-    ) -> Mat4[type]:
+    fn u(self) -> Vec4[type]:
+        return self._u
+
+    fn v(self) -> Vec4[type]:
+        return self._v
+
+    fn w(self) -> Vec4[type]:
+        return self._w
+
+    fn t(self) -> Vec4[type]:
+        return self._t
+
+    fn set_u(inout self, u: Vec4[type]) -> Self:
+        self._u = u
+        return self
+
+    fn set_v(inout self, v: Vec4[type]) -> Self:
+        self._v = v
+        return self
+
+    fn set_w(inout self, w: Vec4[type]) -> Self:
+        self._w = w
+        return self
+
+    fn set_t(inout self, t: Vec4[type]) -> Self:
+        self._t = t
+        return self
+
+    fn rotate(self, angle_rads: Scalar[type], axis: Vec4[type]) -> Mat4[type]:
         """
         This just computes a 3D rotation.
         """
@@ -67,33 +93,33 @@ struct Mat4[type: DType]:
         )
 
         return Mat4(
-            rotation_matrix * self.u,
-            rotation_matrix * self.v,
-            rotation_matrix * self.w,
-            rotation_matrix * self.t,
+            rotation_matrix * self._u,
+            rotation_matrix * self._v,
+            rotation_matrix * self._w,
+            rotation_matrix * self._t,
         )
 
     fn __mul__(self, rhs: Vec4[type]) -> Vec4[type]:
         return Vec4(
             Self.S4(
-                self.u.dot(rhs),
-                self.v.dot(rhs),
-                self.w.dot(rhs),
-                self.t.dot(rhs),
+                self._u.dot(rhs),
+                self._v.dot(rhs),
+                self._w.dot(rhs),
+                self._t.dot(rhs),
             )
         )
 
     fn __str__(self) -> String:
         return (
             "u: "
-            + str(self.u)
+            + str(self._u)
             + "\n"
             + "v: "
-            + str(self.v)
+            + str(self._v)
             + "\n"
             + "w: "
-            + str(self.w)
+            + str(self._w)
             + "\n"
             + "t: "
-            + str(self.t)
+            + str(self._t)
         )

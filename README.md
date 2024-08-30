@@ -37,6 +37,10 @@ mojo 2024.8.2916 (1e9c68e6)
 
 ## progress notes
 
+### 2024-08-30: arcball camera and refactoring vec to be dimensionally parameterized
+
+<video autoplay src="https://github.com/user-attachments/assets/531891b5-37f4-4158-b89c-1f108d7945cb" />
+
 ### 2024-08-27: refactoring ray, adding hittables, basic ray multi-sampling to update a progressive texture
 - Struggling to get a proper generic/runtime polymorphic hittable implementation working.
 - Couple of concrete/leaky dependencies in the ray_color/HittableList implementations.

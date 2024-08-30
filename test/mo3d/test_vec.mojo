@@ -69,11 +69,11 @@ fn test_dot() raises:
     assert_equal(v1.dot(v2), 38.0)
 
 
-fn test_cross() raises:
+fn test_cross_3() raises:
     var v1 = Vec[DType.float32, 3](1.0, 0.0, 0.0)
     var v2 = Vec[DType.float32, 3](0.0, 1.0, 0.0)
     var v3 = Vec[DType.float32, 3](0.0, 0.0, 1.0)
-    assert_equal(v1.cross(v2), v3)
+    assert_equal(Vec.cross_3(v1, v2), v3)
 
 
 fn test_unit() raises:

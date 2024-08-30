@@ -5,45 +5,48 @@ from random import random_float64
 
 
 @value
-struct Vec[type: DType, size: Int](EqualityComparable, Stringable):
-    var _data: InlinedFixedVector[Scalar[type], size]
+struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
+    var _data: InlinedFixedVector[Scalar[T], size]
 
     fn __init__(inout self):
-        self._data = InlinedFixedVector[Scalar[type], size](size)
+        self._data = InlinedFixedVector[Scalar[T], size](size)
 
-    fn __init__(inout self, *args: Scalar[type]):
-        self._data = InlinedFixedVector[Scalar[type], size](size)
+    fn __init__(inout self, *args: Scalar[T]):
+        self._data = InlinedFixedVector[Scalar[T], size](size)
         for i in range(size):
             self._data[i] = args[i]
 
-    fn __getitem__(self, index: Int) -> Scalar[type]:
+    fn __getitem__(self, index: Int) -> Scalar[T]:
         return self._data[index]
 
-    fn __setitem__(inout self, index: Int, value: SIMD[type, 1]):
+    fn __setitem__(inout self, index: Int, value: SIMD[T, 1]):
         self._data[index] = value
 
-    fn dot(self, rhs: Self) -> SIMD[type, 1]:
-        var sum: Scalar[type] = 0
+    fn dot(self, rhs: Self) -> SIMD[T, 1]:
+        var sum: Scalar[T] = 0
         for i in range(size):
             sum += self._data[i] * rhs._data[i]
         return sum
 
-    fn length_squared(self) -> Scalar[type]:
+    fn length_squared(self) -> Scalar[T]:
         return self.dot(self)
 
-    fn length(self) -> SIMD[type, 1]:
+    fn length(self) -> SIMD[T, 1]:
         return sqrt(self.length_squared())
 
-    fn cross(self, rhs: Self) raises -> Self:
-        @parameter
-        if size == 3:
-            return Self(
-                self._data[1] * rhs._data[2] - self._data[2] * rhs._data[1],
-                self._data[2] * rhs._data[0] - self._data[0] * rhs._data[2],
-                self._data[0] * rhs._data[1] - self._data[1] * rhs._data[0],
-            )
-        else:
+    @staticmethod
+    fn cross_3(lhs: Self, rhs: Self) raises-> Self:
+        """
+        Cross product of two 3D vectors.
+        It will raise an error if the vectors are not 3D.
+        """
+        if size != 3:
             raise Error("Cross product is only defined for 3D vectors.")
+        return Self(
+            lhs._data[1] * rhs._data[2] - lhs._data[2] * rhs._data[1],
+            lhs._data[2] * rhs._data[0] - lhs._data[0] * rhs._data[2],
+            lhs._data[0] * rhs._data[1] - lhs._data[1] * rhs._data[0],
+        )
 
     fn unit(self) -> Self:
         return self / self.length()
@@ -70,18 +73,18 @@ struct Vec[type: DType, size: Int](EqualityComparable, Stringable):
 
     @staticmethod
     fn random() -> Self:
-        var data = InlinedFixedVector[Scalar[type], size](size)
+        var data = InlinedFixedVector[Scalar[T], size](size)
         for i in range(size):
-            data[i] = random_float64().cast[type]()
+            data[i] = random_float64().cast[T]()
         return Self(data)
 
     @staticmethod
-    fn random(min: Scalar[type], max: Scalar[type]) -> Self:
+    fn random(min: Scalar[T], max: Scalar[T]) -> Self:
         var min_64 = min.cast[DType.float64]()
         var max_64 = max.cast[DType.float64]()
-        var data = InlinedFixedVector[Scalar[type], size](size)
+        var data = InlinedFixedVector[Scalar[T], size](size)
         for i in range(size):
-            data[i] = random_float64(min_64, max_64).cast[type]()
+            data[i] = random_float64(min_64, max_64).cast[T]()
         return Self(data)
 
     fn __str__(self) -> String:
@@ -175,25 +178,25 @@ struct Vec[type: DType, size: Int](EqualityComparable, Stringable):
         for i in range(size):
             self._data[i] -= rhs._data[i]
 
-    fn __mul__(self, rhs: SIMD[type, 1]) -> Self:
+    fn __mul__(self, rhs: SIMD[T, 1]) -> Self:
         var result = Self()
         for i in range(size):
             result._data[i] = self._data[i] * rhs
         return result
 
-    fn __rmul__(self, lhs: SIMD[type, 1]) -> Self:
+    fn __rmul__(self, lhs: SIMD[T, 1]) -> Self:
         return self * lhs
 
-    fn __imul__(inout self, rhs: SIMD[type, 1]):
+    fn __imul__(inout self, rhs: SIMD[T, 1]):
         for i in range(size):
             self._data[i] *= rhs
 
-    fn __truediv__(self, rhs: SIMD[type, 1]) -> Self:
+    fn __truediv__(self, rhs: SIMD[T, 1]) -> Self:
         var result = Self()
         for i in range(size):
             result._data[i] = self._data[i] / rhs
         return result
 
-    fn __itruediv__(inout self, rhs: SIMD[type, 1]):
+    fn __itruediv__(inout self, rhs: SIMD[T, 1]):
         for i in range(size):
             self._data[i] /= rhs

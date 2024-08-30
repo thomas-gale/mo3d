@@ -1,20 +1,20 @@
 from collections import List
 
-from mo3d.precision import float_type
+# from mo3d.precision import float_type
 from mo3d.math.interval import Interval
-from mo3d.ray.hittable import Hittable, HitRecord
-from mo3d.ray.ray4 import Ray4
+from mo3d.ray.hittable import HitRecord
+from mo3d.ray.ray import Ray
 from mo3d.ray.sphere import Sphere
 
 
 @value
-struct HittableList(Hittable):
+struct HittableList[T: DType, dim: Int]:
     """
     This implementation is horrible, need to try to find a way to store generic lists of concrete hittables using some sort of compile time expansion.
     """
 
     # Mojo doesn't support polymorphic storage, so we need to have separate of each concrete type.
-    var _sphere_list: List[Sphere]
+    var _sphere_list: List[Sphere[T, dim]]
     # e.g.
     # var _other_primitive_list: List[OtherPrimitive]
     # ...
@@ -23,18 +23,18 @@ struct HittableList(Hittable):
         """
         TODO: Variadic comp time constructor based on lists of hittable types we wish to store?.
         """
-        self._sphere_list = List[Sphere]()
+        self._sphere_list = List[Sphere[T, dim]]()
 
-    def add_sphere(inout self, sphere: Sphere):
+    def add_sphere(inout self, sphere: Sphere[T, dim]):
         self._sphere_list.append(sphere)
 
     fn hit(
         self,
-        r: Ray4[float_type],
-        ray_t: Interval[float_type],
-        inout rec: HitRecord[float_type],
+        r: Ray[T, dim],
+        ray_t: Interval[T],
+        inout rec: HitRecord[T, dim],
     ) -> Bool:
-        var temp_rec = HitRecord[float_type]()
+        var temp_rec = HitRecord[T, dim]()
         var hit_anything = False
         var closest_so_far = ray_t.max
 

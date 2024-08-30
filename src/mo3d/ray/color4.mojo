@@ -1,8 +1,9 @@
 from math import sqrt
 
-from mo3d.math.vec4 import Vec4
 
-alias Color4 = Vec4
+from mo3d.math.vec import Vec
+
+alias Color4 = Vec[size=4]
 
 
 fn linear_to_gamma[

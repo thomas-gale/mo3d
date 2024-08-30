@@ -1,28 +1,27 @@
 from math import sqrt
 
-from mo3d.precision import float_type
 from mo3d.math.interval import Interval
-from mo3d.math.point4 import Point4
-from mo3d.ray.ray4 import Ray4
-from mo3d.ray.hittable import HitRecord, Hittable
+from mo3d.math.point import Point
+from mo3d.ray.ray import Ray
+from mo3d.ray.hittable import HitRecord
 
 
 @value
-struct Sphere(Hittable):
-    var _center: Point4[float_type]
-    var _radius: Scalar[float_type]
+struct Sphere[T: DType, dim: Int]:
+    var _center: Point[T, dim]
+    var _radius: Scalar[T]
 
     fn __init__(
-        inout self, center: Point4[float_type], radius: Scalar[float_type]
+        inout self, center: Point[T, dim], radius: Scalar[T]
     ):
         self._center = center
         self._radius = radius
 
     fn hit(
         self,
-        r: Ray4[float_type],
-        ray_t: Interval[float_type],
-        inout rec: HitRecord[float_type],
+        r: Ray[T, dim],
+        ray_t: Interval[T],
+        inout rec: HitRecord[T, dim],
     ) -> Bool:
         var oc = self._center - r.orig
         var a = r.dir.length_squared()
@@ -51,10 +50,11 @@ struct Sphere(Hittable):
 
 
 fn hit_sphere[
-    float_type: DType
+    T: DType,
+    dim: Int
 ](
-    center: Point4[float_type], radius: Scalar[float_type], r: Ray4[float_type]
-) -> Scalar[float_type]:
+    center: Point[T, dim], radius: Scalar[T], r: Ray[T, dim]
+) -> Scalar[T]:
     var oc = center - r.orig
     var a = r.dir.length_squared()
     var h = r.dir.dot(oc)

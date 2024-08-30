@@ -10,12 +10,11 @@ from utils import StaticIntTuple
 
 from max.tensor import Tensor
 
-from mo3d.precision import float_type
 from mo3d.math.interval import Interval
-from mo3d.math.vec4 import Vec4
-from mo3d.math.point4 import Point4
-from mo3d.ray.ray4 import Ray4
-from mo3d.ray.hittable import Hittable, HitRecord
+from mo3d.math.vec import Vec
+from mo3d.math.point import Point
+from mo3d.ray.ray import Ray
+from mo3d.ray.hittable import HitRecord
 from mo3d.ray.hittable_list import HittableList
 from mo3d.ray.sphere import Sphere
 from mo3d.camera.camera import Camera
@@ -26,6 +25,9 @@ fn main() raises:
     print("-- Hello, mo3d! --")
 
     # Settings
+    alias int_type = DType.int32
+    alias float_type = DType.float32
+
     alias max_fps = 60
     alias width = 800
     alias height = 450
@@ -36,14 +38,14 @@ fn main() raises:
     alias max_samples = 1024 * 1024
 
     # World
-    var world = HittableList()
-    world.add_sphere(Sphere(Point4(S4(0, 0, 0, 0)), 0.5))
-    world.add_sphere(Sphere(Point4(S4(1, 0, 0, 0)), 0.5))
-    world.add_sphere(Sphere(Point4(S4(-1, 0, 0, 0)), 0.5))
-    world.add_sphere(Sphere(Point4(S4(0, -100.5, 0, 0)), 100))
+    var world = HittableList[float_type, 3]()
+    world.add_sphere(Sphere(Point[float_type, 3](0, 0, 0), 0.5))
+    world.add_sphere(Sphere(Point[float_type, 3](1, 0, 0), 0.5))
+    world.add_sphere(Sphere(Point[float_type, 3](-1, 0, 0), 0.5))
+    world.add_sphere(Sphere(Point[float_type, 3](0, -100.5, 0), 100))
 
     # Camera
-    var camera = Camera[width, height, channels, max_depth, max_samples]()
+    var camera = Camera[float_type, width, height, channels, max_depth, max_samples]()
 
     # Collect timing stats - TODO: Tidy and move
     var start_time = now()

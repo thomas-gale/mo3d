@@ -118,6 +118,7 @@ struct Keysym:
         self.unused = 0
 
 
+@value
 @register_passable("trivial")
 struct MouseMotionEvent:
     var type: UInt32
@@ -161,20 +162,6 @@ struct MouseWheelEvent:
 
 
 @register_passable("trivial")
-struct Event:
-    var type: Int32
-    var _padding: SIMD[DType.uint8, 16]
-    var _padding2: Int64
-    var _padding3: Int64
-
-    fn __init__(inout self):
-        self.type = 0
-        self._padding = 0
-        self._padding2 = 0
-        self._padding3 = 0
-
-
-@register_passable("trivial")
 struct Keyevent:
     var type: UInt32
     var timestamp: UInt32
@@ -194,6 +181,32 @@ struct Keyevent:
         self.padding2 = 0
         self.padding3 = 0
         self.keysym = Keysym()
+
+
+@register_passable("trivial")
+struct Event:
+    var type: UInt32
+    var _padding: SIMD[DType.uint8, 16]
+    var _padding2: Int64
+    var _padding3: Int64
+
+    fn __init__(inout self):
+        self.type = 0
+        self._padding = 0
+        self._padding2 = 0
+        self._padding3 = 0
+
+    def as_keyboard(inout self) -> UnsafePointer[Keyevent]:
+        return UnsafePointer.address_of(self).bitcast[Keyevent]()
+
+    def as_mousemotion(inout self) -> UnsafePointer[MouseMotionEvent]:
+        return UnsafePointer.address_of(self).bitcast[MouseMotionEvent]()
+
+    def as_mousebutton(inout self) -> UnsafePointer[MouseButtonEvent]:
+        return UnsafePointer.address_of(self).bitcast[MouseButtonEvent]()
+
+    def as_mousewheel(inout self) -> UnsafePointer[MouseWheelEvent]:
+        return UnsafePointer.address_of(self).bitcast[MouseWheelEvent]()
 
 
 # SDL.h
@@ -395,7 +408,7 @@ struct SDL:
         self.PollEvent = SDL.get_function[c_SDL_PollEvent]("SDL_PollEvent")
 
         self.GetError = SDL.get_function[c_SDL_GetError]("SDL_GetError")
-    
+
     fn get_sdl_error_as_string(self) -> String:
         var error_ptr = self.GetError()  # Call the function to get the error pointer
 

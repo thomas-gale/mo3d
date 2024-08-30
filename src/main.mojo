@@ -52,7 +52,7 @@ fn main() raises:
 
     # Create window and start the main loop
     var window = SDL2Window.create("mo3d", width, height)
-    while not window.should_close():
+    while window.process_events():
         start_time = now()
         camera.render(world)
         average_compute_time = (1.0 - alpha) * average_compute_time + alpha * (

@@ -8,6 +8,10 @@ from mo3d.window.sdl2 import (
     SDL_INIT_VIDEO,
     SDL_PIXELFORMAT_RGBA8888,
     SDL_QUIT,
+    SDL_MOUSEMOTION,
+    SDL_MOUSEBUTTONDOWN,
+    SDL_MOUSEBUTTONUP,
+    SDL_MOUSEWHEEL,
     SDL_TEXTUREACCESS_STREAMING,
     SDL_WINDOWPOS_CENTERED,
     SDL_WINDOW_SHOWN,
@@ -29,6 +33,7 @@ struct SDL2Window(Window):
     var _window: UnsafePointer[SDL_Window]
     var _renderer: UnsafePointer[SDL_Renderer]
     var _display_texture: UnsafePointer[SDL_Texture]
+
     var _event: Event
 
     fn __init__(
@@ -88,19 +93,49 @@ struct SDL2Window(Window):
     fn create(name: String, height: Int, width: Int) raises -> Self:
         return SDL2Window(name, height, width)
 
-    fn should_close(self) -> Bool:
+    fn process_events(inout self) -> Bool:
+        """
+        Process all SDL2 events and return True if the window should remain open.
+        """
         while (
             self._sdl.PollEvent(UnsafePointer[Event].address_of(self._event))
             != 0
         ):
             if self._event.type == SDL_QUIT:
-                return True
-        return False
+                return False
+
+            try:
+                if self._event.type == SDL_MOUSEBUTTONDOWN:
+                    var button = self._event.as_mousebutton()
+                    print(
+                        "Button: ",
+                        button[].button,
+                        "down at",
+                        button[].x,
+                        button[].y,
+                    )
+                if self._event.type == SDL_MOUSEBUTTONUP:
+                    var button = self._event.as_mousebutton()
+                    print(
+                        "Button: ",
+                        button[].button,
+                        "up at",
+                        button[].x,
+                        button[].y,
+                    )
+                if self._event.type == SDL_MOUSEMOTION:
+                    var motion = self._event.as_mousemotion()
+                    print("X: ", motion[].x, "Y: ", motion[].y)
+            except Error:
+                print("Failed to cast event")
+
+        return True
 
     fn redraw[
         float_type: DType
-    ](self, t: UnsafePointer[Scalar[float_type]], channels: Int = 4) raises -> None:
-    # ](self, t: Tensor[float_type], channels: Int = 4) raises -> None:
+    ](
+        self, t: UnsafePointer[Scalar[float_type]], channels: Int = 4
+    ) raises -> None:
         _ = self._sdl.RenderClear(self._renderer)
 
         # These pixels are in GPU memory - we cant use SIMD as we don't know if SDL2 has aligned them
@@ -127,17 +162,10 @@ struct SDL2Window(Window):
                 # Calculate the correct offset using pitch
                 var offset = y * manual_pitch + x * channels
 
-                # Apply a linear to gamma transform for gamma 2
-                # var r = linear_to_gamma(t[y, x, 3])
-                # var g = linear_to_gamma(t[y, x, 2])
-                # var b = linear_to_gamma(t[y, x, 1])
-                # var a = linear_to_gamma(t[y, x, 0])
-
                 var r = linear_to_gamma((t + offset + 3)[])
                 var g = linear_to_gamma((t + offset + 2)[])
                 var b = linear_to_gamma((t + offset + 1)[])
-                var a = linear_to_gamma((t + offset )[])
-
+                var a = linear_to_gamma((t + offset)[])
 
                 # Translate all 0-1 values to 0-255 and cast to uint8
                 var intensity = Interval[float_type](0.000, 0.999)

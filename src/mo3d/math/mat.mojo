@@ -11,9 +11,7 @@ struct Mat[T: DType, dim: Int]:
 
     fn __init__(inout self):
         self._data = UnsafePointer[Vec[T, dim]].alloc(dim)
-        # print(str(self._data[]))
         for i in range(dim):
-            print("i: " + str(i))
             (self._data + i)[] = Vec[T, dim]()
 
     fn __init__(inout self, *args: Vec[T, dim]):
@@ -21,8 +19,12 @@ struct Mat[T: DType, dim: Int]:
         var i = 0
         for arg in args:
             (self._data + i)[] = arg[].clone()
+            i += 1
 
     fn __del__(owned self):
+        """
+        Mojo's lifetime management is over eager, disabling for now.
+        """
         pass
         # self._data.free()
 

@@ -37,6 +37,9 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
         return result
 
     fn __del__(owned self):
+        """
+        Mojo's lifetime management is over eager, disabling for now.
+        """
         pass
         # self._data.free()
 

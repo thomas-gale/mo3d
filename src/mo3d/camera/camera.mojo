@@ -55,13 +55,9 @@ struct Camera[
     ) raises -> None:
         # Set default field of view, starting position (look from), target (look at) and orientation (up vector)
         self._vfov = Scalar[T](70.0)
-        self._look_from = Point[T, dim](0, 0, 3)
+        self._look_from = Point[T, dim](0, 0, 2)
         self._look_at = Point[T, dim](0, 0, 0)
         self._vup = Vec[T, dim](0, 1, 0)
-
-        print("look_from: " + str(self._look_from))
-        print("look_at: " + str(self._look_at))
-        print("vup: " + str(self._vup))
 
         # Determine viewport dimensions
         self._focal_length = 1.0
@@ -74,14 +70,9 @@ struct Camera[
 
         # Calculate the u,v,w basis vectors for the camera orientation. - TODO: somehow refactor the code to use update view matrix (however)
         var w = Vec.unit(self._look_from - self._look_at)
-        # print(str(w))
-        # print(str(self._vup))
         var u = Vec.cross_3(self._vup, w)
-        # print(str(u))
         var v = Vec.cross_3(w, u)
-        # print(str(v))
         self._rot = Mat[T, dim](u, v, w)
-        # print(str(self._rot))
 
         # Calculate the vectors across the horizontal and down the vertical viewport edges.
         var viewport_u = self._viewport_width * self._rot[0]
@@ -112,17 +103,12 @@ struct Camera[
         self._last_x = 0
         self._last_y = 0
 
-        # Do a final update of the view matrix
-        print("FInal update")
-        print(str(self._rot))
+        # Do a final update of the view matrix: TODO: Remove the duplicate code above.
         self.update_view_matrix()
-        print(str(self._rot))
 
         print("Camera initialized")
 
     fn __del__(owned self):
-        # print(str(self._rot))
-        # _ = self._rot
         self._sensor_state.free()
         print("Camera destroyed")
 
@@ -130,8 +116,8 @@ struct Camera[
         inout self,
     ) raises -> None:
         self._rot[2] = Vec.unit(self._look_from - self._look_at)
-        self._rot[0] = Vec.cross_3(self._vup, self._rot[2])
-        self._rot[1] = Vec.cross_3(self._rot[2], self._rot[0])
+        self._rot[0] = Vec.cross_3(self._vup, self._rot[2]).unit()
+        self._rot[1] = Vec.cross_3(self._rot[2], self._rot[0]).unit()
 
         var viewport_u = self._viewport_width * self._rot[0]
         var viewport_v = self._viewport_height * -self._rot[1]

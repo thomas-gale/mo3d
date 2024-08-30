@@ -4,23 +4,47 @@ from math import sqrt
 from random import random_float64
 
 
-@value
 struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
-    var _data: InlinedFixedVector[Scalar[T], size]
+    var _data: UnsafePointer[Scalar[T]]
 
     fn __init__(inout self):
-        self._data = InlinedFixedVector[Scalar[T], size](size)
+        self._data = UnsafePointer[Scalar[T]].alloc(size)
+        for i in range(size):
+            (self._data + i)[] = Scalar[T](0)
+
+    fn __init__(inout self, data: UnsafePointer[Scalar[T]]):
+        self._data = data
 
     fn __init__(inout self, *args: Scalar[T]):
-        self._data = InlinedFixedVector[Scalar[T], size](size)
+        self._data = UnsafePointer[Scalar[T]].alloc(size)
+        var i = 0
+        for arg in args:
+            (self._data + i)[] = arg
+            i += 1
+
+    fn __copyinit__(inout self, other: Self):
+        self._data = UnsafePointer[Scalar[T]].alloc(size)
         for i in range(size):
-            self._data[i] = args[i]
+            (self._data + i)[] = (other._data + i)[]
+
+    fn __moveinit__(inout self, owned other: Self):
+        self._data = other._data
+
+    fn clone(self) -> Self:
+        var result = Self()
+        for i in range(size):
+            result._data[i] = self._data[i]
+        return result
+
+    fn __del__(owned self):
+        pass
+        # self._data.free()
 
     fn __getitem__(self, index: Int) -> Scalar[T]:
-        return self._data[index]
+        return (self._data + index)[]
 
     fn __setitem__(inout self, index: Int, value: SIMD[T, 1]):
-        self._data[index] = value
+        (self._data + index)[] = value
 
     fn dot(self, rhs: Self) -> SIMD[T, 1]:
         var sum: Scalar[T] = 0
@@ -35,7 +59,7 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
         return sqrt(self.length_squared())
 
     @staticmethod
-    fn cross_3(lhs: Self, rhs: Self) raises-> Self:
+    fn cross_3(lhs: Self, rhs: Self) raises -> Self:
         """
         Cross product of two 3D vectors.
         It will raise an error if the vectors are not 3D.
@@ -73,7 +97,7 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
 
     @staticmethod
     fn random() -> Self:
-        var data = InlinedFixedVector[Scalar[T], size](size)
+        var data = UnsafePointer[Scalar[T]].alloc(size)
         for i in range(size):
             data[i] = random_float64().cast[T]()
         return Self(data)
@@ -82,7 +106,7 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
     fn random(min: Scalar[T], max: Scalar[T]) -> Self:
         var min_64 = min.cast[DType.float64]()
         var max_64 = max.cast[DType.float64]()
-        var data = InlinedFixedVector[Scalar[T], size](size)
+        var data = UnsafePointer[Scalar[T]].alloc(size)
         for i in range(size):
             data[i] = random_float64(min_64, max_64).cast[T]()
         return Self(data)

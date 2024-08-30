@@ -7,37 +7,47 @@ from mo3d.math.vec import Vec
 
 @value
 struct Mat[T: DType, dim: Int]:
-    var _data: InlinedFixedVector[Scalar[T], dim * dim]
+    var _data: UnsafePointer[Vec[T, dim]]
 
     fn __init__(inout self):
-        self._data = InlinedFixedVector[Scalar[T], dim * dim](dim * dim)
-        for i in range(dim * dim):
-            self._data[i] = Scalar[T](0)
+        self._data = UnsafePointer[Vec[T, dim]].alloc(dim)
+        # print(str(self._data[]))
+        for i in range(dim):
+            print("i: " + str(i))
+            (self._data + i)[] = Vec[T, dim]()
 
     fn __init__(inout self, *args: Vec[T, dim]):
-        self._data = InlinedFixedVector[Scalar[T], dim * dim](dim * dim)
+        self._data = UnsafePointer[Vec[T, dim]].alloc(dim)
         var i = 0
         for arg in args:
-            self._data[i] = arg[][i % dim]
-            i += 1
+            (self._data + i)[] = arg[].clone()
+
+    fn __del__(owned self):
+        pass
+        # self._data.free()
 
     @staticmethod
     fn eye() -> Self:
         var result = Self()
         for i in range(dim):
             for j in range(dim):
-                result._data[i * dim + j] = 1 if i == j else 0
+                if i == j:
+                    result[i][j] = Scalar[T](1)
+                else:
+                    result[i][j] = Scalar[T](0)
         return result
 
     fn __getitem__(self, index: Int) -> Vec[T, dim]:
-        var result = Vec[T, dim]()
-        for i in range(index * dim, (index + 1) * dim):
-            result[i] = self._data[index * dim + i]
-        return result
+        return (self._data + index)[]
 
     fn __setitem__(inout self, index: Int, value: Vec[T, dim]):
-        for i in range(index * dim, (index + 1) * dim):
-            self._data[index * dim + i] = value[i]
+        (self._data + index)[] = value.clone()
+
+    fn __str__(self) -> String:
+        var result = String("")
+        for i in range(dim):
+            result += str(self[i]) + "\n"
+        return result
 
     @staticmethod
     fn rotate_3(

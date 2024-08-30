@@ -3,14 +3,14 @@
 ### [mojo](https://docs.modular.com/mojo/manual/) 3D library
 
 > [!WARNING]  
-> Under [active](#progress-notes) development/unstable
+> Under [active](#progress-notes) development/unstable 🔥
 
 - [x] Cross platform SDL window with [`ffi`](https://docs.modular.com/mojo/stdlib/sys/ffi/) bindings directly to `mojo` (based on [mojo-sdl](https://github.com/msteele/mojo-sdl/))
 - [x] Basic `3D` primitives and behaviors (vectors/rays with dot/cross products etc.)
 - [ ] Basic ray/path tracer based 'ray tracing in one weekend'
 	- [x] Antialias
 	- [ ] Use Mojo Variant in place of abstract hittables/materials.
-- [ ] Mouse interaction for arcball orbit controls (e.g. https://asliceofrendering.com/camera/2019/11/30/ArcballCamera/)
+- [x] Mouse interaction for arcball orbit controls (e.g. https://asliceofrendering.com/camera/2019/11/30/ArcballCamera/)
 - [ ] Basic shader replacement pattern (however no need to use actual graphics shaders - as the idea is that mojo optimized compute can perform the same function directly)
 - [ ] Mesh rendering (using bvh or other similar acceleration structure)
 - [ ] ...
@@ -37,9 +37,12 @@ mojo 2024.8.2916 (1e9c68e6)
 
 ## progress notes
 
-### 2024-08-30: arcball camera and refactoring vec to be dimensionally parameterized
+### 2024-08-30: arcball camera implemented and refactoring `vec`/`mat` to be dimensionally parameterized
+- Vec4 is now `Vec` - Backing storaged is directly managed via `UnsafePointer`
+- Matrix `Mat` - Backing storage is directly managed via `UnsafePointer` (I initially tried owning `dim` number of `Vec`s however, I ended up struggling to convince mojo to not prematurly deallocate them. So instead, now, `Mat` carves out it's own memory and copies to and from `Vec` when required.
+- Arcball camera implemenation - many thanks to [this](https://asliceofrendering.com/camera/2019/11/30/ArcballCamera/) article!
 
-<video autoplay src="https://github.com/user-attachments/assets/531891b5-37f4-4158-b89c-1f108d7945cb" />
+https://github.com/user-attachments/assets/480e9b67-529a-4f3b-9a3b-843bfa9760db
 
 ### 2024-08-27: refactoring ray, adding hittables, basic ray multi-sampling to update a progressive texture
 - Struggling to get a proper generic/runtime polymorphic hittable implementation working.
@@ -50,7 +53,7 @@ mojo 2024.8.2916 (1e9c68e6)
 - Replaced the Tensor with my own UnsafePointer texture state implementation.
 - Progressive rendering to the texture state, so rather than multiple samples in a single pass, the image samples and re-renders, this keeps the frame time at around `10ms` on mac m3.
 
-<img width="795" alt="Screenshot 2024-08-27 at 22 59 29" src="https://github.com/user-attachments/assets/fab7211a-2841-49f5-9e93-dfcd07fb05d4">
+![image](https://github.com/user-attachments/assets/fab7211a-2841-49f5-9e93-dfcd07fb05d4)
 
 ### 2024-08-23: wrapping sdl2 in a window trait and battling with over eager resource freeing by mojo
 - Took longer that I would have liked to track down the mysterious/non-deterministic corrupted data being rendered in the main loop

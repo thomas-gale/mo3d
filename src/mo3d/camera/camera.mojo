@@ -63,7 +63,6 @@ struct Camera[
         print("look_at: " + str(self._look_at))
         print("vup: " + str(self._vup))
 
-
         # Determine viewport dimensions
         self._focal_length = 1.0
         var theta: Scalar[T] = degrees_to_radians(self._vfov)
@@ -174,20 +173,20 @@ struct Camera[
         var y_angle = (self._last_y - y).cast[T]() * -delta_angle_y
 
         # Extra step to handle the problem when the camera direction is the same as the up vector
-        # var cos_angle = Vec4.dot(self._rot.w, self._vup)
-        # if (
-        #     cos_angle
-        #     * (
-        #         (Scalar[T](0.0) < y_angle).cast[T, dim]()
-        #         - (y_angle < Scalar[T](0.0)).cast[T, dim]()
-        #     )
-        # ) > 0.99:
-        #     y_angle = 0
+        var cos_angle = Vec.dot(self._rot[2], self._vup)
+        if (
+            cos_angle
+            * (
+                (Scalar[T](0.0) < y_angle).cast[T]()
+                - (y_angle < Scalar[T](0.0)).cast[T]()
+            )
+        ) > 0.99:
+            y_angle = 0
 
         # Step 2: Rotate the camera around the pivot point on the first axis.
         var rotation_matrix_x = Mat[T, dim].eye()
         rotation_matrix_x = Mat[T, dim].rotate_3(
-            rotation_matrix_x, x_angle, self._rot[2]
+            rotation_matrix_x, x_angle, self._vup
         )
         position = (rotation_matrix_x * (position - pivot)) + pivot
 
@@ -201,9 +200,6 @@ struct Camera[
         # Update the camera view (we keep the same lookat and the same up vector)
         self._look_from = final_position
         self.update_view_matrix()
-
-        print("View matrix updated")
-        # print(str(self._rot))
 
         # Update the mouse position for the next rotation
         self._last_x = x

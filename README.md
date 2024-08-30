@@ -31,10 +31,7 @@
 ### using nightly version
 ```
 $ mojo --version
-mojo 2024.8.2617 (d505bcbe)
-$ max --version
-max 2024.8.2617 (d505bcbe)
-Modular version 2024.8.2617
+mojo 2024.8.2916 (1e9c68e6)
 ```
 
 ## progress notes

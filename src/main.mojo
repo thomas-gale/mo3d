@@ -31,8 +31,6 @@ fn main() raises:
     alias max_fps = 60
     alias width = 800
     alias height = 450
-    alias aspect_ratio = Scalar[float_type](width) / Scalar[float_type](height)
-    alias S4 = SIMD[float_type, 4]
     alias channels = 4
     alias max_depth = 8
     alias max_samples = 1024 * 1024

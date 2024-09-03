@@ -14,6 +14,8 @@ struct HittableList[T: DType, dim: Int]:
     """
 
     # Mojo doesn't support polymorphic storage, so we need to have separate of each concrete type.
+    # I think this can be a list of Variants[Various Types....]
+
     var _sphere_list: List[Sphere[T, dim]]
     # e.g.
     # var _other_primitive_list: List[OtherPrimitive]

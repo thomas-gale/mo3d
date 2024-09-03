@@ -2,7 +2,7 @@ from collections import List
 
 # from mo3d.precision import float_type
 from mo3d.math.interval import Interval
-from mo3d.ray.hittable import HitRecord
+from mo3d.ray.hit_record import HitRecord
 from mo3d.ray.ray import Ray
 from mo3d.ray.sphere import Sphere
 

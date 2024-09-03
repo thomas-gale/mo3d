@@ -3,7 +3,7 @@ from math import sqrt
 from mo3d.math.interval import Interval
 from mo3d.math.point import Point
 from mo3d.ray.ray import Ray
-from mo3d.ray.hittable import HitRecord
+from mo3d.ray.hit_record import HitRecord
 
 
 @value

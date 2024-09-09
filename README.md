@@ -17,7 +17,9 @@
 - [x] Mouse interaction for arcball orbit controls (e.g. https://asliceofrendering.com/camera/2019/11/30/ArcballCamera/)
 - [ ] Basic shader replacement pattern (however no need to use actual graphics shaders - as the idea is that mojo optimized compute can perform the same function directly)
 - [ ] Mesh rendering (using bvh or other similar acceleration structure)
-- [ ] ...
+
+### Basic Architecture
+![Basic Architecture](./doc/mo3d-basic-architecture.svg)
 
 ## attribution and inspiration
 - [mojo-sdl](https://github.com/msteele/mojo-sdl/)

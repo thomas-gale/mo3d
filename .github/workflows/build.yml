@@ -1,5 +1,5 @@
 # Attribution: https://github.com/thatstoasty/hue/blob/nightly/.github/workflows/build.yml
-name: Build all packages
+name: Build
 
 on:
   push:

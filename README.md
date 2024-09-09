@@ -7,6 +7,9 @@
 > Under [active](#progress-notes) development 🔥
 
 # mo3d
+
+![latest_showcase_image](https://github.com/user-attachments/assets/d821f26a-05e5-4649-b5b6-e929ee1059df)
+
 ### [mojo](https://docs.modular.com/mojo/manual/) 3d library
 
 `mo3d` is aiming to be a 3d graphics library built from the ground up in Mojo, with minimal external dependencies. It utilizes only a basic subset of `SDL2` for rendering, employing parallelized copying of Mojo-rendered scenes directly to texture data. Unlike traditional shader pipelines, `mo3d` aims to rethink rendering by consolidating shaders into Mojo code, while planning for future support of Mojo’s hardware accelerators.

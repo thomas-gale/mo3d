@@ -40,6 +40,4 @@ jobs:
 
         run: |
           source $HOME/.bash_profile
-
-          # Build
-          magic run build --target-platform=$TARGET_PLATFORM
+          magic run build

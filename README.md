@@ -1,4 +1,7 @@
 ![image](https://github.com/user-attachments/assets/39e934ae-1aeb-434a-af8f-5986b348e1cc) 
+
+[![Build](https://github.com/thomas-gale/mo3d/actions/workflows/build.yml/badge.svg)](https://github.com/thomas-gale/mo3d/actions/workflows/build.yml)
+
 # mo3d
 ### [mojo](https://docs.modular.com/mojo/manual/) 3D library
 

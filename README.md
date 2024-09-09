@@ -22,20 +22,16 @@
 - [magnum-graphics](https://magnum.graphics/)
 
 ## dev
-- devcontainer or mac
-- `make setup-linux-env` or `make setup-mac-env`
-- `make install`
-- Set environment variables as documented https://docs.modular.com/max/install depending on terminal
-- `make run`
-- `make ...` # See `Makefile`
-
-### using nightly version
-```
-$ mojo --version
-mojo 2024.8.2916 (1e9c68e6)
-```
+- install [`magic`](https://docs.modular.com/magic/#install-magic)
+- see available tasks with `magic run list`
+- main app `magic run start`
 
 ## progress notes
+
+### 2024-09-09: moving to the magic package manager
+- This replaces the `Makefile`
+- The environment setup (installing sdl2) is cached based on a proxy of the local `pixi.toml` file - given the stability of `sdl2` API, this should be adequate.
+- Other commands should do appropriate caching for extra wonderful speedyness. 
 
 ### 2024-08-30: arcball camera implemented and refactoring `vec`/`mat` to be dimensionally parameterized
 - Vec4 is now `Vec` - Backing storaged is directly managed via `UnsafePointer`

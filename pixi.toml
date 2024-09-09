@@ -1,25 +1,25 @@
 [project]
+name = "mo3d"
+version = "0.1.0"
+description = "Prototype 3d library for Mojo Lang"
 authors = ["Thomas Gale <mail@thomasjamesgale.com>"]
 channels = ["conda-forge", "https://conda.modular.com/max-nightly"]
-description = "Prototype 3d library for Mojo Lang"
-license = "Apache-2.0"
-name = "nightly-proj"
-platforms = ["linux-64", "osx-arm64"]
 readme = "README.md"
-version = "0.1.0"
+license = "Apache-2.0"
+platforms = ["linux-64", "osx-arm64"]
 
 [tasks]
-launch = { cmd = "mojo run src/main.mojo", depends-on = ["setup"] }
-package = { cmd = "mkdir -p bin && magic run mojo package src/mo3d -o bin/mo3d.mojopkg && cp bin/mo3d.mojopkg test/mo3d/mo3d.mojopkg", depends-on = ["setup"] }
-test = { cmd = "magic run mojo test", depends-on = ["package"] }
-build = { cmd = "mkdir -p bin && magic run mojo build src/main.mojo -o bin/mo3d", depends-on = ["setup"] }
-launch-build = { cmd = "bin/mo3d", depends-on = ["build"] }
+start = { cmd = "mojo run src/main.mojo", depends-on = ["setup"] }
+package = { cmd = "mkdir -p bin && magic run mojo package src/mo3d -o bin/mo3d.mojopkg && cp bin/mo3d.mojopkg test/mo3d/mo3d.mojopkg", depends-on = ["setup"], inputs=["src/*.mojo"], outputs = ["bin/mo3d.mojopkg", "test/mo3d/mo3d.mojopkg"] }
+test = { cmd = "magic run mojo test", depends-on = ["package"], inputs=["src/*.mojo", "test/*.mojo"] }
+build = { cmd = "mkdir -p bin && magic run mojo build src/main.mojo -o bin/mo3d", depends-on = ["setup"], inputs=["src/*.mojo"], outputs = ["bin/mo3d"] }
+built = { cmd = "bin/mo3d", depends-on = ["build"] }
 
 [dependencies]
 max = ">=24.6.0.dev2024090905,<25"
 
 [target.linux-64.tasks]
-setup = "sudo apt update && sudo apt install -y llvm libsdl2-dev"
+setup = { cmd="sudo apt update && sudo apt install -y llvm libsdl2-dev", inputs=["pixi.toml"] }
 
 [target.osx-arm64.tasks]
-setup = "brew install llvm sdl2"
+setup = { cmd="brew install llvm sdl2", inputs=["pixi.toml"] }

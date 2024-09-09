@@ -3,25 +3,27 @@
 [![Build](https://github.com/thomas-gale/mo3d/actions/workflows/build.yml/badge.svg)](https://github.com/thomas-gale/mo3d/actions/workflows/build.yml)
 [![Test](https://github.com/thomas-gale/mo3d/actions/workflows/test.yml/badge.svg)](https://github.com/thomas-gale/mo3d/actions/workflows/test.yml)
 
-# mo3d
-### [mojo](https://docs.modular.com/mojo/manual/) 3D library
-
 > [!WARNING]  
 > Under [active](#progress-notes) development 🔥
 
-`mo3d` is aiming to be a 3D graphics library built from the ground up in Mojo, with minimal external dependencies. It utilizes only a basic subset of SDL2 for rendering, employing parallelized copying of Mojo-rendered scenes directly to texture data. Unlike traditional shader pipelines, `mo3d` aims to rethink rendering by consolidating shaders into Mojo code, while planning for future support of Mojo’s hardware accelerators.
+# mo3d
+### [mojo](https://docs.modular.com/mojo/manual/) 3d library
 
-Key features aim to include an experimental ECS-based architecture for efficient scene management and ray/path tracing as the default rendering method, to capitalize on modern GPU hardware with ray tracing cores. Future goals include integrating a minimal physics engine, creating a complete 3D simulation environment akin to a lightweight version of NVIDIA’s Omniverse, focused on simplicity, composability and high performance.
+`mo3d` is aiming to be a 3d graphics library built from the ground up in Mojo, with minimal external dependencies. It utilizes only a basic subset of `SDL2` for rendering, employing parallelized copying of Mojo-rendered scenes directly to texture data. Unlike traditional shader pipelines, `mo3d` aims to rethink rendering by consolidating shaders into Mojo code, while planning for future support of Mojo’s hardware accelerators.
 
-### Basic Architecture
-![Basic Architecture](./doc/mo3d-basic-architecture.svg)
+Key features aim to include an experimental ECS-based architecture for efficient scene management and ray/path tracing as the default rendering method, to capitalize on modern GPU hardware with ray tracing cores. Future goals include integrating a minimal physics engine, creating a complete 3d simulation environment akin to a lightweight version of NVIDIA’s Omniverse, focused on simplicity, composability and high performance.
 
-## attribution and inspiration
+`mo3d` could serve as a foundation for game engines, providing an optimized and flexible base for interactive 3D environments. Additionally, its potential to support simulation environments makes it ideal for reinforcement learning (RL) use cases, where optimization is crucial. By allowing render code and neural network forward/backward pass code to be co-compiled and optimized by [mojo](https://docs.modular.com/mojo/manual/) , `mo3d` aims to minimize latency in the RL loop. Differentiable rendering techniques could further enable seamless integration between RL agents and rendered environments, facilitating single differentiable passes for tasks such as RL agent training, gradient calculation, and environment interaction.
+
+### attribution and inspiration
 - [mojo-sdl](https://github.com/msteele/mojo-sdl/) (this code was mildly edited, but is pretty much verbatim as the base `sdl_window` implementation)
 - [ray tracing in one weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.html) / [the next week](https://raytracing.github.io/books/RayTracingTheNextWeek.html) / [rest of your life](https://raytracing.github.io/books/RayTracingTheRestOfYourLife.html) (all the ray tracing core ideas are attributed to these guides)
 - [three.js](https://github.com/mrdoob/three.js/) (example of a successful 3d library for javascript)
 - [magnum-graphics](https://magnum.graphics/) (example of a c++ middleware library for graphics)
 - [bevy](https://bevyengine.org/) (example of a minimal ECS game engine for rust)
+
+### Basic Architecture
+![Basic Architecture](./doc/mo3d-basic-architecture.svg)
 
 ## dev
 - install [`magic`](https://docs.modular.com/magic/#install-magic)

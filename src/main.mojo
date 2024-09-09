@@ -15,7 +15,7 @@ from mo3d.math.vec import Vec
 from mo3d.math.mat import Mat
 from mo3d.math.point import Point
 from mo3d.ray.ray import Ray
-from mo3d.ray.hittable import HitRecord
+from mo3d.ray.hit_record import HitRecord
 from mo3d.ray.hittable_list import HittableList
 from mo3d.ray.sphere import Sphere
 from mo3d.camera.camera import Camera
@@ -31,8 +31,6 @@ fn main() raises:
     alias max_fps = 60
     alias width = 800
     alias height = 450
-    alias aspect_ratio = Scalar[float_type](width) / Scalar[float_type](height)
-    alias S4 = SIMD[float_type, 4]
     alias channels = 4
     alias max_depth = 8
     alias max_samples = 1024 * 1024

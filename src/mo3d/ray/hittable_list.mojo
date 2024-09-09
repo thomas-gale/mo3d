@@ -2,7 +2,7 @@ from collections import List
 
 # from mo3d.precision import float_type
 from mo3d.math.interval import Interval
-from mo3d.ray.hittable import HitRecord
+from mo3d.ray.hit_record import HitRecord
 from mo3d.ray.ray import Ray
 from mo3d.ray.sphere import Sphere
 
@@ -14,6 +14,8 @@ struct HittableList[T: DType, dim: Int]:
     """
 
     # Mojo doesn't support polymorphic storage, so we need to have separate of each concrete type.
+    # I think this can be a list of Variants[Various Types....]
+
     var _sphere_list: List[Sphere[T, dim]]
     # e.g.
     # var _other_primitive_list: List[OtherPrimitive]

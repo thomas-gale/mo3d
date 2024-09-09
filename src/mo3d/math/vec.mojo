@@ -5,6 +5,7 @@ from random import random_float64
 
 
 struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
+    # Need to read the docs - does _data automatically free
     var _data: UnsafePointer[Scalar[T]]
 
     fn __init__(inout self):
@@ -12,7 +13,8 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
         for i in range(size):
             (self._data + i)[] = Scalar[T](0)
 
-    fn __init__(inout self, data: UnsafePointer[Scalar[T]]):
+    fn __init__(inout self, owned data: UnsafePointer[Scalar[T]]):
+        # TODO: Clarify ownership - we take ownership of this pointer.
         self._data = data
 
     fn __init__(inout self, *args: Scalar[T]):

@@ -226,7 +226,7 @@ struct Camera[
                     pixel_color += Self._ray_color(r, max_depth, world)
                 pixel_color *= pixel_samples_scale.cast[T]()
 
-                # Progressivelh store the color in the render state
+                # Progressively store the color in the render state
                 (
                     self._sensor_state + (y * (width * channels) + x * channels)
                 )[] *= Scalar[T](self._sensor_samples - 1) / Scalar[T](

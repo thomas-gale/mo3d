@@ -7,16 +7,11 @@
 ### [mojo](https://docs.modular.com/mojo/manual/) 3D library
 
 > [!WARNING]  
-> Under [active](#progress-notes) development/unstable 🔥
+> Under [active](#progress-notes) development 🔥
 
-- [x] Cross platform SDL window with [`ffi`](https://docs.modular.com/mojo/stdlib/sys/ffi/) bindings directly to `mojo` (based on [mojo-sdl](https://github.com/msteele/mojo-sdl/))
-- [x] Basic `3D` primitives and behaviors (vectors/rays with dot/cross products etc.)
-- [ ] Basic ray/path tracer based 'ray tracing in one weekend'
-	- [x] Antialias
-	- [ ] Use Mojo Variant in place of abstract hittables/materials.
-- [x] Mouse interaction for arcball orbit controls (e.g. https://asliceofrendering.com/camera/2019/11/30/ArcballCamera/)
-- [ ] Basic shader replacement pattern (however no need to use actual graphics shaders - as the idea is that mojo optimized compute can perform the same function directly)
-- [ ] Mesh rendering (using bvh or other similar acceleration structure)
+`mo3d` is aiming to be a 3D graphics library built from the ground up in Mojo, with minimal external dependencies. It utilizes only a basic subset of SDL2 for rendering, employing parallelized copying of Mojo-rendered scenes directly to texture data. Unlike traditional shader pipelines, `mo3d` aims to rethink rendering by consolidating shaders into Mojo code, while planning for future support of Mojo’s hardware accelerators.
+
+Key features aim to include an experimental ECS-based architecture for efficient scene management and ray/path tracing as the default rendering method, to capitalize on modern GPU hardware with ray tracing cores. Future goals include integrating a minimal physics engine, creating a complete 3D simulation environment akin to a lightweight version of NVIDIA’s Omniverse, focused on simplicity, composability and high performance.
 
 ### Basic Architecture
 ![Basic Architecture](./doc/mo3d-basic-architecture.svg)

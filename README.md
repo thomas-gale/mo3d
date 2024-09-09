@@ -17,10 +17,11 @@ Key features aim to include an experimental ECS-based architecture for efficient
 ![Basic Architecture](./doc/mo3d-basic-architecture.svg)
 
 ## attribution and inspiration
-- [mojo-sdl](https://github.com/msteele/mojo-sdl/)
-- [ray tracing in one weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.html)
-- [three.js](https://github.com/mrdoob/three.js/)
-- [magnum-graphics](https://magnum.graphics/)
+- [mojo-sdl](https://github.com/msteele/mojo-sdl/) (this code was mildly edited, but is pretty much verbatim as the base `sdl_window` implementation)
+- [ray tracing in one weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.html) / [the next week](https://raytracing.github.io/books/RayTracingTheNextWeek.html) / [rest of your life](https://raytracing.github.io/books/RayTracingTheRestOfYourLife.html) (all the ray tracing core ideas are attributed to these guides)
+- [three.js](https://github.com/mrdoob/three.js/) (example of a successful 3d library for javascript)
+- [magnum-graphics](https://magnum.graphics/) (example of a c++ middleware library for graphics)
+- [bevy](https://bevyengine.org/) (example of a minimal ECS game engine for rust)
 
 ## dev
 - install [`magic`](https://docs.modular.com/magic/#install-magic)

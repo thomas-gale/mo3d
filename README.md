@@ -24,6 +24,7 @@ Key features aim to include an experimental ECS-based architecture for efficient
 - [three.js](https://github.com/mrdoob/three.js/) (example of a successful 3d library for javascript)
 - [magnum-graphics](https://magnum.graphics/) (example of a c++ middleware library for graphics)
 - [bevy](https://bevyengine.org/) (example of a minimal ECS game engine for rust)
+- (I also did a similar thing in rust wgpu and webgpu shaders [previously](https://github.com/thomas-gale/monte-carlo) which I will likely draw knowledge from)
 
 ### Basic Architecture
 ![Basic Architecture](./doc/mo3d-basic-architecture.svg)

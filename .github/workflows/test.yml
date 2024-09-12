@@ -34,9 +34,6 @@ jobs:
           curl -ssL https://magic.modular.com | bash
 
       - name: Test package for target platform
-        env:
-          TARGET_PLATFORM: ${{ matrix.target }}
-
         run: |
           source $HOME/.bash_profile
           magic run test

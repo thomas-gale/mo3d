@@ -23,7 +23,9 @@ Key features aim to include an experimental ECS-based architecture for efficient
 - [ray tracing in one weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.html) / [the next week](https://raytracing.github.io/books/RayTracingTheNextWeek.html) / [rest of your life](https://raytracing.github.io/books/RayTracingTheRestOfYourLife.html) (all the ray tracing core ideas are attributed to these guides)
 - [three.js](https://github.com/mrdoob/three.js/) (example of a successful 3d library for javascript)
 - [magnum-graphics](https://magnum.graphics/) (example of a c++ middleware library for graphics)
-- [bevy](https://bevyengine.org/) (example of a minimal ECS game engine for rust)
+- [bevy](https://bevyengine.org/) (example of a lightweight ECS game engine for rust)
+- [taichi](https://github.com/taichi-dev/taichi) (great examples of compute on sparse data and differentiable programming)
+- [openvdb](https://github.com/AcademySoftwareFoundation/openvdb) (this could be a interesting integration in the future and/or futher inspiration for spare data representations)
 - (I also did a similar thing in rust wgpu and webgpu shaders [previously](https://github.com/thomas-gale/monte-carlo) which I will likely draw knowledge from)
 
 ### Basic Architecture

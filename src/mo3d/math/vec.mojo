@@ -3,7 +3,6 @@ from collections import InlinedFixedVector
 from math import sqrt
 from random import random_float64
 
-
 struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
     # Need to read the docs - does _data automatically free
     var _data: UnsafePointer[Scalar[T]]

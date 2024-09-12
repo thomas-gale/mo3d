@@ -59,6 +59,12 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
     fn length(self) -> SIMD[T, 1]:
         return sqrt(self.length_squared())
 
+    fn near_zero[tol: Scalar[T] = 1e-8](self) -> Bool:
+        for i in range(size):
+            if abs(self._data[i]) > tol:
+                return False
+        return True
+
     @staticmethod
     fn cross_3(lhs: Self, rhs: Self) raises -> Self:
         """

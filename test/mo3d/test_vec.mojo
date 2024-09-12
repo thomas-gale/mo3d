@@ -18,6 +18,13 @@ fn test_create_vec_size_3_float32() raises:
     assert_equal(v[1], 43.0)
     assert_equal(v[2], 44.0)
 
+fn test_vec_size_3_float32_is_near_zero() raises:
+    var v1 = Vec[DType.float32, 3]()
+    var v2 = Vec[DType.float32, 3](42.0, 43.0, 44.0)
+
+    assert_true(v1.near_zero())
+    assert_false(v2.near_zero())
+
 fn test_mul() raises:
     var v = Vec[DType.float32, 3](1.0, 2.0, 3.0)
     var scalar: Float32 = 2.0

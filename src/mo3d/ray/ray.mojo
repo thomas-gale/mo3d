@@ -17,3 +17,6 @@ struct Ray[type: DType, dim: Int]:
 
     fn at(self, t: Scalar[type]) -> Point[type, dim]:
         return self.orig + self.dir * t
+
+    fn __str__(self) -> String:
+        return "Ray(orig=" + str(self.orig) + ", dir=" + str(self.dir) + ")"

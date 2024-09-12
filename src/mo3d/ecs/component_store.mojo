@@ -4,7 +4,7 @@ from utils import Variant
 from mo3d.math.vec import Vec
 from mo3d.math.point import Point
 from mo3d.ecs.entity import EntityID
-from mo3d.ecs.component import ComponentID, Component, VecComponent 
+from mo3d.ecs.component import ComponentID 
 
 
 struct ComponentStore[T: DType, dim: Int]:
@@ -15,6 +15,11 @@ struct ComponentStore[T: DType, dim: Int]:
     var position_components: List[Point[T, dim]]
     var velocity_components: List[Vec[T, dim]]
     var entity_component_map: Dict[EntityID, List[ComponentID]]
+
+    fn __init__(inout self) raises:
+        self.position_components = List[Point[T, dim]]()
+        self.velocity_components = List[Vec[T, dim]]()
+        self.entity_component_map = Dict[EntityID, List[ComponentID]]()
 
     fn _add_position_component(inout self, entity_id: EntityID, component: Point[T, dim]) raises -> ComponentID:
         self.position_components.append(component)
@@ -28,11 +33,11 @@ struct ComponentStore[T: DType, dim: Int]:
         self.entity_component_map[entity_id].append(component_id)
         return component_id
 
-    fn add_component(inout self, entity_id: EntityID, component: Self.ComponentVariants) raises:
+    fn add_component(inout self, entity_id: EntityID, component: Self.ComponentVariants) raises -> ComponentID:
         if component.isa[Point[T, dim]]():
-            self._add_position_component(entity_id, component[Point[T, dim]])
+            return self._add_position_component(entity_id, component[Point[T, dim]])
         elif component.isa[Vec[T, dim]]():
-            self._add_velocity_component(entity_id, component[Vec[T, dim]])
+            return self._add_velocity_component(entity_id, component[Vec[T, dim]])
         else:
             raise Error("Unknown component type")
 

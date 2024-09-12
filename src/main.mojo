@@ -83,4 +83,4 @@ fn main() raises:
         str(average_redraw_time / (1000 * 1000)),
         " ms",
     )
-    print("Goodbye, mo3d!")
+    print("-- Goodbye, mo3d! --")

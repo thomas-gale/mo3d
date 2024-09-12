@@ -4,18 +4,21 @@ from mo3d.math.interval import Interval
 from mo3d.math.point import Point
 from mo3d.ray.ray import Ray
 from mo3d.ray.hit_record import HitRecord
+from mo3d.material.material import Material 
 
 
 @value
 struct Sphere[T: DType, dim: Int]:
     var _center: Point[T, dim]
     var _radius: Scalar[T]
+    var _mat: UnsafePointer[Material[T, dim].Variant]
 
     fn __init__(
         inout self, center: Point[T, dim], radius: Scalar[T]
     ):
         self._center = center
         self._radius = radius
+        self._mat = UnsafePointer[Material[T, dim].Variant]()
 
     fn hit(
         self,
@@ -45,6 +48,7 @@ struct Sphere[T: DType, dim: Int]:
         rec.p = r.at(rec.t)
         var outward_normal = (rec.p - self._center) / self._radius
         rec.set_face_normal(r, outward_normal)
+        rec.mat = self._mat
 
         return True
 

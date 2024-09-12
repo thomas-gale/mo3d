@@ -2,18 +2,21 @@ from mo3d.math.interval import Interval
 from mo3d.math.vec import Vec
 from mo3d.math.point import Point
 from mo3d.ray.ray import Ray
+from mo3d.material.material import Material
 
 
 @value
 struct HitRecord[T: DType, dim: Int]:
     var p: Point[T, dim]
     var normal: Vec[T, dim]
+    var mat: UnsafePointer[Material[T, dim].Variant]
     var t: Scalar[T]
     var front_face: Bool
 
     fn __init__(inout self):
         self.p = Point[T, dim]()
         self.normal = Vec[T, dim]()
+        self.mat = UnsafePointer[Material[T, dim].Variant]()
         self.t = Scalar[T]()
         self.front_face = False
 

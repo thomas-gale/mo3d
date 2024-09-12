@@ -10,9 +10,9 @@ platforms = ["linux-64", "osx-arm64"]
 
 [tasks]
 start = { cmd = "mojo run src/main.mojo", depends-on = ["setup"] }
-package = { cmd = "mkdir -p bin && magic run mojo package src/mo3d -o bin/mo3d.mojopkg && cp bin/mo3d.mojopkg test/mo3d/mo3d.mojopkg", depends-on = ["setup"], inputs=["src/*.mojo"], outputs = ["bin/mo3d.mojopkg", "test/mo3d/mo3d.mojopkg"] }
-test = { cmd = "magic run mojo test ./test", depends-on = ["package"] }
-build = { cmd = "mkdir -p bin && magic run mojo build src/main.mojo -o bin/mo3d", depends-on = ["setup"], inputs=["src/*.mojo"], outputs = ["bin/mo3d"] }
+package = { cmd = "mkdir -p bin && magic run mojo package src/mo3d -o bin/mo3d.mojopkg && cp bin/mo3d.mojopkg test/mo3d/mo3d.mojopkg", depends-on = ["setup"], inputs=["src/**/*.mojo"], outputs = ["bin/mo3d.mojopkg", "test/mo3d/mo3d.mojopkg"] }
+test = { cmd = "magic run mojo test ./test", depends-on = ["package"], inputs=["src/**/*.mojo", "test/**/*.mojo"] }
+build = { cmd = "mkdir -p bin && magic run mojo build src/main.mojo -o bin/mo3d", depends-on = ["setup"], inputs=["src/**/*.mojo"], outputs = ["bin/mo3d"] }
 built = { cmd = "bin/mo3d", depends-on = ["build"] }
 
 [dependencies]

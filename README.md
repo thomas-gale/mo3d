@@ -39,6 +39,10 @@ Key features aim to include an experimental ECS-based architecture for efficient
 
 ## progress notes
 
+### 2024-09-13: thinking about a basic ecs module for scene management. 
+- Trying to implement a minimal proof of concept for `SoA` (structure of arrays) `ComponentStore` to hold the state of components.
+- Modified the underlying storage for `Vec` and `Mat` to use `InlineArray` rather than a heap storage. This should improve performance. I still need to think how to elegantly further improve this ComponentStore with `SIMD` (not sure how to extend `Vec` and `Mat` to use `SIMD` without having problems with wasted space when sizes are not powers of 2 and how to align multiple bits of data)
+
 ### 2024-09-09: moving to the magic package manager
 - This replaces the `Makefile`
 - The environment setup (installing sdl2) is cached based on a proxy of the local `pixi.toml` file - given the stability of `sdl2` API, this should be adequate.

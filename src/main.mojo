@@ -42,6 +42,7 @@ fn main() raises:
         ).cast[float_type]()
 
     alias max_fps = 60
+    alias fov = 60
     alias aperature = 0.6
     alias width = 800
     alias height = 450
@@ -109,7 +110,14 @@ fn main() raises:
 
     # Camera
     var camera = Camera[
-        float_type, aperature, width, height, channels, max_depth, max_samples
+        T=float_type,
+        fov=fov,
+        aperature=aperature,
+        width=width,
+        height=height,
+        channels=channels,
+        max_depth=max_depth,
+        max_samples=max_samples,
     ]()
 
     # Collect timing stats - TODO: Tidy and move

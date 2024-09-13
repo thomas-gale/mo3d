@@ -19,6 +19,7 @@ from mo3d.ray.hittable_list import HittableList
 @value
 struct Camera[
     T: DType,
+    fov: Scalar[T],
     aperature: Scalar[T],
     width: Int,
     height: Int,
@@ -27,7 +28,6 @@ struct Camera[
     max_samples: Int,
     dim: Int = 3,
 ]:
-    var _vfov: Scalar[T]  # Vertical field of view
     var _focal_length: Scalar[
         T
     ]  #  # Distance from camera lookfrom point to plane of perfect focus and centre of pivot for arcball rotation
@@ -35,7 +35,6 @@ struct Camera[
     var _look_from: Point[T, dim]  # Point camera is looking from
     var _look_at: Point[T, dim]  # Point camera is looking at
     var _vup: Vec[T, dim]  # Camera relative 'up' vector
-    # var _defocus_angle: Scalar[T]  # Variation angle of rays through each pixel
 
     var _rot: Mat[T, dim]  # Camera rotation matrix
     var _defocus_disk_u: Vec[T, dim]  # Defocus horizontal radius
@@ -60,14 +59,13 @@ struct Camera[
         inout self,
     ) raises -> None:
         # Set default field of view, starting position (look from), target (look at) and orientation (up vector)
-        self._vfov = Scalar[T](70.0)
         self._look_from = Point[T, dim](0, 1, 8)
         self._look_at = Point[T, dim](0, 0, 0)
         self._vup = Vec[T, dim](0, 1, 0)
 
         # Determine viewport dimensions
         self._focal_length = (self._look_from - self._look_at).length()
-        var theta: Scalar[T] = degrees_to_radians(self._vfov)
+        var theta: Scalar[T] = degrees_to_radians(fov)
         var h: Scalar[T] = tan(theta / 2.0)
         self._viewport_height = 2.0 * h * self._focal_length
         self._viewport_width = self._viewport_height * (
@@ -317,7 +315,11 @@ struct Camera[
         Returns a random point in the unit disk.
         """
         var p = Vec[T, dim].random_in_unit_disk()
-        return self._look_from + self._defocus_disk_u * p[0] + self._defocus_disk_v * p[1]
+        return (
+            self._look_from
+            + self._defocus_disk_u * p[0]
+            + self._defocus_disk_v * p[1]
+        )
 
     @staticmethod
     @parameter

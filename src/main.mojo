@@ -44,8 +44,8 @@ fn main() raises:
 
     var mat_ground = Material[float_type, 3](Lambertian[float_type, 3](Color4[float_type](0.8, 0.8, 0.0)))
     var mat_center = Material[float_type, 3](Lambertian[float_type, 3](Color4[float_type](0.1, 0.2, 0.5)))
-    var mat_left = Material[float_type, 3](Metal[float_type, 3](Color4[float_type](0.8, 0.8, 0.8)))
-    var mat_right = Material[float_type, 3](Metal[float_type, 3](Color4[float_type](0.8, 0.6, 0.2)))
+    var mat_left = Material[float_type, 3](Metal[float_type, 3](Color4[float_type](0.8, 0.8, 0.8), 0.3))
+    var mat_right = Material[float_type, 3](Metal[float_type, 3](Color4[float_type](0.8, 0.6, 0.2), 1.0))
 
     world.add_sphere(Sphere(Point[float_type, 3](0, 0, 0), 0.5, mat_center))
     world.add_sphere(Sphere(Point[float_type, 3](1, 0, 0), 0.5, mat_right))

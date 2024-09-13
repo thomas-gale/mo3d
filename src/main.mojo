@@ -21,6 +21,7 @@ from mo3d.ray.hittable_list import HittableList
 from mo3d.material.material import Material
 from mo3d.material.lambertian import Lambertian
 from mo3d.material.metal import Metal
+from mo3d.material.dielectric import Dielectric
 from mo3d.geometry.sphere import Sphere
 from mo3d.camera.camera import Camera
 from mo3d.window.sdl2_window import SDL2Window
@@ -42,15 +43,25 @@ fn main() raises:
     # World
     var world = HittableList[float_type, 3]()
 
-    var mat_ground = Material[float_type, 3](Lambertian[float_type, 3](Color4[float_type](0.8, 0.8, 0.0)))
-    var mat_center = Material[float_type, 3](Lambertian[float_type, 3](Color4[float_type](0.1, 0.2, 0.5)))
-    var mat_left = Material[float_type, 3](Metal[float_type, 3](Color4[float_type](0.8, 0.8, 0.8), 0.3))
-    var mat_right = Material[float_type, 3](Metal[float_type, 3](Color4[float_type](0.8, 0.6, 0.2), 1.0))
+    var mat_ground = Material[float_type, 3](
+        Lambertian[float_type, 3](Color4[float_type](0.8, 0.8, 0.0))
+    )
+    var mat_center = Material[float_type, 3](
+        Lambertian[float_type, 3](Color4[float_type](0.1, 0.2, 0.5))
+    )
+    var mat_left = Material[float_type, 3](Dielectric[float_type, 3](1.50))
+    var mat_bubble = Material[float_type, 3](Dielectric[float_type, 3](1.00/1.50))
+    var mat_right = Material[float_type, 3](
+        Metal[float_type, 3](Color4[float_type](0.8, 0.6, 0.2), 1.0)
+    )
 
     world.add_sphere(Sphere(Point[float_type, 3](0, 0, 0), 0.5, mat_center))
     world.add_sphere(Sphere(Point[float_type, 3](1, 0, 0), 0.5, mat_right))
     world.add_sphere(Sphere(Point[float_type, 3](-1, 0, 0), 0.5, mat_left))
-    world.add_sphere(Sphere(Point[float_type, 3](0, -100.5, 0), 100, mat_ground))
+    world.add_sphere(Sphere(Point[float_type, 3](-1, 0, 0), 0.4, mat_bubble))
+    world.add_sphere(
+        Sphere(Point[float_type, 3](0, -100.5, 0), 100, mat_ground)
+    )
 
     # Camera
     var camera = Camera[

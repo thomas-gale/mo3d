@@ -95,6 +95,14 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
     fn reflect(v: Self, n: Self) -> Self:
         return v - 2 * v.dot(n) * n
 
+
+    @staticmethod
+    fn refract(uv: Self, n: Self, etai_over_etat: Scalar[T]) -> Self:
+        var cos_theta = min(-uv.dot(n), 1.0)
+        var r_out_perp = etai_over_etat * (uv + cos_theta * n)
+        var r_out_parallel = -sqrt(abs(1.0 - r_out_perp.length_squared())) * n
+        return r_out_perp + r_out_parallel
+
     @staticmethod
     fn random() -> Self:
         var data = InlineArray[Scalar[T], size](unsafe_uninitialized=True)

@@ -34,6 +34,7 @@ fn main() raises:
     alias float_type = DType.float32
 
     alias max_fps = 60
+    alias aperature = 5.0
     alias width = 800
     alias height = 450
     alias channels = 4
@@ -65,7 +66,7 @@ fn main() raises:
 
     # Camera
     var camera = Camera[
-        float_type, width, height, channels, max_depth, max_samples
+        float_type, aperature, width, height, channels, max_depth, max_samples
     ]()
 
     # Collect timing stats - TODO: Tidy and move

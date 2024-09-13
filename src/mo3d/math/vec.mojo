@@ -72,6 +72,14 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
         return self / self.length()
 
     @staticmethod
+    fn random_in_unit_disk() -> Self:
+        while True:
+            var p = Self.random(-1, 1)
+            p[2] = 0
+            if p.length_squared() < 1:
+                return p
+
+    @staticmethod
     fn random_in_unit_sphere() -> Self:
         while True:
             var p = Self.random(-1, 1)

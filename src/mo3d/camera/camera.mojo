@@ -19,6 +19,7 @@ from mo3d.ray.hittable_list import HittableList
 @value
 struct Camera[
     T: DType,
+    aperature: Scalar[T],
     width: Int,
     height: Int,
     channels: Int,
@@ -27,13 +28,18 @@ struct Camera[
     dim: Int = 3,
 ]:
     var _vfov: Scalar[T]  # Vertical field of view
-    var _focal_length: Scalar[T]
+    var _focal_length: Scalar[
+        T
+    ]  #  # Distance from camera lookfrom point to plane of perfect focus and centre of pivot for arcball rotation
 
     var _look_from: Point[T, dim]  # Point camera is looking from
     var _look_at: Point[T, dim]  # Point camera is looking at
     var _vup: Vec[T, dim]  # Camera relative 'up' vector
+    # var _defocus_angle: Scalar[T]  # Variation angle of rays through each pixel
 
     var _rot: Mat[T, dim]  # Camera rotation matrix
+    var _defocus_disk_u: Vec[T, dim]  # Defocus horizontal radius
+    var _defocus_disk_v: Vec[T, dim]  # Defocus vertical radius
 
     var _viewport_height: Scalar[T]
     var _viewport_width: Scalar[T]
@@ -60,7 +66,7 @@ struct Camera[
         self._vup = Vec[T, dim](0, 1, 0)
 
         # Determine viewport dimensions
-        self._focal_length = 1.0
+        self._focal_length = (self._look_from - self._look_at).length()
         var theta: Scalar[T] = degrees_to_radians(self._vfov)
         var h: Scalar[T] = tan(theta / 2.0)
         self._viewport_height = 2.0 * h * self._focal_length
@@ -89,6 +95,14 @@ struct Camera[
         self._pixel00_loc = viewport_upper_left + 0.5 * (
             self._pixel_delta_u + self._pixel_delta_v
         )
+
+        # Calculate the camera defocus disk basis vectors.
+        # self._defocus_angle = Scalar[T](10.0) # Simulate a large aperature
+        var defocus_radius = self._focal_length * tan(
+            degrees_to_radians(aperature / 2)
+        )
+        self._defocus_disk_u = u * defocus_radius
+        self._defocus_disk_v = v * defocus_radius
 
         # Initialize the render state of the camera 'sensor'
         self._sensor_state = UnsafePointer[Scalar[T]].alloc(
@@ -202,7 +216,9 @@ struct Camera[
     fn get_state(self) -> UnsafePointer[Scalar[T]]:
         return self._sensor_state
 
-    fn render(inout self, world: HittableList[T, dim], num_samples: Int = 1) raises:
+    fn render(
+        inout self, world: HittableList[T, dim], num_samples: Int = 1
+    ) raises:
         """
         Parallelize render, one row for each thread.
         TODO: Switch to one thread per pixel and compare performance (one we're running on GPU).
@@ -280,7 +296,7 @@ struct Camera[
             (Scalar[T](i) + offset[0]) * self._pixel_delta_u
         ) + ((Scalar[T](j) + offset[1]) * self._pixel_delta_v)
 
-        var ray_origin = self._look_from
+        var ray_origin = self._look_from if aperature <= 0.0 else self._defocus_disk_sample()
         var ray_direction = pixel_sample - ray_origin
 
         return Ray(ray_origin, ray_direction)
@@ -295,6 +311,13 @@ struct Camera[
             random_float64().cast[T]() - 0.5,
             0.0,
         )
+
+    fn _defocus_disk_sample(self) -> Point[T, dim]:
+        """
+        Returns a random point in the unit disk.
+        """
+        var p = Vec[T, dim].random_in_unit_disk()
+        return self._look_from + self._defocus_disk_u * p[0] + self._defocus_disk_v * p[1]
 
     @staticmethod
     @parameter
@@ -314,14 +337,12 @@ struct Camera[
             var attenuation = Color4[T]()
             try:
                 if rec.mat.scatter(r, rec, attenuation, scattered):
-                    return attenuation * Self._ray_color(scattered, depth - 1, world)
+                    return attenuation * Self._ray_color(
+                        scattered, depth - 1, world
+                    )
             except:
                 pass
             return Color4[T](0, 0, 0, 0)
-            # var direction = rec.normal + Vec[T, dim].random_unit_vector()
-            # return 0.5 * Self._ray_color(
-            #     Ray[T, dim](rec.p, direction), depth - 1, world
-            # )
 
         var unit_direction = Vec.unit(r.dir)
         var a = 0.5 * (unit_direction[1] + 1.0)

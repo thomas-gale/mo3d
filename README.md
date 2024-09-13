@@ -26,7 +26,8 @@ Key features aim to include an experimental ECS-based architecture for efficient
 - [bevy](https://bevyengine.org/) (example of a lightweight ECS game engine for rust)
 - [taichi](https://github.com/taichi-dev/taichi) (great examples of compute on sparse data and differentiable programming)
 - [openvdb](https://github.com/AcademySoftwareFoundation/openvdb) (this could be a interesting integration in the future and/or futher inspiration for spare data representations)
-- (I also did a similar thing in rust wgpu and webgpu shaders [previously](https://github.com/thomas-gale/monte-carlo) which I will likely draw knowledge from)
+- [pbr-book](https://www.pbr-book.org/) (Physically Based Rendering:From Theory To Implementation: Matt Pharr, Wenzel Jakob, and Greg Humphreys)
+- [previous personal project](https://github.com/thomas-gale/monte-carlo)
 
 ### Basic Architecture
 ![Basic Architecture](./doc/mo3d-basic-architecture.svg)

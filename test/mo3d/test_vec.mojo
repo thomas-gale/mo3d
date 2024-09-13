@@ -84,7 +84,7 @@ fn test_cross_3() raises:
 
 
 fn test_unit() raises:
-    var v = Vec[DType.float32, 3](3.0, 4.0, 0.0, 0.0)
+    var v = Vec[DType.float32, 3](3.0, 4.0, 0.0)
     assert_almost_equal(v.unit().length(), 1.0)
 
 

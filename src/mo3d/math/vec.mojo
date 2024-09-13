@@ -1,50 +1,40 @@
 from algorithm import parallelize
-from collections import InlinedFixedVector
+from collections import InlineArray
 from math import sqrt
 from random import random_float64
 
 struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
-    # Need to read the docs - does _data automatically free
-    var _data: UnsafePointer[Scalar[T]]
+    var _data: InlineArray[Scalar[T], size]
 
     fn __init__(inout self):
-        self._data = UnsafePointer[Scalar[T]].alloc(size)
-        for i in range(size):
-            (self._data + i)[] = Scalar[T](0)
+        self._data = InlineArray[Scalar[T], size](0.0)
 
-    fn __init__(inout self, owned data: UnsafePointer[Scalar[T]]):
-        # TODO: Clarify ownership - we take ownership of this pointer.
+    fn __init__(inout self, owned data: InlineArray[Scalar[T], size]):
         self._data = data
 
-    fn __init__(inout self, *args: Scalar[T]):
-        self._data = UnsafePointer[Scalar[T]].alloc(size)
+    fn __init__(inout self, owned *args: Scalar[T]):
+        self._data = InlineArray[Scalar[T], size](unsafe_uninitialized=True)
         var i = 0
         for arg in args:
-            (self._data + i)[] = arg
+            self._data[i] = arg[]
             i += 1
 
     fn __copyinit__(inout self, other: Self):
-        self._data = UnsafePointer[Scalar[T]].alloc(size)
-        for i in range(size):
-            (self._data + i)[] = (other._data + i)[]
+        self._data = other._data
 
     fn __moveinit__(inout self, owned other: Self):
-        self._data = other._data
+        self._data = other._data^
 
     fn clone(self) -> Self:
         var result = Self()
-        for i in range(size):
-            result._data[i] = self._data[i]
+        result._data = self._data
         return result
 
-    fn __del__(owned self):
-        self._data.free()
-
     fn __getitem__(self, index: Int) -> Scalar[T]:
-        return (self._data + index)[]
+        return self._data[index]
 
     fn __setitem__(inout self, index: Int, value: SIMD[T, 1]):
-        (self._data + index)[] = value
+        self._data[index] = value
 
     fn dot(self, rhs: Self) -> SIMD[T, 1]:
         var sum: Scalar[T] = 0
@@ -103,7 +93,7 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
 
     @staticmethod
     fn random() -> Self:
-        var data = UnsafePointer[Scalar[T]].alloc(size)
+        var data = InlineArray[Scalar[T], size](unsafe_uninitialized=True)
         for i in range(size):
             data[i] = random_float64().cast[T]()
         return Self(data)
@@ -112,7 +102,7 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
     fn random(min: Scalar[T], max: Scalar[T]) -> Self:
         var min_64 = min.cast[DType.float64]()
         var max_64 = max.cast[DType.float64]()
-        var data = UnsafePointer[Scalar[T]].alloc(size)
+        var data = InlineArray[Scalar[T], size](unsafe_uninitialized=True)
         for i in range(size):
             data[i] = random_float64(min_64, max_64).cast[T]()
         return Self(data)

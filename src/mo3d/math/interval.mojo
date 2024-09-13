@@ -1,7 +1,9 @@
 from math import inf
 
 
-struct Interval[T: DType, simd_size: Int = 1]:
+@value
+@register_passable("trivial")
+struct Interval[T: DType, simd_size: Int = 1](CollectionElementNew):
     alias S = SIMD[T, simd_size]
     var min: Self.S
     var max: Self.S
@@ -11,9 +13,9 @@ struct Interval[T: DType, simd_size: Int = 1]:
         self.min = Self.S(inf[T]())
         self.max = Self.S(-inf[T]())
 
-    fn __init__(inout self, min: Self.S, max: Self.S):
-        self.min = min
-        self.max = max
+    fn __init__(inout self: Interval[T, simd_size], /, *, other: Interval[T, simd_size]):
+        self.min = other.min
+        self.max = other.max
 
     @staticmethod
     fn empty() -> Self:
@@ -38,3 +40,6 @@ struct Interval[T: DType, simd_size: Int = 1]:
         if x > self.max:
             return self.max
         return x
+
+    fn expand(self, delta: Self.S) -> Self:
+        return Self(self.min - delta, self.max + delta)

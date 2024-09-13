@@ -17,7 +17,7 @@ fn test_create_sphere_hittable() raises:
 
     assert_equal(hittable_sphere._hittable.isa[Sphere[ft, 3]](), True)
     assert_equal(
-        hittable_sphere._hittable[Sphere[ft, 3]]._center,
+        hittable_sphere._hittable[Sphere[ft, 3]]._center.orig,
         Point[ft, 3](1.0, 2.0, 3.0),
     )
     assert_equal(hittable_sphere._hittable[Sphere[ft, 3]]._radius, 1.0)

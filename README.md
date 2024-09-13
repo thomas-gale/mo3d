@@ -8,7 +8,7 @@
 
 # mo3d
 
-![latest_showcase_image](https://github.com/user-attachments/assets/334fc77a-1207-410d-aa16-9d0f89ecfb96)
+![latest_showcase_image](https://github.com/user-attachments/assets/233198aa-63a3-46ea-bb3b-5d889d777ffb)
 
 ### [mojo](https://docs.modular.com/mojo/manual/) 3d library
 
@@ -39,11 +39,13 @@ Key features aim to include an experimental ECS-based architecture for efficient
 
 ## progress notes
 
-### 2024-09-13: thinking about a basic ecs module for scene management, more materials based on Ray Tracing in One Weekend
+### 2024-09-13: thinking about a basic ecs module for scene management and finished off some bits from Ray Tracing in One Weekend to allow a final scene reference point.
 - Trying to implement a minimal proof of concept for `SoA` (structure of arrays) `ComponentStore` to hold the state of components.
 - Modified the underlying storage for `Vec` and `Mat` to use `InlineArray` rather than a heap storage. This should improve performance. I still need to think how to elegantly further improve this ComponentStore with `SIMD` (not sure how to extend `Vec` and `Mat` to use `SIMD` without having problems with wasted space when sizes are not powers of 2 and how to align multiple bits of data)
+- Added metallic and dielectric materials.
 
 ![image](https://github.com/user-attachments/assets/334fc77a-1207-410d-aa16-9d0f89ecfb96)
+![image](https://github.com/user-attachments/assets/233198aa-63a3-46ea-bb3b-5d889d777ffb)
 
 ### 2024-09-09: moving to the magic package manager
 - This replaces the `Makefile`

@@ -1,25 +1,47 @@
 from math import sqrt
 
 from mo3d.math.interval import Interval
+from mo3d.math.vec import Vec
 from mo3d.math.point import Point
 from mo3d.ray.ray import Ray
 from mo3d.ray.color4 import Color4
 from mo3d.ray.hit_record import HitRecord
 
-from mo3d.material.material import Material 
+from mo3d.material.material import Material
 from mo3d.material.lambertian import Lambertian
 
 
 @value
 struct Sphere[T: DType, dim: Int]:
-    var _center: Point[T, dim]
+    # var _center: Point[T, dim]
+    var _center: Ray[T, dim]
     var _radius: Scalar[T]
-    var _mat: Material[T, dim] # TODO: this will be moved to my ECS shortly 
+    var _mat: Material[T, dim]  # TODO: this will be moved to my ECS shortly
 
     fn __init__(
-        inout self, center: Point[T, dim], radius: Scalar[T], mat: Material[T, dim]
+        inout self,
+        center: Point[T, dim],
+        radius: Scalar[T],
+        mat: Material[T, dim],
     ):
-        self._center = center
+        """
+        Stationary sphere with a given center and radius.
+        """
+        self._center = Ray[T, dim](center, Vec[T, dim]())
+        self._radius = radius
+        self._mat = mat
+
+    fn __init__(
+        inout self,
+        center1: Point[T, dim],
+        center2: Point[T, dim],
+        radius: Scalar[T],
+        mat: Material[T, dim],
+    ):
+        """
+        Moving sphere with a given center, radius, and color.
+        """
+        self._center = Ray[T, dim](center1, center2 - center1)
         self._radius = radius
         self._mat = mat
 
@@ -29,7 +51,8 @@ struct Sphere[T: DType, dim: Int]:
         ray_t: Interval[T],
         inout rec: HitRecord[T, dim],
     ) -> Bool:
-        var oc = self._center - r.orig
+        var current_center = self._center.at(r.tm)
+        var oc = current_center - r.orig
         var a = r.dir.length_squared()
         var h = r.dir.dot(oc)
         var c = oc.length_squared() - self._radius * self._radius
@@ -49,7 +72,7 @@ struct Sphere[T: DType, dim: Int]:
 
         rec.t = root
         rec.p = r.at(rec.t)
-        var outward_normal = (rec.p - self._center) / self._radius
+        var outward_normal = (rec.p - current_center) / self._radius
         rec.set_face_normal(r, outward_normal)
         rec.mat = self._mat
 
@@ -57,11 +80,8 @@ struct Sphere[T: DType, dim: Int]:
 
 
 fn hit_sphere[
-    T: DType,
-    dim: Int
-](
-    center: Point[T, dim], radius: Scalar[T], r: Ray[T, dim]
-) -> Scalar[T]:
+    T: DType, dim: Int
+](center: Point[T, dim], radius: Scalar[T], r: Ray[T, dim]) -> Scalar[T]:
     var oc = center - r.orig
     var a = r.dir.length_squared()
     var h = r.dir.dot(oc)

@@ -39,7 +39,7 @@ struct Dielectric[T: DType, dim: Int](CollectionElement):
         else:
             direction = Vec[T, dim].refract(unit_direction, rec.normal, ri)
 
-        scattered = Ray[T, dim](rec.p, direction)
+        scattered = Ray[T, dim](rec.p, direction, r_in.tm)
         return True
 
     @staticmethod

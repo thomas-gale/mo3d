@@ -59,7 +59,7 @@ struct Camera[
         inout self,
     ) raises -> None:
         # Set default field of view, starting position (look from), target (look at) and orientation (up vector)
-        self._look_from = Point[T, dim](0, 1, 8)
+        self._look_from = Point[T, dim](13, 2, 3)
         self._look_at = Point[T, dim](0, 0, 0)
         self._vup = Vec[T, dim](0, 1, 0)
 
@@ -296,8 +296,9 @@ struct Camera[
 
         var ray_origin = self._look_from if aperature <= 0.0 else self._defocus_disk_sample()
         var ray_direction = pixel_sample - ray_origin
+        var ray_time = random_float64().cast[T]()
 
-        return Ray(ray_origin, ray_direction)
+        return Ray(ray_origin, ray_direction, ray_time)
 
     @staticmethod
     fn _sample_square() -> Vec[T, dim]:

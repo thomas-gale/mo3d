@@ -42,7 +42,7 @@ fn main() raises:
         ).cast[float_type]()
 
     alias max_fps = 60
-    alias fov = 60
+    alias fov = 20
     alias aperature = 0.6
     alias width = 800
     alias height = 450
@@ -80,7 +80,8 @@ fn main() raises:
                     sphere_material = Material[float_type, 3](
                         Lambertian[float_type, 3](albedo)
                     )
-                    world.add_sphere(Sphere(center, 0.2, sphere_material))
+                    var center2 = center + Vec[float_type, 3](0, random_float(0, 0.5), 0)
+                    world.add_sphere(Sphere(center, center2, 0.2, sphere_material))
                 elif choose_mat < 0.95:
                     # metal
                     var albedo = Color4[float_type].random(0.5, 1)

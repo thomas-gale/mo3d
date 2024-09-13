@@ -19,6 +19,6 @@ struct Lambertian[T: DType, dim: Int](CollectionElement):
         # Catch degenerate scatter direction
         if scatter_direction.near_zero():
             scatter_direction = rec.normal
-        scattered = Ray[T, dim](rec.p, scatter_direction)
+        scattered = Ray[T, dim](rec.p, scatter_direction, r_in.tm)
         attenuation = self.albedo
         return True

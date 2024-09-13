@@ -20,6 +20,6 @@ struct Metal[T: DType, dim: Int](CollectionElement):
         reflected = reflected.unit() + (
             self.fuzz * Vec[T, dim].random_unit_vector()
         )
-        scattered = Ray[T, dim](rec.p, reflected)
+        scattered = Ray[T, dim](rec.p, reflected, r_in.tm)
         attenuation = self.albedo
         return scattered.dir.dot(rec.normal) > 0.0

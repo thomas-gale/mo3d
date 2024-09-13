@@ -1,4 +1,4 @@
-from collections import InlinedFixedVector
+from collections import InlineArray
 from math.math import cos, sin
 from random import random_float64
 
@@ -7,24 +7,25 @@ from mo3d.math.vec import Vec
 
 @value
 struct Mat[T: DType, dim: Int]:
-    var _data: UnsafePointer[Scalar[T]]
+    var _data: InlineArray[Scalar[T], dim * dim]
 
     fn __init__(inout self):
-        self._data = UnsafePointer[Scalar[T]].alloc(dim * dim)
+        self._data = InlineArray[Scalar[T], dim * dim](
+            unsafe_uninitialized=True
+        )
         for i in range(dim):
             for j in range(dim):
-                (self._data + i * dim + j)[] = Scalar[T](0)
+                self._data[i * dim + j] = Scalar[T](0)
 
     fn __init__(inout self, *args: Vec[T, dim]):
-        self._data = UnsafePointer[Scalar[T]].alloc(dim * dim)
+        self._data = InlineArray[Scalar[T], dim * dim](
+            unsafe_uninitialized=True
+        )
         var i = 0
         for arg in args:
             for j in range(dim):
-                (self._data + i * dim + j)[] = arg[][j]
+                self._data[i * dim + j] = arg[][j]
             i += 1
-
-    fn __del__(owned self):
-        self._data.free()
 
     @staticmethod
     fn eye() -> Self:
@@ -40,12 +41,12 @@ struct Mat[T: DType, dim: Int]:
     fn __getitem__(self, index: Int) -> Vec[T, dim]:
         var result = Vec[T, dim]()
         for i in range(dim):
-            result[i] = (self._data + dim * index + i)[]
+            result[i] = self._data[dim * index + i]
         return result
 
     fn __setitem__(inout self, index: Int, value: Vec[T, dim]):
         for i in range(dim):
-            (self._data + dim * index + i)[] = value[i]
+            self._data[dim * index + i] = value[i]
 
     fn __str__(self) -> String:
         var result = String("")

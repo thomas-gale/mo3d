@@ -10,10 +10,12 @@ from mo3d.material.lambertian import Lambertian
 
 
 fn test_create_lambertian_material() raises:
-    var m = Lambertian[DType.float32, 3](
+    var l = Lambertian[DType.float32, 3](
         Color4[DType.float32](0.5, 0.5, 0.5, 1.0)
     )
-    assert_equal(m.albedo, Color4[DType.float32](0.5, 0.5, 0.5, 1.0))
+    assert_equal(l.albedo, Color4[DType.float32](0.5, 0.5, 0.5, 1.0))
+    var m = Material[DType.float32, 3](l)
+    assert_true(m._mat.isa[Lambertian[DType.float32, 3]]())
 
 
 fn test_lambertian_material_scatter_ray() raises:

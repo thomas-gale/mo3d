@@ -6,10 +6,12 @@ from mo3d.ray.hit_record import HitRecord
 
 from mo3d.material.lambertian import Lambertian
 
-# We need parametric traits!
-# trait Scatterable:
-# 	fn scatter(self, r_in: Ray[float_type], rec: HitRecord[float_type], inout attenuation: Color4[float_type], inout scattered: Ray4[float_type]) -> Bool:
-# 		...
-
+@value
 struct Material[T: DType, dim: Int]:
     alias Variant = Variant[Lambertian[T, dim]]
+    var _mat: Self.Variant
+
+    fn scatter(self, r_in: Ray[T, dim], rec: HitRecord[T, dim], inout attenuation: Color4[T], inout scattered: Ray[T, dim]) -> Bool:
+        # TODO perform the variant match
+
+        return True

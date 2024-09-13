@@ -202,7 +202,7 @@ struct Camera[
     fn get_state(self) -> UnsafePointer[Scalar[T]]:
         return self._sensor_state
 
-    fn render(inout self, world: HittableList[T, dim], num_samples: Int = 1):
+    fn render(inout self, world: HittableList[T, dim], num_samples: Int = 1) raises:
         """
         Parallelize render, one row for each thread.
         TODO: Switch to one thread per pixel and compare performance (one we're running on GPU).
@@ -310,10 +310,18 @@ struct Camera[
         var rec = HitRecord[T, dim]()
 
         if world.hit(r, Interval[T](0.001, inf[T]()), rec):
-            var direction = rec.normal + Vec[T, dim].random_unit_vector()
-            return 0.5 * Self._ray_color(
-                Ray[T, dim](rec.p, direction), depth - 1, world
-            )
+            var scattered = Ray[T, dim]()
+            var attenuation = Color4[T]()
+            try:
+                if rec.mat.scatter(r, rec, attenuation, scattered):
+                    return attenuation * Self._ray_color(scattered, depth - 1, world)
+            except:
+                pass
+            return Color4[T](0, 0, 0, 0)
+            # var direction = rec.normal + Vec[T, dim].random_unit_vector()
+            # return 0.5 * Self._ray_color(
+            #     Ray[T, dim](rec.p, direction), depth - 1, world
+            # )
 
         var unit_direction = Vec.unit(r.dir)
         var a = 0.5 * (unit_direction[1] + 1.0)

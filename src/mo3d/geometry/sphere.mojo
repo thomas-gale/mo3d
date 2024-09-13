@@ -3,22 +3,25 @@ from math import sqrt
 from mo3d.math.interval import Interval
 from mo3d.math.point import Point
 from mo3d.ray.ray import Ray
+from mo3d.ray.color4 import Color4
 from mo3d.ray.hit_record import HitRecord
+
 from mo3d.material.material import Material 
+from mo3d.material.lambertian import Lambertian
 
 
 @value
 struct Sphere[T: DType, dim: Int]:
     var _center: Point[T, dim]
     var _radius: Scalar[T]
-    var _mat: UnsafePointer[Material[T, dim].Variant]
+    var _mat: Material[T, dim] # TODO: this will be moved to my ECS shortly 
 
     fn __init__(
-        inout self, center: Point[T, dim], radius: Scalar[T]
+        inout self, center: Point[T, dim], radius: Scalar[T], mat: Material[T, dim]
     ):
         self._center = center
         self._radius = radius
-        self._mat = UnsafePointer[Material[T, dim].Variant]()
+        self._mat = mat
 
     fn hit(
         self,

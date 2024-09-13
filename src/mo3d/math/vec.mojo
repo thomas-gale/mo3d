@@ -202,6 +202,12 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
         for i in range(size):
             self._data[i] -= rhs._data[i]
 
+    fn __mul__(self, rhs: Self) -> Self:
+        var result = Self()
+        for i in range(size):
+            result._data[i] = self._data[i] * rhs._data[i]
+        return result
+
     fn __mul__(self, rhs: SIMD[T, 1]) -> Self:
         var result = Self()
         for i in range(size):

@@ -16,7 +16,7 @@ build = { cmd = "mkdir -p bin && magic run mojo build src/main.mojo -o bin/mo3d"
 built = { cmd = "bin/mo3d", depends-on = ["build"] }
 
 [dependencies]
-max = ">=24.6.0.dev2024091205,<25"
+max = ">=24.6.0.dev2024091305,<25"
 
 [target.linux-64.tasks]
 setup = { cmd="sudo apt update && sudo apt install -y llvm libsdl2-dev", inputs=["pixi.toml"] }

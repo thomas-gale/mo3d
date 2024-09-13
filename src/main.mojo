@@ -3,6 +3,7 @@ from complex import ComplexSIMD, ComplexFloat64
 from math import iota, inf
 from memory import UnsafePointer, bitcast
 from pathlib import Path
+from random import random_float64
 from sys import simdwidthof
 from testing import assert_equal
 from time import now, sleep
@@ -33,8 +34,15 @@ fn main() raises:
     # Settings
     alias float_type = DType.float32
 
+    fn random_float(
+        min: Scalar[float_type] = 0, max: Scalar[float_type] = 1.0
+    ) -> Scalar[float_type]:
+        return random_float64(
+            min.cast[DType.float64](), max.cast[DType.float64]()
+        ).cast[float_type]()
+
     alias max_fps = 60
-    alias aperature = 5.0
+    alias aperature = 0.6
     alias width = 800
     alias height = 450
     alias channels = 4
@@ -44,25 +52,60 @@ fn main() raises:
     # World
     var world = HittableList[float_type, 3]()
 
+    # Ground
     var mat_ground = Material[float_type, 3](
-        Lambertian[float_type, 3](Color4[float_type](0.8, 0.8, 0.0))
+        Lambertian[float_type, 3](Color4[float_type](0.5, 0.5, 0.5))
     )
-    var mat_center = Material[float_type, 3](
-        Lambertian[float_type, 3](Color4[float_type](0.1, 0.2, 0.5))
-    )
-    var mat_left = Material[float_type, 3](Dielectric[float_type, 3](1.50))
-    var mat_bubble = Material[float_type, 3](Dielectric[float_type, 3](1.00/1.50))
-    var mat_right = Material[float_type, 3](
-        Metal[float_type, 3](Color4[float_type](0.8, 0.6, 0.2), 1.0)
+    world.add_sphere(
+        Sphere(Point[float_type, 3](0, -1000, 0), 1000, mat_ground)
     )
 
-    world.add_sphere(Sphere(Point[float_type, 3](0, 0, 0), 0.5, mat_center))
-    world.add_sphere(Sphere(Point[float_type, 3](1, 0, 0), 0.5, mat_right))
-    world.add_sphere(Sphere(Point[float_type, 3](-1, 0, 0), 0.5, mat_left))
-    world.add_sphere(Sphere(Point[float_type, 3](-1, 0, 0), 0.4, mat_bubble))
-    world.add_sphere(
-        Sphere(Point[float_type, 3](0, -100.5, 0), 100, mat_ground)
+    # Random spheres
+    for a in range(-11, 11):
+        for b in range(-11, 11):
+            var choose_mat = random_float()
+            var center = Point[float_type, 3](
+                a + 0.9 * random_float(), 0.2, b + 0.9 * random_float()
+            )
+
+            if (center - Point[float_type, 3](4, 0.2, 0)).length() > 0.9:
+                var sphere_material: Material[float_type, 3]
+
+                if choose_mat < 0.8:
+                    # diffuse
+                    var albedo = Color4[float_type].random() * Color4[
+                        float_type
+                    ].random()
+                    sphere_material = Material[float_type, 3](
+                        Lambertian[float_type, 3](albedo)
+                    )
+                    world.add_sphere(Sphere(center, 0.2, sphere_material))
+                elif choose_mat < 0.95:
+                    # metal
+                    var albedo = Color4[float_type].random(0.5, 1)
+                    var fuzz = random_float(0, 0.5)
+                    sphere_material = Material[float_type, 3](
+                        Metal[float_type, 3](albedo, fuzz)
+                    )
+                    world.add_sphere(Sphere(center, 0.2, sphere_material))
+                else:
+                    # glass
+                    sphere_material = Material[float_type, 3](
+                        Dielectric[float_type, 3](1.5)
+                    )
+                    world.add_sphere(Sphere(center, 0.2, sphere_material))
+
+    # Big spheres
+    var mat1 = Material[float_type, 3](Dielectric[float_type, 3](1.5))
+    world.add_sphere(Sphere(Point[float_type, 3](0, 1, 0), 1.0, mat1))
+    var mat2 = Material[float_type, 3](
+        Lambertian[float_type, 3](Color4[float_type](0.4, 0.2, 0.1))
     )
+    world.add_sphere(Sphere(Point[float_type, 3](-4, 1, 0), 1.0, mat2))
+    var mat3 = Material[float_type, 3](
+        Metal[float_type, 3](Color4[float_type](0.7, 0.6, 0.5), 0.0)
+    )
+    world.add_sphere(Sphere(Point[float_type, 3](4, 1, 0), 1.0, mat3))
 
     # Camera
     var camera = Camera[

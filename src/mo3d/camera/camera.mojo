@@ -61,7 +61,7 @@ struct Camera[
     ) raises -> None:
         # Set default field of view, starting position (look from), target (look at) and orientation (up vector)
         self._vfov = Scalar[T](70.0)
-        self._look_from = Point[T, dim](0, 0, 2)
+        self._look_from = Point[T, dim](0, 1, 8)
         self._look_at = Point[T, dim](0, 0, 0)
         self._vup = Vec[T, dim](0, 1, 0)
 

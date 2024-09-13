@@ -92,6 +92,10 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
             return -on_unit_sphere
 
     @staticmethod
+    fn reflect(v: Self, n: Self) -> Self:
+        return v - 2 * v.dot(n) * n
+
+    @staticmethod
     fn random() -> Self:
         var data = InlineArray[Scalar[T], size](unsafe_uninitialized=True)
         for i in range(size):

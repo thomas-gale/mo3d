@@ -43,7 +43,9 @@ fn main() raises:
     world.add_sphere(Sphere(Point[float_type, 3](0, -100.5, 0), 100))
 
     # Camera
-    var camera = Camera[float_type, width, height, channels, max_depth, max_samples]()
+    var camera = Camera[
+        float_type, width, height, channels, max_depth, max_samples
+    ]()
 
     # Collect timing stats - TODO: Tidy and move
     var start_time = now()

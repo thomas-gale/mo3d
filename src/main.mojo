@@ -17,7 +17,7 @@ from mo3d.math.point import Point
 from mo3d.ray.ray import Ray
 from mo3d.ray.hit_record import HitRecord
 from mo3d.ray.hittable_list import HittableList
-from mo3d.ray.sphere import Sphere
+from mo3d.geometry.sphere import Sphere
 from mo3d.camera.camera import Camera
 from mo3d.window.sdl2_window import SDL2Window
 

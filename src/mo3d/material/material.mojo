@@ -12,6 +12,6 @@ struct Material[T: DType, dim: Int]:
     var _mat: Self.Variant
 
     fn scatter(self, r_in: Ray[T, dim], rec: HitRecord[T, dim], inout attenuation: Color4[T], inout scattered: Ray[T, dim]) -> Bool:
-        # TODO perform the variant match
+        # TODO perform the runtime variant match
 
         return True

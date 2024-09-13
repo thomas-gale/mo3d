@@ -1,20 +1,25 @@
-# from collections import Variant
+from utils import Variant
 
 from mo3d.math.interval import Interval
 from mo3d.math.vec import Vec
 from mo3d.math.point import Point
 from mo3d.ray.ray import Ray
+from mo3d.ray.hit_record import HitRecord
+
+from mo3d.geometry.sphere import Sphere
 
 
-# We have to bake in the float_type here, because mojo doesn't support generic traits yet.q
-# TODO: Removing for now due to issue ^^
-# trait Hittable:
-#     fn hit(
-#         self,
-#         r: Ray[float_type],
-#         ray_t: Interval[float_type],
-#         inout rec: HitRecord[float_type],
-#     ) -> Bool:
-#         ...
+@value
+struct Hittable[T: DType, dim: Int]:
+    alias Variant = Variant[Sphere[T, dim]]
+    var _hittable: Self.Variant
 
-# alias Hittable = Variant[Sphere]
+    fn hit(
+        self,
+        r: Ray[T, dim],
+        ray_t: Interval[T],
+        inout rec: HitRecord[T, dim],
+    ) -> Bool:
+        # TODO perform the runtime variant match
+
+        return False

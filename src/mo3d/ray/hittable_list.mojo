@@ -10,34 +10,19 @@ from mo3d.geometry.aabb import AABB
 
 
 @value
-struct HittableList[T: DType, dim: Int]:
+struct HittableList[T: DType, dim: Int](CollectionElement):
     """
-    This implementation is horrible, need to try to find a way to store generic lists of concrete hittables using some sort of compile time expansion.
+    Basic AoS implementation for a list of hittables.
+    Where each hittable is a Variant of various geometry types.
     """
+    var _hittables: List[Hittable[T, dim]] # This is about to be supeceded by ECS system, its' not clear the ownership model currently.
+    var _bounding_box: AABB[T, dim]
 
-    # Mojo doesn't support polymorphic storage, so we need to have separate of each concrete type.
-    # I think this can be a list of Variants[Various Types....]
-
-    # var _sphere_list: List[Sphere[T, dim]]
-    var _hittables: List[Hittable[T, dim]]
-    var _bounding_box: AABB[T, dim] # TODO: As will this ^^
-
-    # e.g.
-    # var _other_primitive_list: List[OtherPrimitive]
-    # ...
-
-    def __init__(inout self):
-        """
-        TODO: Variadic comp time constructor based on lists of hittable types we wish to store?.
-        """
-        # self._sphere_list = List[Sphere[T, dim]]()
+    fn __init__(inout self):
         self._hittables = List[Hittable[T, dim]]()
         self._bounding_box = AABB[T, dim]()
 
-    # def add_sphere(inout self, sphere: Sphere[T, dim]):
-    #     self._sphere_list.append(sphere)
-
-    def add_hittable(inout self, hittable: Hittable[T, dim]):
+    fn add_hittable(inout self, hittable: Hittable[T, dim]):
         self._hittables.append(hittable)
         self._bounding_box = AABB[T, dim](self._bounding_box.clone(), hittable.bounding_box())    
 
@@ -51,7 +36,6 @@ struct HittableList[T: DType, dim: Int]:
         var hit_anything = False
         var closest_so_far = ray_t.max
 
-        # for sphere in self._sphere_list:
         for hittable in self._hittables:
             if hittable[].hit(r, Interval(ray_t.min, closest_so_far), temp_rec):
                 hit_anything = True

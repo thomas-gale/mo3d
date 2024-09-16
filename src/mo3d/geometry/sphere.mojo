@@ -14,7 +14,7 @@ from mo3d.material.lambertian import Lambertian
 
 
 @value
-struct Sphere[T: DType, dim: Int]:
+struct Sphere[T: DType, dim: Int](CollectionElement):
     var _center: Ray[T, dim]
     var _radius: Scalar[T]
     var _mat: Material[T, dim]  # TODO: this will be moved to my ECS shortly

@@ -9,16 +9,11 @@ struct BVHNode[T: DType, dim: Int](CollectionElement):
   var _right: UnsafePointer[Hittable[T, dim]] # TODO: Non-owning pointer vs owning pointer - ECS refactor will help here
   var _bbox: AABB[T, dim]
 
-  fn __init__(inout self, owned objects: List[Hittable[T, dim]], start: Int, end: Int) raises:
-    # self._left = UnsafePointer[Hittable[T, dim]]()  
-    # self._right = UnsafePointer[Hittable[T, dim]]()
-    # self._bbox = AABB[T, dim]()
-
+  fn __init__(inout self, inout objects: List[Hittable[T, dim]], start: Int, end: Int) raises:
     var object_span = end - start
-
     if object_span == 1:
       self._left = UnsafePointer[Hittable[T, dim]].address_of(objects[start])
-      self._right = UnsafePointer[Hittable[T, dim]].address_of(objects[end])
+      self._right = UnsafePointer[Hittable[T, dim]].address_of(objects[start])
     elif object_span == 2:
       self._left = UnsafePointer[Hittable[T, dim]].address_of(objects[start])
       self._right = UnsafePointer[Hittable[T, dim]].address_of(objects[start+1])

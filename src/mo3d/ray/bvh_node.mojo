@@ -35,11 +35,17 @@ from mo3d.ray.hittable import Hittable
 from mo3d.geometry.aabb import AABB
 
 struct BVHNode[T: DType, dim: Int]:	
-  # var _left: Hittable[T, dim]
-  # var _right: Hittable[T, dim]
-  # var _bbox: AABB[T, dim]
+  var _left: UnsafePointer[Hittable[T, dim]]
+  var _right: UnsafePointer[Hittable[T, dim]]
+  var _bbox: AABB[T, dim]
 
   fn __init__(inout self, objects: List[Hittable[T, dim]], start: Int, end: Int):
+    self._left = UnsafePointer[Hittable[T, dim]]()  
+    self._right = UnsafePointer[Hittable[T, dim]]()
+    self._bbox = AABB[T, dim]()
+
+
+
       # int axis = random_int(0,2);
 
       # auto comparator = (axis == 0) ? box_x_compare

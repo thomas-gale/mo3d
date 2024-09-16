@@ -20,8 +20,10 @@ struct Hittable[T: DType, dim: Int](CollectionElement):
     fn __init__(inout self, hittable: Self.Variant) raises:
         if hittable.isa[Sphere[T, dim]]():
             self._hittable = hittable
+        elif hittable.isa[BVHNode[T, dim]]():
+            self._hittable = hittable
         else:
-            raise Error("Unsupported hittable type")
+            raise Error("Hittable c'tor: Unsupported hittable type")
 
     fn hit(
         self,
@@ -31,15 +33,17 @@ struct Hittable[T: DType, dim: Int](CollectionElement):
     ) -> Bool:
         if self._hittable.isa[Sphere[T, dim]]():
             return self._hittable[Sphere[T, dim]].hit(r, ray_t, rec)
-        if self._hittable.isa[BVHNode[T, dim]]():
+        elif self._hittable.isa[BVHNode[T, dim]]():
             return self._hittable[BVHNode[T, dim]].hit(r, ray_t, rec)
         else:
-            print("Unsupported hittable type")
+            print("Hittable hit: Unsupported hittable type")
             return False
 
     fn bounding_box(self) -> AABB[T, dim]:
         if self._hittable.isa[Sphere[T, dim]]():
             return self._hittable[Sphere[T, dim]]._bounding_box
+        elif self._hittable.isa[BVHNode[T, dim]]():
+            return self._hittable[BVHNode[T, dim]]._bbox
         else:
-            print("Unsupported hittable type")
+            print("Hittable bounding_box: Unsupported hittable type")
             return AABB[T, dim]()

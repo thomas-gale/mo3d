@@ -9,10 +9,10 @@ struct BVHNode[T: DType, dim: Int](CollectionElement):
   var _right: UnsafePointer[Hittable[T, dim]] # TODO: Non-owning pointer vs owning pointer - ECS refactor will help here
   var _bbox: AABB[T, dim]
 
-  fn __init__(inout self, objects: List[Hittable[T, dim]], start: Int, end: Int) raises:
-    self._left = UnsafePointer[Hittable[T, dim]]()  
-    self._right = UnsafePointer[Hittable[T, dim]]()
-    self._bbox = AABB[T, dim]()
+  fn __init__(inout self, owned objects: List[Hittable[T, dim]], start: Int, end: Int) raises:
+    # self._left = UnsafePointer[Hittable[T, dim]]()  
+    # self._right = UnsafePointer[Hittable[T, dim]]()
+    # self._bbox = AABB[T, dim]()
 
     var object_span = end - start
 
@@ -23,12 +23,12 @@ struct BVHNode[T: DType, dim: Int](CollectionElement):
       self._left = UnsafePointer[Hittable[T, dim]].address_of(objects[start])
       self._right = UnsafePointer[Hittable[T, dim]].address_of(objects[start+1])
     else:
-      # @parameter
-      # fn cmp_fn(a: Hittable[T, dim], b: Hittable[T, dim]) -> Bool:
-      #   # Just sort in x for now
-      #   alias axis = 0
-      #   return a.bounding_box()._bounds[axis].min < b.bounding_box()._bounds[axis].min
-      # sort[cmp_fn](objects)
+      @parameter
+      fn cmp_fn(a: Hittable[T, dim], b: Hittable[T, dim]) -> Bool:
+        # Just sort in x for now
+        alias axis = 0
+        return a.bounding_box()._bounds[axis].min < b.bounding_box()._bounds[axis].min
+      sort[cmp_fn](objects)
       var mid = start + object_span // 2
       self._left = UnsafePointer[Hittable[T, dim]].alloc(1) # Ahh this will be owning...
       self._left[] = Hittable[T, dim](BVHNode[T, dim](objects, start, mid))

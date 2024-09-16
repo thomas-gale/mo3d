@@ -54,3 +54,13 @@ fn test_create_3d_aabb_from_points() raises:
     assert_equal(aabb._bounds[1].max, 5)
     assert_equal(aabb._bounds[2].min, 3)
     assert_equal(aabb._bounds[2].max, 6)
+
+
+fn test_3d_aabb_longest_axis() raises:
+    alias ft = DType.float32
+    var a = Point[ft, 3](1, 2, 3)
+    var b = Point[ft, 3](2, 8, 4)
+
+    var aabb = AABB[ft, 3](a, b)
+
+    assert_equal(aabb.longest_axis(), 1)

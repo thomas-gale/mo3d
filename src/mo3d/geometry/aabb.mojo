@@ -38,6 +38,17 @@ struct AABB[T: DType, dim: Int]:
             return Interval[T, 1]()
         return self._bounds[n]
 
+    fn longest_axis(self) -> Int:
+        # Returns the index of the longest axis of the bounding box.
+        var longest_size: Scalar[T] = 0
+        var longest_axis = 0
+        for i in range(dim):
+            var size = self._bounds[i].size()
+            if size > longest_size:
+                longest_size = size
+                longest_axis = i 
+        return longest_axis
+
     fn hit(self, r: Ray[T, dim], inout ray_t: Interval[T, 1]) -> Bool:
         for axis in range(dim):
             var ax = self.axis_interval(axis)

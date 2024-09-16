@@ -7,16 +7,19 @@ from mo3d.ray.ray import Ray
 from mo3d.ray.color4 import Color4
 from mo3d.ray.hit_record import HitRecord
 
+from mo3d.geometry.aabb import AABB
+
 from mo3d.material.material import Material
 from mo3d.material.lambertian import Lambertian
 
 
 @value
 struct Sphere[T: DType, dim: Int]:
-    # var _center: Point[T, dim]
     var _center: Ray[T, dim]
     var _radius: Scalar[T]
     var _mat: Material[T, dim]  # TODO: this will be moved to my ECS shortly
+    var _bounding_box: AABB[T, dim] # TODO: As will this ^^
+
 
     fn __init__(
         inout self,
@@ -31,6 +34,18 @@ struct Sphere[T: DType, dim: Int]:
         self._radius = radius
         self._mat = mat
 
+        # TODO Refactor 
+        var rvec = Vec[T, dim](self._radius)
+        var b1 = AABB[T, dim](
+            self._center.at(0) - rvec,
+            self._center.at(0) + rvec,
+        )
+        var b2 = AABB[T, dim](
+            self._center.at(1) - rvec,
+            self._center.at(1) + rvec,
+        )
+        self._bounding_box = AABB[T, dim](b1, b2)
+
     fn __init__(
         inout self,
         center1: Point[T, dim],
@@ -44,6 +59,18 @@ struct Sphere[T: DType, dim: Int]:
         self._center = Ray[T, dim](center1, center2 - center1)
         self._radius = radius
         self._mat = mat
+
+        # TODO Refactor 
+        var rvec = Vec[T, dim](self._radius)
+        var b1 = AABB[T, dim](
+            self._center.at(0) - rvec,
+            self._center.at(0) + rvec,
+        )
+        var b2 = AABB[T, dim](
+            self._center.at(1) - rvec,
+            self._center.at(1) + rvec,
+        )
+        self._bounding_box = AABB[T, dim](b1, b2)
 
     fn hit(
         self,

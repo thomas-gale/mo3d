@@ -19,6 +19,19 @@ struct AABB[T: DType, dim: Int]:
         for i in range(dim):
             self._bounds[i] = Interval[T, 1](a[i], b[i])
 
+    fn __init__(inout self, box_a: Self, box_b: Self):
+        self._bounds = InlineArray[Interval[T, 1], dim](
+            unsafe_uninitialized=True
+        )
+        for i in range(dim):
+            self._bounds[i] = Interval[T, 1](box_a._bounds[i], box_b._bounds[i])
+
+    fn clone(self) -> Self:
+        var new_box = Self()
+        for i in range(dim):
+            new_box._bounds[i] = self._bounds[i]
+        return new_box
+
     fn axis_interval(self, n: Int) raises -> Interval[T, 1]:
         if n < 0 or n >= dim:
             raise Error("Invalid axis index")

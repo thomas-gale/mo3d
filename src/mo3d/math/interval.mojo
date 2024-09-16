@@ -8,14 +8,26 @@ struct Interval[T: DType, simd_size: Int = 1](CollectionElementNew):
     var min: Self.S
     var max: Self.S
 
-    # Default interval is empty
     fn __init__(inout self):
+        """
+        Default constructor (empty interval).
+        """
         self.min = Self.S(inf[T]())
         self.max = Self.S(-inf[T]())
 
-    fn __init__(inout self: Interval[T, simd_size], /, *, other: Interval[T, simd_size]):
+    fn __init__(inout self, other: Self):
+        """
+        Copy constructor.
+        """
         self.min = other.min
         self.max = other.max
+
+    fn __init__(inout self, a: Self, b: Self):
+        """
+        Construct interval tightly bounding two intervals.
+        """
+        self.min = min(a.min, b.min)
+        self.max = max(a.max, b.max)
 
     @staticmethod
     fn empty() -> Self:

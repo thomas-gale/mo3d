@@ -18,6 +18,7 @@ from mo3d.math.point import Point
 from mo3d.ray.ray import Ray
 from mo3d.ray.color4 import Color4
 from mo3d.ray.hit_record import HitRecord
+from mo3d.ray.hittable import Hittable
 from mo3d.ray.hittable_list import HittableList
 from mo3d.material.material import Material
 from mo3d.material.lambertian import Lambertian
@@ -57,57 +58,57 @@ fn main() raises:
     var mat_ground = Material[float_type, 3](
         Lambertian[float_type, 3](Color4[float_type](0.5, 0.5, 0.5))
     )
-    world.add_sphere(
-        Sphere(Point[float_type, 3](0, -1000, 0), 1000, mat_ground)
+    world.add_hittable(
+        Hittable[float_type, 3](Sphere(Point[float_type, 3](0, -1000, 0), 1000, mat_ground))
     )
 
     # Random spheres
-    for a in range(-11, 11):
-        for b in range(-11, 11):
-            var choose_mat = random_float()
-            var center = Point[float_type, 3](
-                a + 0.9 * random_float(), 0.2, b + 0.9 * random_float()
-            )
+    # for a in range(-11, 11):
+    #     for b in range(-11, 11):
+    #         var choose_mat = random_float()
+    #         var center = Point[float_type, 3](
+    #             a + 0.9 * random_float(), 0.2, b + 0.9 * random_float()
+    #         )
 
-            if (center - Point[float_type, 3](4, 0.2, 0)).length() > 0.9:
-                var sphere_material: Material[float_type, 3]
+    #         if (center - Point[float_type, 3](4, 0.2, 0)).length() > 0.9:
+    #             var sphere_material: Material[float_type, 3]
 
-                if choose_mat < 0.8:
-                    # diffuse
-                    var albedo = Color4[float_type].random() * Color4[
-                        float_type
-                    ].random()
-                    sphere_material = Material[float_type, 3](
-                        Lambertian[float_type, 3](albedo)
-                    )
-                    var center2 = center + Vec[float_type, 3](0, random_float(0, 0.5), 0)
-                    world.add_sphere(Sphere(center, center2, 0.2, sphere_material))
-                elif choose_mat < 0.95:
-                    # metal
-                    var albedo = Color4[float_type].random(0.5, 1)
-                    var fuzz = random_float(0, 0.5)
-                    sphere_material = Material[float_type, 3](
-                        Metal[float_type, 3](albedo, fuzz)
-                    )
-                    world.add_sphere(Sphere(center, 0.2, sphere_material))
-                else:
-                    # glass
-                    sphere_material = Material[float_type, 3](
-                        Dielectric[float_type, 3](1.5)
-                    )
-                    world.add_sphere(Sphere(center, 0.2, sphere_material))
+    #             if choose_mat < 0.8:
+    #                 # diffuse
+    #                 var albedo = Color4[float_type].random() * Color4[
+    #                     float_type
+    #                 ].random()
+    #                 sphere_material = Material[float_type, 3](
+    #                     Lambertian[float_type, 3](albedo)
+    #                 )
+    #                 var center2 = center + Vec[float_type, 3](0, random_float(0, 0.5), 0)
+    #                 world.add_sphere(Sphere(center, center2, 0.2, sphere_material))
+    #             elif choose_mat < 0.95:
+    #                 # metal
+    #                 var albedo = Color4[float_type].random(0.5, 1)
+    #                 var fuzz = random_float(0, 0.5)
+    #                 sphere_material = Material[float_type, 3](
+    #                     Metal[float_type, 3](albedo, fuzz)
+    #                 )
+    #                 world.add_sphere(Sphere(center, 0.2, sphere_material))
+    #             else:
+    #                 # glass
+    #                 sphere_material = Material[float_type, 3](
+    #                     Dielectric[float_type, 3](1.5)
+    #                 )
+    #                 world.add_sphere(Sphere(center, 0.2, sphere_material))
 
     # Big spheres
     var mat1 = Material[float_type, 3](Dielectric[float_type, 3](1.5))
-    world.add_sphere(Sphere(Point[float_type, 3](0, 1, 0), 1.0, mat1))
+    world.add_hittable(Hittable[float_type, 3](Sphere(Point[float_type, 3](0, 1, 0), 1.0, mat1)))
     var mat2 = Material[float_type, 3](
         Lambertian[float_type, 3](Color4[float_type](0.4, 0.2, 0.1))
     )
-    world.add_sphere(Sphere(Point[float_type, 3](-4, 1, 0), 1.0, mat2))
+    world.add_hittable(Hittable[float_type, 3](Sphere(Point[float_type, 3](-4, 1, 0), 1.0, mat2)))
     var mat3 = Material[float_type, 3](
         Metal[float_type, 3](Color4[float_type](0.7, 0.6, 0.5), 0.0)
     )
-    world.add_sphere(Sphere(Point[float_type, 3](4, 1, 0), 1.0, mat3))
+    world.add_hittable(Hittable[float_type, 3](Sphere(Point[float_type, 3](4, 1, 0), 1.0, mat3)))
 
     # Camera
     var camera = Camera[

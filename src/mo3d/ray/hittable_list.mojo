@@ -2,9 +2,11 @@ from collections import List
 
 from mo3d.math.interval import Interval
 from mo3d.ray.hit_record import HitRecord
+from mo3d.ray.hittable import Hittable
 from mo3d.ray.ray import Ray
 
 from mo3d.geometry.sphere import Sphere
+from mo3d.geometry.aabb import AABB
 
 
 @value
@@ -16,7 +18,10 @@ struct HittableList[T: DType, dim: Int]:
     # Mojo doesn't support polymorphic storage, so we need to have separate of each concrete type.
     # I think this can be a list of Variants[Various Types....]
 
-    var _sphere_list: List[Sphere[T, dim]]
+    # var _sphere_list: List[Sphere[T, dim]]
+    var _hittables: List[Hittable[T, dim]]
+    var _bounding_box: AABB[T, dim] # TODO: As will this ^^
+
     # e.g.
     # var _other_primitive_list: List[OtherPrimitive]
     # ...
@@ -25,10 +30,16 @@ struct HittableList[T: DType, dim: Int]:
         """
         TODO: Variadic comp time constructor based on lists of hittable types we wish to store?.
         """
-        self._sphere_list = List[Sphere[T, dim]]()
+        # self._sphere_list = List[Sphere[T, dim]]()
+        self._hittables = List[Hittable[T, dim]]()
+        self._bounding_box = AABB[T, dim]()
 
-    def add_sphere(inout self, sphere: Sphere[T, dim]):
-        self._sphere_list.append(sphere)
+    # def add_sphere(inout self, sphere: Sphere[T, dim]):
+    #     self._sphere_list.append(sphere)
+
+    def add_hittable(inout self, hittable: Hittable[T, dim]):
+        self._hittables.append(hittable)
+        self._bounding_box = AABB[T, dim](self._bounding_box.clone(), hittable.bounding_box())    
 
     fn hit(
         self,
@@ -40,8 +51,9 @@ struct HittableList[T: DType, dim: Int]:
         var hit_anything = False
         var closest_so_far = ray_t.max
 
-        for sphere in self._sphere_list:
-            if sphere[].hit(r, Interval(ray_t.min, closest_so_far), temp_rec):
+        # for sphere in self._sphere_list:
+        for hittable in self._hittables:
+            if hittable[].hit(r, Interval(ray_t.min, closest_so_far), temp_rec):
                 hit_anything = True
                 closest_so_far = temp_rec.t
                 rec = temp_rec

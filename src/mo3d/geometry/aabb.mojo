@@ -32,12 +32,13 @@ struct AABB[T: DType, dim: Int]:
             new_box._bounds[i] = self._bounds[i]
         return new_box
 
-    fn axis_interval(self, n: Int) raises -> Interval[T, 1]:
+    fn axis_interval(self, n: Int) -> Interval[T, 1]:
         if n < 0 or n >= dim:
-            raise Error("Invalid axis index")
+            print("Invalid axis index")
+            return Interval[T, 1]()
         return self._bounds[n]
 
-    fn hit(self, r: Ray[T, dim], inout ray_t: Interval[T, 1]) raises -> Bool:
+    fn hit(self, r: Ray[T, dim], inout ray_t: Interval[T, 1]) -> Bool:
         for axis in range(dim):
             var ax = self.axis_interval(axis)
             var adinv = 1.0 / r.dir[axis]

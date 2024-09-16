@@ -26,4 +26,5 @@ fn test_create_simple_bvh_node() raises:
       Hittable[f32, 3](Sphere(Point[f32, 3](1, 0, 0), 1, mat)),
       Hittable[f32, 3](Sphere(Point[f32, 3](-1, 0, 0), 1, mat)),
   )
-  var bvh_node = BVHNode[f32, 3](hittables, -10, 10)
+  var bvh_node = BVHNode[f32, 3](hittables, 0, len(hittables))
+  # assert(bvh_node._left.isa[BVHNode[f32, 3]]())

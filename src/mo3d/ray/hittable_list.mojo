@@ -9,7 +9,6 @@ from mo3d.geometry.sphere import Sphere
 from mo3d.geometry.aabb import AABB
 
 
-@value
 struct HittableList[T: DType, dim: Int](CollectionElement):
     """
     Basic AoS implementation for a list of hittables.
@@ -19,8 +18,21 @@ struct HittableList[T: DType, dim: Int](CollectionElement):
     var _bounding_box: AABB[T, dim]
 
     fn __init__(inout self):
+        # self._hittables = UnsafePointer[List[Hittable[T, dim]]].alloc(1)
         self._hittables = List[Hittable[T, dim]]()
         self._bounding_box = AABB[T, dim]()
+
+    fn __copyinit__(inout self, other: Self):
+        self._hittables = other._hittables
+        self._bounding_box = other._bounding_box
+
+    fn __moveinit__(inout self, owned other: Self):
+        self._hittables = other._hittables^
+        self._bounding_box = other._bounding_box^
+
+    # fn __del__(owned self):
+    #     self._hittables[].clear()
+    #     self._hittables.free()
 
     fn add_hittable(inout self, hittable: Hittable[T, dim]):
         self._hittables.append(hittable)

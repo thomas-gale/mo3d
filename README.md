@@ -40,6 +40,7 @@ Key features aim to include an experimental ECS-based architecture for efficient
 ## progress notes
 
 ### 2024-09-17: basic gui proof of concept (e.g. rendering text) using PIL (python interop) and taking the raw image output and drawing directly into the main output texture
+![image](https://github.com/user-attachments/assets/7973da9f-e132-454c-9bf0-1df932caefa3)
 
 
 ### 2024-09-13: thinking about a basic ecs module for scene management and finished off some bits from Ray Tracing in One Weekend and starting on the Ray Tracing the Next week!

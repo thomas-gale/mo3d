@@ -134,7 +134,7 @@ fn main() raises:
 
     while window.process_events(camera):
         start_time = now()
-        camera.render(world)
+        camera.render(world, average_compute_time.cast[DType.int32]() / 10**6, average_redraw_time.cast[DType.int32]() / 10**3)
         average_compute_time = (1.0 - alpha) * average_compute_time + alpha * (
             now() - start_time
         )

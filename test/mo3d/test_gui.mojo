@@ -10,15 +10,15 @@ fn test_import_pil() raises:
 
 fn test_pil_render_text() raises:
     var p = PIL()
-    var txt = p.render_text("Hello, World!")
-    print(str(txt))
-    assert_true(txt is not None)
+    var txt_img = p._text_to_image("Hello, World!")
+    print(str(txt_img))
+    assert_true(txt_img is not None)
 
 
 fn test_pil_image_to_list() raises:
     var p = PIL()
-    var txt_img = p.render_text("Hello, World!")
+    var txt_img = p._text_to_image("Hello, World!")
     var width = txt_img.width
     var height = txt_img.height
-    var img = p.pil_image_to_list(txt_img)
-    assert_true(len(img) == width * height * 3)
+    var pixels = p._image_to_pixels(txt_img)
+    assert_true(len(pixels) == width * height * 3)

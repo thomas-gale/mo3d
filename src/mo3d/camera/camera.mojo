@@ -15,6 +15,8 @@ from mo3d.ray.ray import Ray
 from mo3d.ray.hit_record import HitRecord
 from mo3d.ray.hittable_list import HittableList
 
+from mo3d.gui.pil import PIL
+
 
 @value
 struct Camera[
@@ -286,6 +288,25 @@ struct Camera[
             vectorize[compute_row_vectorize, 1](width)
 
         parallelize[compute_row](height, height)
+
+        # Test render some text
+        var p = PIL()
+        var txt_img = p.render_text("Hello, GUI!")
+        var text_width = txt_img.width
+        var text_height = txt_img.height
+        var text_list = p.pil_image_to_list(txt_img)
+
+        var text_x = 10
+        var text_y = 10
+
+        for y in range(text_height):
+                for x in range(text_width):
+                    # if text_y + y < height and text_x + x < width:
+                        var texture_index = ((text_y + y) * width + (text_x + x)) * channels
+                        var text_index = (y * text_width + x) * 3  # RGB
+                        for c in range(3):  # RGB channels
+                            var text_color = text_list[text_index + c].cast[T]() / 255.0
+                            (self._sensor_state +texture_index + c)[] = text_color
 
     fn get_ray(self, i: Int, j: Int) -> Ray[T, dim]:
         var offset = Self._sample_square()

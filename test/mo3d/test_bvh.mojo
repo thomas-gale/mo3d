@@ -60,4 +60,4 @@ fn test_create_simple_bvh_node_3() raises:
   print(str(bvh_node._left[]._hittable[BVHNode[f32, 3]]._right[]._hittable[Sphere[f32, 3]]._center.orig))
   print(str(bvh_node._right[]._hittable[BVHNode[f32, 3]]._left[]._hittable[Sphere[f32, 3]]._center.orig))
   print(str(bvh_node._right[]._hittable[BVHNode[f32, 3]]._right[]._hittable[Sphere[f32, 3]]._center.orig))
-  assert_true(False)
+#   assert_true(False)

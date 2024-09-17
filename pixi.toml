@@ -17,6 +17,7 @@ built = { cmd = "bin/mo3d", depends-on = ["build"] }
 
 [dependencies]
 max = ">=24.6.0.dev2024091305,<25"
+pillow = ">=10.4.0,<11"
 
 [target.linux-64.tasks]
 setup = { cmd="sudo apt update && sudo apt install -y llvm libsdl2-dev", inputs=["pixi.toml"] }

@@ -39,6 +39,9 @@ Key features aim to include an experimental ECS-based architecture for efficient
 
 ## progress notes
 
+### 2024-09-17: basic gui proof of concept (e.g. rendering text) using PIL (python interop) and taking the raw image output and drawing directly into the main output texture
+
+
 ### 2024-09-13: thinking about a basic ecs module for scene management and finished off some bits from Ray Tracing in One Weekend and starting on the Ray Tracing the Next week!
 - Trying to implement a minimal proof of concept for `SoA` (structure of arrays) `ComponentStore` to hold the state of components.
 - Modified the underlying storage for `Vec` and `Mat` to use `InlineArray` rather than a heap storage. This should improve performance. I still need to think how to elegantly further improve this ComponentStore with `SIMD` (not sure how to extend `Vec` and `Mat` to use `SIMD` without having problems with wasted space when sizes are not powers of 2 and how to align multiple bits of data)

@@ -17,60 +17,60 @@ from mo3d.material.lambertian import Lambertian
 struct Sphere[T: DType, dim: Int](CollectionElement):
     var _center: Ray[T, dim]
     var _radius: Scalar[T]
-    var _mat: Material[T, dim]  # TODO: this will be moved to my ECS shortly
-    var _bounding_box: AABB[T, dim] # TODO: As will this ^^
+    # var _mat: Material[T, dim]  # TODO: this will be moved to my ECS shortly
+    # var _bounding_box: AABB[T, dim] # TODO: As will this ^^
 
 
     fn __init__(
         inout self,
         center: Point[T, dim],
         radius: Scalar[T],
-        mat: Material[T, dim],
+        # mat: Material[T, dim],
     ):
         """
         Stationary sphere with a given center and radius.
         """
         self._center = Ray[T, dim](center, Vec[T, dim]())
         self._radius = radius
-        self._mat = mat
+        # self._mat = mat
 
         # TODO Refactor 
-        var rvec = Vec[T, dim](self._radius)
-        var b1 = AABB[T, dim](
-            self._center.at(0) - rvec,
-            self._center.at(0) + rvec,
-        )
-        var b2 = AABB[T, dim](
-            self._center.at(1) - rvec,
-            self._center.at(1) + rvec,
-        )
-        self._bounding_box = AABB[T, dim](b1, b2)
+        # var rvec = Vec[T, dim](self._radius)
+        # var b1 = AABB[T, dim](
+        #     self._center.at(0) - rvec,
+        #     self._center.at(0) + rvec,
+        # )
+        # var b2 = AABB[T, dim](
+        #     self._center.at(1) - rvec,
+        #     self._center.at(1) + rvec,
+        # )
+        # self._bounding_box = AABB[T, dim](b1, b2)
 
     fn __init__(
         inout self,
         center1: Point[T, dim],
         center2: Point[T, dim],
         radius: Scalar[T],
-        mat: Material[T, dim],
+        # mat: Material[T, dim],
     ):
         """
         Moving sphere with a given center, radius, and color.
         """
         self._center = Ray[T, dim](center1, center2 - center1)
         self._radius = radius
-        self._mat = mat
+        # self._mat = mat
 
         # TODO Refactor 
-        var rvec = Vec[T, dim](self._radius)
-        var b1 = AABB[T, dim](
-            self._center.at(0) - rvec,
-            self._center.at(0) + rvec,
-        )
-        var b2 = AABB[T, dim](
-            self._center.at(1) - rvec,
-            self._center.at(1) + rvec,
-        )
-        self._bounding_box = AABB[T, dim](b1, b2)
+        # var rvec = Vec[T, dim](self._radius)
+        # var b1 = AABB[T, dim](
+        #     self._center.at(0) - rvec,
+        #     self._center.at(0) + rvec,
+        # )
+        # var b2 = AABB[T, dim](
+        #     self._center.at(1) - rvec,
+        #     self._center.at(1) + rvec,
+        # )
+        # self._bounding_box = AABB[T, dim](b1, b2)
 
     fn hit(
         self,
@@ -101,7 +101,7 @@ struct Sphere[T: DType, dim: Int](CollectionElement):
         rec.p = r.at(rec.t)
         var outward_normal = (rec.p - current_center) / self._radius
         rec.set_face_normal(r, outward_normal)
-        rec.mat = self._mat
+        # rec.mat = self._mat
 
         return True
 

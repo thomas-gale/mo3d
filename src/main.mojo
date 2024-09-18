@@ -59,7 +59,8 @@ fn main() raises:
         Lambertian[float_type, 3](Color4[float_type](0.5, 0.5, 0.5))
     )
     world.add_hittable(
-        Hittable[float_type, 3](Sphere(Point[float_type, 3](0, -1000, 0), 1000, mat_ground))
+        Hittable[float_type, 3](Sphere(Point[float_type, 3](0, -1000, 0), 1000))
+        # Hittable[float_type, 3](Sphere(Point[float_type, 3](0, -1000, 0), 1000, mat_ground))
     )
 
     # Random spheres
@@ -82,7 +83,8 @@ fn main() raises:
                         Lambertian[float_type, 3](albedo)
                     )
                     var center2 = center + Vec[float_type, 3](0, random_float(0, 0.5), 0)
-                    world.add_hittable(Hittable[float_type, 3](Sphere(center, center2, 0.2, sphere_material)))
+                    # world.add_hittable(Hittable[float_type, 3](Sphere(center, center2, 0.2, sphere_material)))
+                    world.add_hittable(Hittable[float_type, 3](Sphere(center, center2, 0.2)))
                 elif choose_mat < 0.95:
                     # metal
                     var albedo = Color4[float_type].random(0.5, 1)
@@ -90,25 +92,30 @@ fn main() raises:
                     sphere_material = Material[float_type, 3](
                         Metal[float_type, 3](albedo, fuzz)
                     )
-                    world.add_hittable(Hittable[float_type, 3](Sphere(center, 0.2, sphere_material)))
+                    # world.add_hittable(Hittable[float_type, 3](Sphere(center, 0.2, sphere_material)))
+                    world.add_hittable(Hittable[float_type, 3](Sphere(center, 0.2)))
                 else:
                     # glass
                     sphere_material = Material[float_type, 3](
                         Dielectric[float_type, 3](1.5)
                     )
-                    world.add_hittable(Hittable[float_type, 3](Sphere(center, 0.2, sphere_material)))
+                    # world.add_hittable(Hittable[float_type, 3](Sphere(center, 0.2, sphere_material)))
+                    world.add_hittable(Hittable[float_type, 3](Sphere(center, 0.2)))
 
     # Big spheres
     var mat1 = Material[float_type, 3](Dielectric[float_type, 3](1.5))
-    world.add_hittable(Hittable[float_type, 3](Sphere(Point[float_type, 3](0, 1, 0), 1.0, mat1)))
+    # world.add_hittable(Hittable[float_type, 3](Sphere(Point[float_type, 3](0, 1, 0), 1.0, mat1)))
+    world.add_hittable(Hittable[float_type, 3](Sphere(Point[float_type, 3](0, 1, 0), 1.0)))
     var mat2 = Material[float_type, 3](
         Lambertian[float_type, 3](Color4[float_type](0.4, 0.2, 0.1))
     )
-    world.add_hittable(Hittable[float_type, 3](Sphere(Point[float_type, 3](-4, 1, 0), 1.0, mat2)))
+    # world.add_hittable(Hittable[float_type, 3](Sphere(Point[float_type, 3](-4, 1, 0), 1.0, mat2)))
+    world.add_hittable(Hittable[float_type, 3](Sphere(Point[float_type, 3](-4, 1, 0), 1.0)))
     var mat3 = Material[float_type, 3](
         Metal[float_type, 3](Color4[float_type](0.7, 0.6, 0.5), 0.0)
     )
-    world.add_hittable(Hittable[float_type, 3](Sphere(Point[float_type, 3](4, 1, 0), 1.0, mat3)))
+    # world.add_hittable(Hittable[float_type, 3](Sphere(Point[float_type, 3](4, 1, 0), 1.0, mat3)))
+    world.add_hittable(Hittable[float_type, 3](Sphere(Point[float_type, 3](4, 1, 0), 1.0)))
 
     # Camera
     var camera = Camera[

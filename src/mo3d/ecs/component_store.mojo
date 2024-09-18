@@ -13,6 +13,7 @@ from mo3d.ecs.component import (
     PositionComponent,
     VelocityComponent,
     OrientationComponent,
+    GeometryComponent,
     MaterialComponent,
     BoundingBoxComponent,
     BinaryChildrenComponent,
@@ -32,6 +33,7 @@ struct ComponentStore[T: DType, dim: Int]:
         PositionComponent[T, dim],
         VelocityComponent[T, dim],
         OrientationComponent[T, dim],
+        GeometryComponent[T, dim],
         MaterialComponent[T, dim],
         BoundingBoxComponent[T, dim],
         BinaryChildrenComponent,
@@ -45,6 +47,9 @@ struct ComponentStore[T: DType, dim: Int]:
 
     var orientation_components: List[OrientationComponent[T, dim]]
     var orientation_component_to_entities: Dict[ComponentID, EntityID]
+
+    var geometry_components: List[GeometryComponent[T, dim]]
+    var geometry_component_to_entities: Dict[ComponentID, EntityID]
 
     var material_components: List[MaterialComponent[T, dim]]
     var material_component_to_entities: Dict[ComponentID, EntityID]
@@ -68,6 +73,9 @@ struct ComponentStore[T: DType, dim: Int]:
         self.orientation_components = List[OrientationComponent[T, dim]]()
         self.orientation_component_to_entities = Dict[ComponentID, EntityID]()
 
+        self.geometry_components = List[GeometryComponent[T, dim]]()
+        self.geometry_component_to_entities = Dict[ComponentID, EntityID]()
+
         self.material_components = List[MaterialComponent[T, dim]]()
         self.material_component_to_entities = Dict[ComponentID, EntityID]()
 
@@ -85,7 +93,7 @@ struct ComponentStore[T: DType, dim: Int]:
         self.entity_to_component_type_mask = Dict[EntityID, ComponentTypeID]()
 
     fn _add_position_component(
-        inout self, entity_id: EntityID, component: Point[T, dim]
+        inout self, entity_id: EntityID, component: PositionComponent[T, dim]
     ) raises -> ComponentID:
         if (
             self.entity_to_component_type_mask[entity_id]
@@ -104,7 +112,7 @@ struct ComponentStore[T: DType, dim: Int]:
         return component_id
 
     fn _add_velocity_component(
-        inout self, entity_id: EntityID, component: Vec[T, dim]
+        inout self, entity_id: EntityID, component: VelocityComponent[T, dim]
     ) raises -> ComponentID:
         if (
             self.entity_to_component_type_mask[entity_id]
@@ -122,6 +130,27 @@ struct ComponentStore[T: DType, dim: Int]:
         self.entity_to_component_type_mask[entity_id] |= ComponentType.Velocity
 
         return component_id
+
+    fn _add_geometry_component(
+        inout self, entity_id: EntityID, component: GeometryComponent[T, dim]
+    ) raises -> ComponentID:
+        if (
+            self.entity_to_component_type_mask[entity_id]
+            & ComponentType.Geometry
+        ):
+            raise Error("Entity already has a geometry component")
+
+        self.geometry_components.append(component)
+        var component_id = ComponentID(len(self.geometry_components) - 1)
+        self.geometry_component_to_entities[component_id] = entity_id
+
+        self.entity_to_components[entity_id][
+            ComponentType.Geometry
+        ] = component_id
+        self.entity_to_component_type_mask[entity_id] |= ComponentType.Geometry
+
+        return component_id
+
 
     fn create_entity(inout self) -> EntityID:
         """
@@ -151,6 +180,10 @@ struct ComponentStore[T: DType, dim: Int]:
         elif component.isa[VelocityComponent[T, dim]]():
             return self._add_velocity_component(
                 entity_id, component[Vec[T, dim]]
+            )
+        elif component.isa[GeometryComponent[T, dim]]():
+            return self._add_geometry_component(
+                entity_id, component[GeometryComponent[T, dim]]
             )
         else:
             raise Error("Unknown component type")

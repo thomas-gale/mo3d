@@ -41,7 +41,8 @@ struct Hittable[T: DType, dim: Int](CollectionElement):
 
     fn bounding_box(self) -> AABB[T, dim]:
         if self._hittable.isa[Sphere[T, dim]]():
-            return self._hittable[Sphere[T, dim]]._bounding_box
+            # return self._hittable[Sphere[T, dim]]._bounding_box
+            return AABB[T, dim]()
         elif self._hittable.isa[BVHNode[T, dim]]():
             return self._hittable[BVHNode[T, dim]]._bbox
         else:

@@ -331,10 +331,12 @@ struct Camera[
 
         parallelize[compute_row](height, height)
 
+        # Ensure that mojo doesn't optimize away the list variables till parallelize is complete
         _ = hitable_positions
         _ = hitable_geometeries
         _ = hitable_materials
 
+        # Some experimental code to render text to the texture
         var p = PIL()
         p.render_to_texture[T](
             self._sensor_state,

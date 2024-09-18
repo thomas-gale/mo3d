@@ -40,13 +40,13 @@ Key features aim to include an experimental ECS-based architecture for efficient
 ## progress notes
 
 ### 2024-09-18: basic migration to ecs!
-- ComponentStore basic implmentation working - getting component data out of it is still a little ugly (the renderer in camera is the only system using this component store right now)
+- ECS ComponentStore basic implementation working - getting component data out of it is still a little ugly (the renderer in camera is the only system using this component store right now)
 - Building a ECS scene is fairly straightfoward, `sphere_scene` shows an ECS migration of the current test scene.
 ```
 # Note: T is DType.float32, dim is 3
 var store = ComponentStore[T, dim]()
 var mat_ground = Material[T, dim](
-		Lambertian[T, dim](Color4[T](0.5, 0.5, 0.5, 1.0))
+		Lambertian[T, dim](Color4[T](0.5, 0.5, 0.5))
 )
 var ground = Sphere[T, dim](1000)
 var ground_entity_id = store.create_entity()

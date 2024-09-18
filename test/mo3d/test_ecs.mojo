@@ -28,7 +28,7 @@ fn test_add_entity_with_position_to_component_store() raises:
     assert_equal(position_component_id, store.entity_to_components[entity_id][ComponentType.Position])
     assert_true(store.entity_has_component(entity_id, ComponentType.Position))
 
-    var query = store.entities_with_components(ComponentType.Position)
+    var query = store.get_entities_with_components(ComponentType.Position)
     assert_equal(len(query), 1)
     assert_equal(query[0], entity_id)
 
@@ -39,3 +39,13 @@ fn test_add_more_complex_entity_to_component_store() raises:
     _ = store.add_component(entity_id, position)
     var sphere = Sphere[f32, 3](Point[f32, 3](1, 2, 3), 1)
     _ = store.add_component(entity_id, Geometry[f32, 3](sphere))
+
+    var query1 = store.get_entities_with_components(ComponentType.Position)
+    assert_equal(len(query1), 1)
+    assert_equal(query1[0], entity_id)
+
+    var query2 = store.get_entities_with_components(ComponentType.Position | ComponentType.Geometry)
+    assert_equal(len(query2), 1)
+
+    var query3 = store.get_entities_with_components(ComponentType.Position | ComponentType.Geometry | ComponentType.Velocity)
+    assert_equal(len(query3), 0)

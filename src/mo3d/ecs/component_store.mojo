@@ -197,15 +197,16 @@ struct ComponentStore[T: DType, dim: Int]:
         """
         return self.entity_to_component_type_mask[entity_id] & component_type
 
-    fn entities_with_components(
-        self, component_type: ComponentTypeID
+    fn get_entities_with_components(
+        self, component_type_mask: ComponentTypeID
     ) raises -> List[EntityID]:
         """
         WIP: Very hacky initial implementation.
         """
         var entities = Set[EntityID]()
         for entity_id in self.entity_to_component_type_mask:
-            if self.entity_to_component_type_mask[entity_id[]] & component_type:
+            # Queried component type mask is a subset of the entity's component type mask.
+            if (component_type_mask | self.entity_to_component_type_mask[entity_id[]]) == self.entity_to_component_type_mask[entity_id[]]:
                 entities.add(entity_id[])
 
         var entities_list = List[EntityID]()

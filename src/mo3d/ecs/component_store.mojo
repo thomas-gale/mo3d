@@ -38,55 +38,45 @@ struct ComponentStore[T: DType, dim: Int]:
     ]
 
     var position_components: List[PositionComponent[T, dim]]
-    var position_component_to_entities: Dict[ComponentID, List[EntityID]]
+    var position_component_to_entities: Dict[ComponentID, EntityID]
 
     var velocity_components: List[VelocityComponent[T, dim]]
-    var velocity_component_to_entities: Dict[ComponentID, List[EntityID]]
+    var velocity_component_to_entities: Dict[ComponentID, EntityID]
 
     var orientation_components: List[OrientationComponent[T, dim]]
-    var orientation_component_to_entities: Dict[ComponentID, List[EntityID]]
+    var orientation_component_to_entities: Dict[ComponentID, EntityID]
 
     var material_components: List[MaterialComponent[T, dim]]
-    var material_component_to_entities: Dict[ComponentID, List[EntityID]]
+    var material_component_to_entities: Dict[ComponentID, EntityID]
 
     var bounding_box_components: List[BoundingBoxComponent[T, dim]]
-    var bounding_box_component_to_entities: Dict[ComponentID, List[EntityID]]
+    var bounding_box_component_to_entities: Dict[ComponentID, EntityID]
 
     var binary_children_components: List[BinaryChildrenComponent]
-    var binary_children_component_to_entities: Dict[ComponentID, List[EntityID]]
+    var binary_children_component_to_entities: Dict[ComponentID, EntityID]
 
     var entity_to_components: Dict[EntityID, Dict[ComponentTypeID, ComponentID]]
     var entity_to_component_type_mask: Dict[EntityID, ComponentTypeID]
 
     fn __init__(inout self):
         self.position_components = List[PositionComponent[T, dim]]()
-        self.position_component_to_entities = Dict[
-            ComponentID, List[EntityID]
-        ]()
+        self.position_component_to_entities = Dict[ComponentID, EntityID]()
 
         self.velocity_components = List[VelocityComponent[T, dim]]()
-        self.velocity_component_to_entities = Dict[
-            ComponentID, List[EntityID]
-        ]()
+        self.velocity_component_to_entities = Dict[ComponentID, EntityID]()
 
         self.orientation_components = List[OrientationComponent[T, dim]]()
-        self.orientation_component_to_entities = Dict[
-            ComponentID, List[EntityID]
-        ]()
+        self.orientation_component_to_entities = Dict[ComponentID, EntityID]()
 
         self.material_components = List[MaterialComponent[T, dim]]()
-        self.material_component_to_entities = Dict[
-            ComponentID, List[EntityID]
-        ]()
+        self.material_component_to_entities = Dict[ComponentID, EntityID]()
 
         self.bounding_box_components = List[BoundingBoxComponent[T, dim]]()
-        self.bounding_box_component_to_entities = Dict[
-            ComponentID, List[EntityID]
-        ]()
+        self.bounding_box_component_to_entities = Dict[ComponentID, EntityID]()
 
         self.binary_children_components = List[BinaryChildrenComponent]()
         self.binary_children_component_to_entities = Dict[
-            ComponentID, List[EntityID]
+            ComponentID, EntityID
         ]()
 
         self.entity_to_components = Dict[
@@ -104,9 +94,7 @@ struct ComponentStore[T: DType, dim: Int]:
             raise Error("Entity already has a position component")
         self.position_components.append(component)
         var component_id = ComponentID(len(self.position_components) - 1)
-        if component_id not in self.position_component_to_entities:
-            self.position_component_to_entities[component_id] = List[EntityID]()
-        self.position_component_to_entities[component_id].append(entity_id)
+        self.position_component_to_entities[component_id] = entity_id
 
         self.entity_to_components[entity_id][
             ComponentType.Position
@@ -126,9 +114,7 @@ struct ComponentStore[T: DType, dim: Int]:
 
         self.velocity_components.append(component)
         var component_id = ComponentID(len(self.velocity_components) - 1)
-        if component_id not in self.velocity_component_to_entities:
-            self.velocity_component_to_entities[component_id] = List[EntityID]()
-        self.velocity_component_to_entities[component_id].append(entity_id)
+        self.velocity_component_to_entities[component_id] = entity_id
 
         self.entity_to_components[entity_id][
             ComponentType.Velocity
@@ -146,7 +132,6 @@ struct ComponentStore[T: DType, dim: Int]:
             ComponentTypeID, ComponentID
         ]()
         self.entity_to_component_type_mask[entity_id] = 0
-        # self.entity_to_components[entity_id] = List[ComponentID]()
         return entity_id
 
     fn add_component(
@@ -156,6 +141,9 @@ struct ComponentStore[T: DType, dim: Int]:
         This implementation is probably not thread safe.
         We need to lock a given entity_id before adding a component to it.
         """
+        if entity_id not in self.entity_to_components:
+            raise Error("Entity does not exist")
+
         if component.isa[PositionComponent[T, dim]]():
             return self._add_position_component(
                 entity_id, component[Point[T, dim]]
@@ -166,3 +154,28 @@ struct ComponentStore[T: DType, dim: Int]:
             )
         else:
             raise Error("Unknown component type")
+
+    fn entity_has_component(
+        self, entity_id: EntityID, component_type: ComponentTypeID
+    ) raises -> Bool:
+        """
+        Example:
+        entity_has_component(entity_id, ComponentType.Position | ComponentType.Velocity).
+        """
+        return self.entity_to_component_type_mask[entity_id] & component_type
+
+    fn entities_with_components(
+        self, component_type: ComponentTypeID
+    ) raises -> List[EntityID]:
+        """
+        WIP: Very hacky initial implementation.
+        """
+        var entities = Set[EntityID]()
+        for entity_id in self.entity_to_component_type_mask:
+            if self.entity_to_component_type_mask[entity_id[]] & component_type:
+                entities.add(entity_id[])
+
+        var entities_list = List[EntityID]()
+        for entity in entities:
+            entities_list.append(entity[])
+        return entities_list

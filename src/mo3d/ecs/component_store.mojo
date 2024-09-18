@@ -151,6 +151,26 @@ struct ComponentStore[T: DType, dim: Int]:
 
         return component_id
 
+    fn _add_material_component(
+        inout self, entity_id: EntityID, component: MaterialComponent[T, dim]
+    ) raises -> ComponentID:
+        if (
+            self.entity_to_component_type_mask[entity_id]
+            & ComponentType.Material
+        ):
+            raise Error("Entity already has a material component")
+
+        self.material_components.append(component)
+        var component_id = ComponentID(len(self.material_components) - 1)
+        self.material_component_to_entities[component_id] = entity_id
+
+        self.entity_to_components[entity_id][
+            ComponentType.Material
+        ] = component_id
+        self.entity_to_component_type_mask[entity_id] |= ComponentType.Material
+
+        return component_id
+
     fn create_entity(inout self) -> EntityID:
         """
         This implementation is not thread safe.
@@ -184,17 +204,33 @@ struct ComponentStore[T: DType, dim: Int]:
             return self._add_geometry_component(
                 entity_id, component[GeometryComponent[T, dim]]
             )
+        elif component.isa[MaterialComponent[T, dim]]():
+            return self._add_material_component(
+                entity_id, component[MaterialComponent[T, dim]]
+            )
+        elif component.isa[BoundingBoxComponent[T, dim]]():
+            raise Error("Bounding box component not implemented")
+        elif component.isa[BinaryChildrenComponent]():
+            raise Error("Binary children component not implemented")
         else:
             raise Error("Unknown component type")
 
-    fn entity_has_component(
-        self, entity_id: EntityID, component_type: ComponentTypeID
-    ) raises -> Bool:
+    fn entity_has_components(
+        self, entity_id: EntityID, component_type_mask: ComponentTypeID
+    ) -> Bool:
         """
+        Using bitwise OR to check if the queried component type mask is a subset of the entity's component type mask.
+
         Example:
-        entity_has_component(entity_id, ComponentType.Position | ComponentType.Velocity).
+        entity_has_components(entity_id, ComponentType.Position | ComponentType.Velocity).
         """
-        return self.entity_to_component_type_mask[entity_id] & component_type
+        try:
+            return (
+                component_type_mask
+                | self.entity_to_component_type_mask[entity_id]
+            ) == self.entity_to_component_type_mask[entity_id]
+        except:
+            return False
 
     fn get_entities_with_components(
         self, component_type_mask: ComponentTypeID
@@ -205,19 +241,6 @@ struct ComponentStore[T: DType, dim: Int]:
         var entities = List[EntityID]()
         for entity_id in self.entity_to_component_type_mask:
             # Queried component type mask is a subset of the entity's component type mask.
-            try:
-                if (
-                    component_type_mask
-                    | self.entity_to_component_type_mask[entity_id[]]
-                ) == self.entity_to_component_type_mask[entity_id[]]:
-                    entities.append(entity_id[])
-            except:
-                print("Error: get_entities_with_components")
-                pass
+            if self.entity_has_components(entity_id[], component_type_mask):
+                entities.append(entity_id[])
         return entities
-
-    # fn get_entity_components(
-    #     self, entity_id: EntityID, component_type_mask: ComponentTypeID
-    # ) -> List[]:
-    #     return self.entity_to_components[entity_id]
-    # )

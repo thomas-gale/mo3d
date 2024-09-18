@@ -26,7 +26,7 @@ fn test_add_entity_with_position_to_component_store() raises:
     var position = Point[f32, 3](0, 0, 0)
     var position_component_id = store.add_component(entity_id, position)
     assert_equal(position_component_id, store.entity_to_components[entity_id][ComponentType.Position])
-    assert_true(store.entity_has_component(entity_id, ComponentType.Position))
+    assert_true(store.entity_has_components(entity_id, ComponentType.Position))
 
     var query = store.get_entities_with_components(ComponentType.Position)
     assert_equal(len(query), 1)

@@ -127,6 +127,8 @@ fn main() raises:
     _ = store.add_component(entity_id, position)
     var sphere = Sphere[float_type, 3](Point[float_type, 3](0, 0, 0), 1)
     _ = store.add_component(entity_id, Geometry[float_type, 3](sphere))
+    var mat = Material[float_type, 3](Lambertian[float_type, 3](Color4[float_type](0.5, 0.5, 0.5)))
+    _ = store.add_component(entity_id, mat)
 
     # Camera
     var camera = Camera[

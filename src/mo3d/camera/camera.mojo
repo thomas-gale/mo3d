@@ -245,18 +245,24 @@ struct Camera[
             return
 
         # Get hittable components
-        var hittables = store.get_entities_with_components(
-            ComponentType.Position | ComponentType.Geometry
+        var hitables = store.get_entities_with_components(
+            ComponentType.Position
+            | ComponentType.Geometry
+            | ComponentType.Material
         )
 
-        var hittable_positions = List[ComponentID]()
-        var hittable_geometeries = List[ComponentID]()
-        for hittable in hittables:
-            hittable_positions.append(
-                store.entity_to_components[hittable[]][ComponentType.Position]
+        var hitable_positions = List[ComponentID]()
+        var hitable_geometeries = List[ComponentID]()
+        var hitable_materials = List[ComponentID]()
+        for hitable in hitables:
+            hitable_positions.append(
+                store.entity_to_components[hitable[]][ComponentType.Position]
             )
-            hittable_geometeries.append(
-                store.entity_to_components[hittable[]][ComponentType.Geometry]
+            hitable_geometeries.append(
+                store.entity_to_components[hitable[]][ComponentType.Geometry]
+            )
+            hitable_materials.append(
+                store.entity_to_components[hitable[]][ComponentType.Material]
             )
 
         @parameter
@@ -272,8 +278,9 @@ struct Camera[
                         r,
                         max_depth,
                         store,
-                        hittable_positions,
-                        hittable_geometeries,
+                        hitable_positions,
+                        hitable_geometeries,
+                        hitable_materials,
                     )
                 pixel_color *= pixel_samples_scale.cast[T]()
 
@@ -324,8 +331,9 @@ struct Camera[
 
         parallelize[compute_row](height, height)
 
-        _ = hittable_positions
-        _ = hittable_geometeries
+        _ = hitable_positions
+        _ = hitable_geometeries
+        _ = hitable_materials
 
         var p = PIL()
         p.render_to_texture[T](
@@ -381,12 +389,12 @@ struct Camera[
     @staticmethod
     @parameter
     fn _ray_color(
-        # r: Ray[T, dim], depth: Int, world: HittableList[T, dim]
         r: Ray[T, dim],
         depth: Int,
         store: ComponentStore[T, dim],
-        hittable_positions: List[ComponentID],
-        hittable_geometeries: List[ComponentID],
+        hitable_positions: List[ComponentID],
+        hitable_geometeries: List[ComponentID],
+        hitable_materials: List[ComponentID],
     ) -> Color4[T]:
         """
         This is the first ECS 'system' like function that we're implementing in mo3d.
@@ -396,14 +404,15 @@ struct Camera[
 
         var rec = HitRecord[T, dim]()
 
-
-        for entity in range(len(hittable_positions)):
-            var pos = store.position_components[hittable_positions[entity]]
+        for entity in range(len(hitable_positions)):
+            var pos = store.position_components[hitable_positions[entity]]
             var r_shifted = Ray(r.orig - pos, r.dir, r.tm)
 
-            var geom = store.geometry_components[hittable_geometeries[entity]]
+            var geom = store.geometry_components[hitable_geometeries[entity]]
+            var mat = store.material_components[hitable_materials[entity]]
 
             if geom.hit(r_shifted, Interval[T](0.001, inf[T]()), rec):
+                rec.mat = mat
                 var scattered = Ray[T, dim]()
                 var attenuation = Color4[T]()
                 try:
@@ -412,8 +421,9 @@ struct Camera[
                             scattered,
                             depth - 1,
                             store,
-                            hittable_positions,
-                            hittable_geometeries,
+                            hitable_positions,
+                            hitable_geometeries,
+                            hitable_materials,
                         )
                 except:
                     pass

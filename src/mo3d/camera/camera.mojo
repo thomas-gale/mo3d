@@ -13,7 +13,7 @@ from mo3d.math.point import Point
 from mo3d.ray.color4 import Color4
 from mo3d.ray.ray import Ray
 from mo3d.ray.hit_record import HitRecord
-from mo3d.ray.hittable_list import HittableList
+# from mo3d.ray.hittable_list import HittableList
 
 from mo3d.ecs.entity import EntityID
 from mo3d.ecs.component import (

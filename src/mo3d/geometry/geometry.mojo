@@ -5,8 +5,8 @@ from mo3d.math.vec import Vec
 from mo3d.math.point import Point
 from mo3d.ray.ray import Ray
 from mo3d.ray.hit_record import HitRecord
-from mo3d.ray.hittable_list import HittableList
-from mo3d.ray.bvh_node import BVHNode
+# from mo3d.ray.hittable_list import HittableList
+# from mo3d.ray.bvh_node import BVHNode
 
 from mo3d.geometry.sphere import Sphere
 from mo3d.geometry.aabb import AABB

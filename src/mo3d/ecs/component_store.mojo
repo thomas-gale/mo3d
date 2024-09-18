@@ -24,9 +24,9 @@ from mo3d.ecs.component import (
 struct ComponentStore[T: DType, dim: Int]:
     """
     It will be nice to move the component store data to some variadic comptime SoA design.
-    While experimenting with Proof of Concept, I will keep it simple and have hardcoded component stores for each component type.
+    While experimenting with Proof of Concept, I will keep it simple and have hardcoded component lists for each component type.
 
-    Experiementing with direct and inverted indexing for entity to component mapping.
+    Experimenting with direct and inverted indexing for entity to component mapping.
     Having both will allow for faster access to components given an entity and vice versa however presents a challenge in keeping the two in sync and a larger memory footprint.
     """
 

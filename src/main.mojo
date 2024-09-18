@@ -18,6 +18,7 @@ from mo3d.math.point import Point
 from mo3d.ray.ray import Ray
 from mo3d.ray.color4 import Color4
 from mo3d.ray.hit_record import HitRecord
+
 # from mo3d.ray.hittable import Hittable
 # from mo3d.ray.hittable_list import HittableList
 from mo3d.material.material import Material
@@ -96,7 +97,7 @@ fn main() raises:
             sleep(1.0 / Float64(max_fps) - frame_duration)
 
     # DEBUG
-    _ = store.entity_to_components
+    _ = store
 
     # Print stats
     print(

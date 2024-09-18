@@ -19,7 +19,7 @@ from mo3d.ecs.component import (
     BinaryChildrenComponent,
 )
 
-
+@value
 struct ComponentStore[T: DType, dim: Int]:
     """
     It will be nice to move the component store data to some variadic comptime SoA design.

@@ -16,7 +16,7 @@ build = { cmd = "mkdir -p bin && magic run mojo build src/main.mojo -o bin/mo3d"
 built = { cmd = "bin/mo3d", depends-on = ["build"] }
 
 [dependencies]
-max = ">=24.6.0.dev2024091305,<25"
+max = ">=24.6.0.dev2024091816,<25"
 pillow = ">=10.4.0,<11"
 
 [target.linux-64.tasks]

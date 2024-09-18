@@ -399,10 +399,11 @@ struct Camera[
 
         for entity in range(len(hittable_positions)):
             var pos = store.position_components[hittable_positions[entity]]
+            var r_shifted = Ray(r.orig - pos, r.dir, r.tm)
+
             var geom = store.geometry_components[hittable_geometeries[entity]]
 
-            # if world.hit(r, Interval[T](0.001, inf[T]()), rec):
-            if geom.hit(r, Interval[T](0.001, inf[T]()), rec):
+            if geom.hit(r_shifted, Interval[T](0.001, inf[T]()), rec):
                 var scattered = Ray[T, dim]()
                 var attenuation = Color4[T]()
                 try:

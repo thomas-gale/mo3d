@@ -18,9 +18,8 @@ struct Mat[T: DType, dim: Int]:
                 self._data[i * dim + j] = Scalar[T](0)
 
     fn __init__(inout self, *args: Vec[T, dim]):
-        self._data = InlineArray[Scalar[T], dim * dim](
-            unsafe_uninitialized=True
-        )
+        # We don't know for sure that the user has passed in the right number of Vecs, so we'll just initialize the matrix to 0 for safety.
+        self._data = InlineArray[Scalar[T], dim * dim](0.0)
         var i = 0
         for arg in args:
             for j in range(dim):

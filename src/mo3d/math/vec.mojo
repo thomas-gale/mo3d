@@ -13,7 +13,8 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
         self._data = data
 
     fn __init__(inout self, owned *args: Scalar[T]):
-        self._data = InlineArray[Scalar[T], size](unsafe_uninitialized=True)
+        # We don't know for sure that the user has passed in the right number of Scalars, so we'll just initialize the vector to 0 for safety.
+        self._data = InlineArray[Scalar[T], size](0.0)
         var i = 0
         for arg in args:
             self._data[i] = arg[]

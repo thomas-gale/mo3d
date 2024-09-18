@@ -27,6 +27,7 @@ fn sphere_scene_3d[T: DType](inout store: ComponentStore[T, 3]) raises:
     var mat_ground = Material[T, dim](
         Lambertian[T, dim](Color4[T](0.5, 0.5, 0.5))
     )
+    print(str(Color4[T](0.5, 0.5, 0.5)))
     var ground = Sphere[T, dim](1000)
     var ground_entity_id = store.create_entity()
     _ = store.add_components(

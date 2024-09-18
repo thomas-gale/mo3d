@@ -39,6 +39,25 @@ Key features aim to include an experimental ECS-based architecture for efficient
 
 ## progress notes
 
+### 2024-09-18: basic migration to ecs!
+- ComponentStore basic implmentation working - getting component data out of it is still a little ugly (the renderer in camera is the only system using this component store right now)
+- Building a ECS scene is fairly straightfoward, `sphere_scene` shows an ECS migration of the current test scene.
+```
+# Note: T is DType.float32, dim is 3
+var store = ComponentStore[T, dim]()
+var mat_ground = Material[T, dim](
+		Lambertian[T, dim](Color4[T](0.5, 0.5, 0.5, 1.0))
+)
+var ground = Sphere[T, dim](1000)
+var ground_entity_id = store.create_entity()
+_ = store.add_components(
+		ground_entity_id,
+		Point[T, dim](0, -1000, 0),
+		Geometry[T, dim](ground),
+		mat_ground,
+)
+```
+
 ### 2024-09-17: basic gui proof of concept (e.g. rendering text) using PIL (python interop) and taking the raw image output and drawing directly into the main output texture
 ![image](https://github.com/user-attachments/assets/7973da9f-e132-454c-9bf0-1df932caefa3)
 

@@ -11,6 +11,8 @@ from mo3d.ray.bvh_node import BVHNode
 from mo3d.geometry.sphere import Sphere
 from mo3d.geometry.aabb import AABB
 
+from mo3d.material.material import Material
+
 
 @value
 struct Geometry[T: DType, dim: Int]:
@@ -30,10 +32,12 @@ struct Geometry[T: DType, dim: Int]:
         r: Ray[T, dim],
         owned ray_t: Interval[T],
         inout rec: HitRecord[T, dim],
+        offset: Point[T, dim],
+        mat: Material[T, dim],
     ) -> Bool:
         if self._hittable.isa[Sphere[T, dim]]():
-            return self._hittable[Sphere[T, dim]].hit(r, ray_t, rec)
-        # elif self._hittable.isa[BVHNode[T, dim]]():
+            return self._hittable[Sphere[T, dim]].hit(r, ray_t, rec, offset, mat)
+        # elif self._hittable.isa[BVHNode[T, dim]]():k
         #     return self._hittable[BVHNode[T, dim]].hit(r, ray_t, rec)
         else:
             print("Hittable hit: Unsupported hittable type")

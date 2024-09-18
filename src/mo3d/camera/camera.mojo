@@ -402,32 +402,42 @@ struct Camera[
         if depth <= 0:
             return Color4[T](0, 0, 0, 0)
 
+        # TODO: Tidy massively (this 'system' is a mess)
+        # First stage find the closest hit (this used to be handled by the HittableList)
+        var ray_t = Interval[T](0.001, inf[T]())
         var rec = HitRecord[T, dim]()
+        var temp_rec = HitRecord[T, dim]()
+        var hit_anything = False
+        var closest_so_far = ray_t.max
 
         for entity in range(len(hitable_positions)):
             var pos = store.position_components[hitable_positions[entity]]
-            var r_shifted = Ray(r.orig - pos, r.dir, r.tm)
-
             var geom = store.geometry_components[hitable_geometeries[entity]]
             var mat = store.material_components[hitable_materials[entity]]
+            if geom.hit(
+                r, Interval(ray_t.min, closest_so_far), temp_rec, pos, mat
+            ):
+                hit_anything = True
+                closest_so_far = temp_rec.t
+                rec = temp_rec
 
-            if geom.hit(r_shifted, Interval[T](0.001, inf[T]()), rec):
-                rec.mat = mat
-                var scattered = Ray[T, dim]()
-                var attenuation = Color4[T]()
-                try:
-                    if rec.mat.scatter(r, rec, attenuation, scattered):
-                        return attenuation * Self._ray_color(
-                            scattered,
-                            depth - 1,
-                            store,
-                            hitable_positions,
-                            hitable_geometeries,
-                            hitable_materials,
-                        )
-                except:
-                    pass
-                return Color4[T](0, 0, 0, 0)
+        # If we hit something, scatter the ray and recurse
+        if hit_anything:
+            var scattered = Ray[T, dim]()
+            var attenuation = Color4[T]()
+            try:
+                if rec.mat.scatter(r, rec, attenuation, scattered):
+                    return attenuation * Self._ray_color(
+                        scattered,
+                        depth - 1,
+                        store,
+                        hitable_positions,
+                        hitable_geometeries,
+                        hitable_materials,
+                    )
+            except:
+                pass
+            return Color4[T](0, 0, 0, 0)
 
         var unit_direction = Vec.unit(r.dir)
         var a = 0.5 * (unit_direction[1] + 1.0)

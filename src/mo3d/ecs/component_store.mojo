@@ -151,7 +151,6 @@ struct ComponentStore[T: DType, dim: Int]:
 
         return component_id
 
-
     fn create_entity(inout self) -> EntityID:
         """
         This implementation is not thread safe.
@@ -199,17 +198,26 @@ struct ComponentStore[T: DType, dim: Int]:
 
     fn get_entities_with_components(
         self, component_type_mask: ComponentTypeID
-    ) raises -> List[EntityID]:
+    ) -> List[EntityID]:
         """
         WIP: Very hacky initial implementation.
         """
-        var entities = Set[EntityID]()
+        var entities = List[EntityID]()
         for entity_id in self.entity_to_component_type_mask:
             # Queried component type mask is a subset of the entity's component type mask.
-            if (component_type_mask | self.entity_to_component_type_mask[entity_id[]]) == self.entity_to_component_type_mask[entity_id[]]:
-                entities.add(entity_id[])
+            try:
+                if (
+                    component_type_mask
+                    | self.entity_to_component_type_mask[entity_id[]]
+                ) == self.entity_to_component_type_mask[entity_id[]]:
+                    entities.append(entity_id[])
+            except:
+                print("Error: get_entities_with_components")
+                pass
+        return entities
 
-        var entities_list = List[EntityID]()
-        for entity in entities:
-            entities_list.append(entity[])
-        return entities_list
+    # fn get_entity_components(
+    #     self, entity_id: EntityID, component_type_mask: ComponentTypeID
+    # ) -> List[]:
+    #     return self.entity_to_components[entity_id]
+    # )

@@ -15,6 +15,15 @@ from mo3d.ray.ray import Ray
 from mo3d.ray.hit_record import HitRecord
 from mo3d.ray.hittable_list import HittableList
 
+from mo3d.ecs.entity import EntityID
+from mo3d.ecs.component import (
+    ComponentID,
+    ComponentType,
+    PositionComponent,
+    GeometryComponent,
+)
+from mo3d.ecs.component_store import ComponentStore
+
 from mo3d.gui.pil import PIL
 
 
@@ -217,7 +226,12 @@ struct Camera[
         return self._sensor_state
 
     fn render(
-        inout self, world: HittableList[T, dim], compute_time_ms: Int32, redraw_time_ns: Int32, num_samples: Int = 1
+        inout self,
+        store: ComponentStore[T, dim],
+        compute_time_ms: Int32,
+        redraw_time_ns: Int32,
+        num_samples: Int = 1
+        # inout self, world: HittableList[T, dim], compute_time_ms: Int32, redraw_time_ns: Int32, num_samples: Int = 1
     ) raises:
         """
         Parallelize render, one row for each thread.
@@ -230,6 +244,21 @@ struct Camera[
         if self._sensor_samples > max_samples:
             return
 
+        # Get hittable components
+        var hittables = store.get_entities_with_components(
+            ComponentType.Position | ComponentType.Geometry
+        )
+
+        var hittable_positions = List[ComponentID]()
+        var hittable_geometeries = List[ComponentID]()
+        for hittable in hittables:
+            hittable_positions.append(
+                store.entity_to_components[hittable[]][ComponentType.Position]
+            )
+            hittable_geometeries.append(
+                store.entity_to_components[hittable[]][ComponentType.Geometry]
+            )
+
         @parameter
         fn compute_row(y: Int):
             @parameter
@@ -239,7 +268,13 @@ struct Camera[
                 var pixel_color = Color4[T](0, 0, 0, 0)
                 for _ in range(num_samples):
                     var r = self.get_ray(x, y)
-                    pixel_color += Self._ray_color(r, max_depth, world)
+                    pixel_color += Self._ray_color(
+                        r,
+                        max_depth,
+                        store,
+                        hittable_positions,
+                        hittable_geometeries,
+                    )
                 pixel_color *= pixel_samples_scale.cast[T]()
 
                 # Progressively store the color in the render state
@@ -289,9 +324,24 @@ struct Camera[
 
         parallelize[compute_row](height, height)
 
+        _ = hittable_positions
+        _ = hittable_geometeries
+
         var p = PIL()
-        p.render_to_texture[T](self._sensor_state, width, 10, 10, "average compute: " + str(compute_time_ms) + " ms")
-        p.render_to_texture(self._sensor_state, width, 10, 25, "average redraw: " + str(redraw_time_ns) + " ns")
+        p.render_to_texture[T](
+            self._sensor_state,
+            width,
+            10,
+            10,
+            "average compute: " + str(compute_time_ms) + " ms",
+        )
+        p.render_to_texture(
+            self._sensor_state,
+            width,
+            10,
+            25,
+            "average redraw: " + str(redraw_time_ns) + " ns",
+        )
 
     fn get_ray(self, i: Int, j: Int) -> Ray[T, dim]:
         var offset = Self._sample_square()
@@ -331,27 +381,42 @@ struct Camera[
     @staticmethod
     @parameter
     fn _ray_color(
-        r: Ray[T, dim], depth: Int, world: HittableList[T, dim]
+        # r: Ray[T, dim], depth: Int, world: HittableList[T, dim]
+        r: Ray[T, dim],
+        depth: Int,
+        store: ComponentStore[T, dim],
+        hittable_positions: List[ComponentID],
+        hittable_geometeries: List[ComponentID],
     ) -> Color4[T]:
         """
-        Sadly can't get the generic hittable trait as argument type to work :(.
+        This is the first ECS 'system' like function that we're implementing in mo3d.
         """
         if depth <= 0:
             return Color4[T](0, 0, 0, 0)
 
         var rec = HitRecord[T, dim]()
 
-        if world.hit(r, Interval[T](0.001, inf[T]()), rec):
-            var scattered = Ray[T, dim]()
-            var attenuation = Color4[T]()
-            try:
-                if rec.mat.scatter(r, rec, attenuation, scattered):
-                    return attenuation * Self._ray_color(
-                        scattered, depth - 1, world
-                    )
-            except:
-                pass
-            return Color4[T](0, 0, 0, 0)
+
+        for entity in range(len(hittable_positions)):
+            var pos = store.position_components[hittable_positions[entity]]
+            var geom = store.geometry_components[hittable_geometeries[entity]]
+
+            # if world.hit(r, Interval[T](0.001, inf[T]()), rec):
+            if geom.hit(r, Interval[T](0.001, inf[T]()), rec):
+                var scattered = Ray[T, dim]()
+                var attenuation = Color4[T]()
+                try:
+                    if rec.mat.scatter(r, rec, attenuation, scattered):
+                        return attenuation * Self._ray_color(
+                            scattered,
+                            depth - 1,
+                            store,
+                            hittable_positions,
+                            hittable_geometeries,
+                        )
+                except:
+                    pass
+                return Color4[T](0, 0, 0, 0)
 
         var unit_direction = Vec.unit(r.dir)
         var a = 0.5 * (unit_direction[1] + 1.0)

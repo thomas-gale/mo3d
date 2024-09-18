@@ -18,27 +18,34 @@ struct Geometry[T: DType, dim: Int]:
     var _hittable: Self.Variant
 
     fn __init__(inout self, hittable: Self.Variant) raises:
-        self._hittable = hittable
-        # if hittable.isa[Sphere[T, dim]]():
-        #     self._hittable = hittable
+        if hittable.isa[Sphere[T, dim]]():
+            self._hittable = hittable
         # elif hittable.isa[BVHNode[T, dim]]():
         #     self._hittable = hittable
-        # else:
-        #     raise Error("Hittable c'tor: Unsupported hittable type")
+        else:
+            raise Error("Hittable c'tor: Unsupported hittable type")
 
-    # fn hit(
-    #     self,
-    #     r: Ray[T, dim],
-    #     owned ray_t: Interval[T],
-    #     inout rec: HitRecord[T, dim],
-    # ) -> Bool:
-    #     if self._hittable.isa[Sphere[T, dim]]():
-    #         return self._hittable[Sphere[T, dim]].hit(r, ray_t, rec)
-    #     # elif self._hittable.isa[BVHNode[T, dim]]():
-    #     #     return self._hittable[BVHNode[T, dim]].hit(r, ray_t, rec)
-    #     else:
-    #         print("Hittable hit: Unsupported hittable type")
-    #         return False
+    fn hit(
+        self,
+        r: Ray[T, dim],
+        owned ray_t: Interval[T],
+        inout rec: HitRecord[T, dim],
+    ) -> Bool:
+        if self._hittable.isa[Sphere[T, dim]]():
+            return self._hittable[Sphere[T, dim]].hit(r, ray_t, rec)
+        # elif self._hittable.isa[BVHNode[T, dim]]():
+        #     return self._hittable[BVHNode[T, dim]].hit(r, ray_t, rec)
+        else:
+            print("Hittable hit: Unsupported hittable type")
+            return False
+
+    fn __str__(self) -> String:
+        if self._hittable.isa[Sphere[T, dim]]():
+            return str(self._hittable[Sphere[T, dim]])
+        # elif self._hittable.isa[BVHNode[T, dim]]():
+        #     return "Geometry(BVHNode)"
+        else:
+            return "Geometry(Unknown)"
 
     # fn bounding_box(self) -> AABB[T, dim]:
     #     if self._hittable.isa[Sphere[T, dim]]():

@@ -20,7 +20,6 @@ struct Sphere[T: DType, dim: Int](CollectionElement):
     # var _mat: Material[T, dim]  # TODO: this will be moved to my ECS shortly
     # var _bounding_box: AABB[T, dim] # TODO: As will this ^^
 
-
     fn __init__(
         inout self,
         center: Point[T, dim],
@@ -34,7 +33,7 @@ struct Sphere[T: DType, dim: Int](CollectionElement):
         self._radius = radius
         # self._mat = mat
 
-        # TODO Refactor 
+        # TODO Refactor
         # var rvec = Vec[T, dim](self._radius)
         # var b1 = AABB[T, dim](
         #     self._center.at(0) - rvec,
@@ -60,7 +59,7 @@ struct Sphere[T: DType, dim: Int](CollectionElement):
         self._radius = radius
         # self._mat = mat
 
-        # TODO Refactor 
+        # TODO Refactor
         # var rvec = Vec[T, dim](self._radius)
         # var b1 = AABB[T, dim](
         #     self._center.at(0) - rvec,
@@ -104,6 +103,11 @@ struct Sphere[T: DType, dim: Int](CollectionElement):
         # rec.mat = self._mat
 
         return True
+
+    fn __str__(self) -> String:
+        return (
+            "Sphere(center=" + str(self._center) + ", radius=" + str(self._radius) + ")"
+        )
 
 
 fn hit_sphere[

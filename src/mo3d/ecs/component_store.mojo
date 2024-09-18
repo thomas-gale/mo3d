@@ -19,6 +19,7 @@ from mo3d.ecs.component import (
     BinaryChildrenComponent,
 )
 
+
 @value
 struct ComponentStore[T: DType, dim: Int]:
     """
@@ -214,6 +215,26 @@ struct ComponentStore[T: DType, dim: Int]:
             raise Error("Binary children component not implemented")
         else:
             raise Error("Unknown component type")
+
+    fn add_components(
+        inout self,
+        entity_id: EntityID,
+        components: List[Self.ComponentVariants],
+    ) raises -> List[ComponentID]:
+        var component_ids = List[ComponentID]()
+        for component in components:
+            component_ids.append(self.add_component(entity_id, component))
+        return component_ids
+
+    fn add_components(
+        inout self,
+        entity_id: EntityID,
+        *components: Self.ComponentVariants,
+    ) raises -> List[ComponentID]:
+        var component_ids = List[ComponentID]()
+        for component in components:
+            component_ids.append(self.add_component(entity_id, component[]))
+        return component_ids
 
     fn entity_has_components(
         self, entity_id: EntityID, component_type_mask: ComponentTypeID

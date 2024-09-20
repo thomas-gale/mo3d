@@ -265,6 +265,7 @@ struct Camera[
                 store.entity_to_components[hitable[]][ComponentType.Material]
             )
 
+        # All captured references are unsafe references: https://docs.modular.com/mojo/roadmap#parameter-closure-captures-are-unsafe-references
         @parameter
         fn compute_row(y: Int):
             @parameter
@@ -331,7 +332,7 @@ struct Camera[
 
         parallelize[compute_row](height, height)
 
-        # Ensure that mojo doesn't optimize away the list variables till parallelize is complete
+        # Required because compute_row parametric captured values are unsafe references: https://docs.modular.com/mojo/roadmap#parameter-closure-captures-are-unsafe-references
         _ = hitable_positions
         _ = hitable_geometeries
         _ = hitable_materials

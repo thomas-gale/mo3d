@@ -1,6 +1,7 @@
 from collections import InlineArray
 
 from mo3d.math.interval import Interval
+from mo3d.math.vec import Vec
 from mo3d.math.point import Point
 from mo3d.ray.ray import Ray
 
@@ -19,12 +20,18 @@ struct AABB[T: DType, dim: Int]:
         for i in range(dim):
             self._bounds[i] = Interval[T, 1](a[i], b[i])
 
-    fn __init__(inout self, box_a: Self, box_b: Self):
+    fn __init__(inout self, owned box_a: Self, owned box_b: Self):
         self._bounds = InlineArray[Interval[T, 1], dim](
             unsafe_uninitialized=True
         )
         for i in range(dim):
             self._bounds[i] = Interval[T, 1](box_a._bounds[i], box_b._bounds[i])
+
+    fn __add__(self, vec: Vec[T, dim]) -> Self:
+        var new_box = Self()
+        for i in range(dim):
+            new_box._bounds[i] = self._bounds[i] + vec[i] 
+        return new_box
 
     fn clone(self) -> Self:
         var new_box = Self()
@@ -46,7 +53,7 @@ struct AABB[T: DType, dim: Int]:
             var size = self._bounds[i].size()
             if size > longest_size:
                 longest_size = size
-                longest_axis = i 
+                longest_axis = i
         return longest_axis
 
     fn hit(self, r: Ray[T, dim], inout ray_t: Interval[T, 1]) -> Bool:

@@ -40,6 +40,9 @@ struct Interval[T: DType, simd_size: Int = 1](CollectionElementNew):
     fn __str__(self) -> String:
         return "Interval(" + str(self.min) + ", " + str(self.max) + ")"
 
+    fn __add__(self, delta: Self.S) -> Self:
+        return Self(self.min + delta, self.max + delta)
+
     fn size(self) -> Self.S:
         return self.max - self.min
 

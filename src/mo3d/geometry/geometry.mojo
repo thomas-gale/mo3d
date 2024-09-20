@@ -5,6 +5,7 @@ from mo3d.math.vec import Vec
 from mo3d.math.point import Point
 from mo3d.ray.ray import Ray
 from mo3d.ray.hit_record import HitRecord
+
 # from mo3d.ray.hittable_list import HittableList
 # from mo3d.ray.bvh_node import BVHNode
 
@@ -25,7 +26,16 @@ struct Geometry[T: DType, dim: Int]:
         # elif hittable.isa[BVHNode[T, dim]]():
         #     self._hittable = hittable
         else:
-            raise Error("Hittable c'tor: Unsupported hittable type")
+            raise Error("Geometry c'tor: Unsupported geometry type")
+
+    fn aabb(self) -> AABB[T, dim]:
+        if self._hittable.isa[Sphere[T, dim]]():
+            return self._hittable[Sphere[T, dim]].aabb()
+        # elif self._hittable.isa[BVHNode[T, dim]]():
+        #     return self._hittable[BVHNode[T, dim]].bbox()
+        else:
+            print("Geometry aabb: Unsupported geometry type")
+            return AABB[T, dim]()
 
     fn hit(
         self,
@@ -36,7 +46,9 @@ struct Geometry[T: DType, dim: Int]:
         mat: Material[T, dim],
     ) -> Bool:
         if self._hittable.isa[Sphere[T, dim]]():
-            return self._hittable[Sphere[T, dim]].hit(r, ray_t, rec, offset, mat)
+            return self._hittable[Sphere[T, dim]].hit(
+                r, ray_t, rec, offset, mat
+            )
         # elif self._hittable.isa[BVHNode[T, dim]]():k
         #     return self._hittable[BVHNode[T, dim]].hit(r, ray_t, rec)
         else:
@@ -50,13 +62,3 @@ struct Geometry[T: DType, dim: Int]:
         #     return "Geometry(BVHNode)"
         else:
             return "Geometry(Unknown)"
-
-    # fn bounding_box(self) -> AABB[T, dim]:
-    #     if self._hittable.isa[Sphere[T, dim]]():
-    #         # return self._hittable[Sphere[T, dim]]._bounding_box
-    #         return AABB[T, dim]()
-    #     elif self._hittable.isa[BVHNode[T, dim]]():
-    #         return self._hittable[BVHNode[T, dim]]._bbox
-    #     else:
-    #         print("Hittable bounding_box: Unsupported hittable type")
-    #         return AABB[T, dim]()

@@ -35,7 +35,6 @@ struct Sphere[T: DType, dim: Int](CollectionElement):
         Generate an axis-aligned bounding box for the sphere.
         """
         var rvec = Vec[T, dim](self._radius)
-        print("rvec: ", str(rvec))
         return AABB[T, dim](
             -rvec,
             rvec,

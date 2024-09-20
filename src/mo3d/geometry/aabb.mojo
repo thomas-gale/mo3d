@@ -30,7 +30,7 @@ struct AABB[T: DType, dim: Int]:
     fn __add__(self, vec: Vec[T, dim]) -> Self:
         var new_box = Self()
         for i in range(dim):
-            new_box._bounds[i] = self._bounds[i] + vec[i] 
+            new_box._bounds[i] = self._bounds[i] + vec[i]
         return new_box
 
     fn clone(self) -> Self:
@@ -55,6 +55,12 @@ struct AABB[T: DType, dim: Int]:
                 longest_size = size
                 longest_axis = i
         return longest_axis
+
+    fn compare[axis: Int](self, other: Self) -> Bool:
+        """
+        Compare the bounding box min along the given axis.
+        """
+        return self._bounds[axis].min < other._bounds[axis].min
 
     fn hit(self, r: Ray[T, dim], inout ray_t: Interval[T, 1]) -> Bool:
         for axis in range(dim):

@@ -25,7 +25,7 @@ fn basic_three_sphere_scene_3d[
     var sphere1_entity_id = store.create_entity()
     _ = store.add_components(
         sphere1_entity_id,
-        Point[T, dim](0, 1, 0),
+        Point[T, dim](-4, 1, 0),
         Geometry[T, dim](sphere1),
         mat1,
     )
@@ -35,7 +35,7 @@ fn basic_three_sphere_scene_3d[
     var sphere2_entity_id = store.create_entity()
     _ = store.add_components(
         sphere2_entity_id,
-        Point[T, dim](-4, 1, 0),
+        Point[T, dim](0, 1, 0),
         Geometry[T, dim](sphere2),
         mat2,
     )

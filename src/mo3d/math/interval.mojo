@@ -37,6 +37,9 @@ struct Interval[T: DType, simd_size: Int = 1](CollectionElementNew):
     fn universe() -> Self:
         return Self(-inf[T](), inf[T]())
 
+    fn __str__(self) -> String:
+        return "Interval(" + str(self.min) + ", " + str(self.max) + ")"
+
     fn size(self) -> Self.S:
         return self.max - self.min
 

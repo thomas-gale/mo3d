@@ -19,7 +19,7 @@ struct HitRecord[T: DType, dim: Int]:
     fn __init__(inout self):
         self.p = Point[T, dim]()
         self.normal = Vec[T, dim]()
-        self.mat = Material[T, dim](Lambertian[T, dim](Color4[T](0.0, 0.0, 0.0)))
+        self.mat = Material[T, dim](Lambertian[T, dim](Color4[T](0.0)))
         self.t = Scalar[T]()
         self.front_face = False
 

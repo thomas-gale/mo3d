@@ -18,69 +18,28 @@ struct Sphere[T: DType, dim: Int](CollectionElement):
     """
     A n-dimensional sphere.
     """
-    var _center: Point[T, dim]
-    var _radius: Scalar[T]
-    # var _mat: Material[T, dim]  # TODO: this will be moved to my ECS shortly
-    # var _bounding_box: AABB[T, dim] # TODO: As will this ^^
 
-    fn __init__(inout self, radius: Scalar[T]):
-        """
-        Sphere defined by radius (center offset will be 0 in each dimension).
-        """
-        self._center = Point[T, dim]()
-        self._radius = radius
+    var _radius: Scalar[T]
 
     fn __init__(
         inout self,
-        center: Point[T, dim],
         radius: Scalar[T],
-        # mat: Material[T, dim],
     ):
         """
-        Sphere defined by center offset and radius.
+        Sphere defined by center position and radius.
         """
-        # self._center = Ray[T, dim](center, Vec[T, dim]())
-        self._center = center
         self._radius = radius
-        # self._mat = mat
 
-        # TODO Refactor
-        # var rvec = Vec[T, dim](self._radius)
-        # var b1 = AABB[T, dim](
-        #     self._center.at(0) - rvec,
-        #     self._center.at(0) + rvec,
-        # )
-        # var b2 = AABB[T, dim](
-        #     self._center.at(1) - rvec,
-        #     self._center.at(1) + rvec,
-        # )
-        # self._bounding_box = AABB[T, dim](b1, b2)
-
-    # fn __init__(
-    #     inout self,
-    #     center1: Point[T, dim],
-    #     center2: Point[T, dim],
-    #     radius: Scalar[T],
-    #     # mat: Material[T, dim],
-    # ):
-    #     """
-    #     Moving sphere with a given center, radius, and color.
-    #     """
-    #     self._center = Ray[T, dim](center1, center2 - center1)
-    #     self._radius = radius
-    #     # self._mat = mat
-
-    #     # TODO Refactor
-    #     # var rvec = Vec[T, dim](self._radius)
-    #     # var b1 = AABB[T, dim](
-    #     #     self._center.at(0) - rvec,
-    #     #     self._center.at(0) + rvec,
-    #     # )
-    #     # var b2 = AABB[T, dim](
-    #     #     self._center.at(1) - rvec,
-    #     #     self._center.at(1) + rvec,
-    #     # )
-    #     # self._bounding_box = AABB[T, dim](b1, b2)
+    fn aabb(self) -> AABB[T, dim]:
+        """
+        Generate an axis-aligned bounding box for the sphere.
+        """
+        var rvec = Vec[T, dim](self._radius)
+        print("rvec: ", str(rvec))
+        return AABB[T, dim](
+            -rvec,
+            rvec,
+        )
 
     fn hit(
         self,
@@ -90,8 +49,7 @@ struct Sphere[T: DType, dim: Int](CollectionElement):
         offset: Point[T, dim],
         mat: Material[T, dim],
     ) -> Bool:
-        var offset_center = self._center + offset
-        var oc = offset_center - r.orig
+        var oc = offset - r.orig
         var a = r.dir.length_squared()
         var h = r.dir.dot(oc)
         var c = oc.length_squared() - self._radius * self._radius
@@ -111,17 +69,14 @@ struct Sphere[T: DType, dim: Int](CollectionElement):
 
         rec.t = root
         rec.p = r.at(rec.t)
-        var outward_normal = (rec.p - offset_center) / self._radius
+        var outward_normal = (rec.p - offset) / self._radius
         rec.set_face_normal(r, outward_normal)
-        # rec.mat = self._mat
         rec.mat = mat
 
         return True
 
     fn __str__(self) -> String:
-        return (
-            "Sphere(center=" + str(self._center) + ", radius=" + str(self._radius) + ")"
-        )
+        return "Sphere(radius=" + str(self._radius) + ")"
 
 
 fn hit_sphere[

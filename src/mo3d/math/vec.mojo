@@ -3,6 +3,7 @@ from collections import InlineArray
 from math import sqrt
 from random import random_float64
 
+
 struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
     var _data: InlineArray[Scalar[T], size]
 
@@ -13,10 +14,19 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
         self._data = data
 
     fn __init__(inout self, owned *args: Scalar[T]):
+        """
+        If you pass in a single argument, it will be broadcasted to all elements.
+        Else, if you pass in multiple elements they will be copied up to the size of the vector.
+        """
         # We don't know for sure that the user has passed in the right number of Scalars, so we'll just initialize the vector to 0 for safety.
         self._data = InlineArray[Scalar[T], size](0.0)
+        if len(args) == 1:
+            for i in range(size):
+                self._data[i] = args[0]
         var i = 0
         for arg in args:
+            if i >= size:
+                break
             self._data[i] = arg[]
             i += 1
 
@@ -103,7 +113,6 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
     @staticmethod
     fn reflect(v: Self, n: Self) -> Self:
         return v - 2 * v.dot(n) * n
-
 
     @staticmethod
     fn refract(uv: Self, n: Self, etai_over_etat: Scalar[T]) -> Self:

@@ -172,6 +172,50 @@ struct ComponentStore[T: DType, dim: Int]:
 
         return component_id
 
+    fn _add_bounding_box_component(
+        inout self, entity_id: EntityID, component: BoundingBoxComponent[T, dim]
+    ) raises -> ComponentID:
+        if (
+            self.entity_to_component_type_mask[entity_id]
+            & ComponentType.BoundingBox
+        ):
+            raise Error("Entity already has a bounding box component")
+
+        self.bounding_box_components.append(component)
+        var component_id = ComponentID(len(self.bounding_box_components) - 1)
+        self.bounding_box_component_to_entities[component_id] = entity_id
+
+        self.entity_to_components[entity_id][
+            ComponentType.BoundingBox
+        ] = component_id
+        self.entity_to_component_type_mask[
+            entity_id
+        ] |= ComponentType.BoundingBox
+
+        return component_id
+
+    fn _add_binary_children_component(
+        inout self, entity_id: EntityID, component: BinaryChildrenComponent
+    ) raises -> ComponentID:
+        if (
+            self.entity_to_component_type_mask[entity_id]
+            & ComponentType.BinaryChildren
+        ):
+            raise Error("Entity already has a binary children component")
+
+        self.binary_children_components.append(component)
+        var component_id = ComponentID(len(self.binary_children_components) - 1)
+        self.binary_children_component_to_entities[component_id] = entity_id
+
+        self.entity_to_components[entity_id][
+            ComponentType.BinaryChildren
+        ] = component_id
+        self.entity_to_component_type_mask[
+            entity_id
+        ] |= ComponentType.BinaryChildren
+
+        return component_id
+
     fn create_entity(inout self) -> EntityID:
         """
         This implementation is not thread safe.
@@ -210,9 +254,13 @@ struct ComponentStore[T: DType, dim: Int]:
                 entity_id, component[MaterialComponent[T, dim]]
             )
         elif component.isa[BoundingBoxComponent[T, dim]]():
-            raise Error("Bounding box component not implemented")
+            return self._add_bounding_box_component(
+                entity_id, component[BoundingBoxComponent[T, dim]]
+            )
         elif component.isa[BinaryChildrenComponent]():
-            raise Error("Binary children component not implemented")
+            return self._add_binary_children_component(
+                entity_id, component[BinaryChildrenComponent]
+            )
         else:
             raise Error("Unknown component type")
 

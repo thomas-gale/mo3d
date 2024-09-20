@@ -18,7 +18,7 @@ struct Dielectric[T: DType, dim: Int](CollectionElement):
         inout attenuation: Color4[T],
         inout scattered: Ray[T, dim],
     ) -> Bool:
-        attenuation = Color4[T](1.0, 1.0, 1.0, 1.0)
+        attenuation = Color4[T](1.0)
         var ri = (
             1.0 / self.refraction_index
         ) if rec.front_face else self.refraction_index

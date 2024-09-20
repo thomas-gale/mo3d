@@ -71,3 +71,12 @@ struct AABB[T: DType, dim: Int]:
             if ray_t.max <= ray_t.min:
                 return False
         return True
+
+    fn __str__(self) -> String:
+        var s: String = "AABB("
+        for i in range(dim):
+            s += str(self._bounds[i])
+            if i < dim - 1:
+                s += ", "
+        s += ")"
+        return s

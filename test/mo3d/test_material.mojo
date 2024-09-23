@@ -31,7 +31,7 @@ fn test_lambertian_material_scatter_ray() raises:
         m,
         1.0,
         True,
-        # 0,
+        0,
     )
     var r = Ray[DType.float32, 3](
         Point[DType.float32, 3](0.0, 0.0, 1.0),

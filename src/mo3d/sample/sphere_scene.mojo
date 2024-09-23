@@ -12,7 +12,7 @@ from mo3d.material.metal import Metal
 from mo3d.material.dielectric import Dielectric
 
 
-fn sphere_scene_3d[T: DType](inout store: ComponentStore[T, 3]) raises:
+fn sphere_scene_3d[T: DType](inout store: ComponentStore[T, 3], grid_size: Int = 11) raises:
     """
     The classic end scene from the Ray Tracing in One Weekend by Peter Shirley.
     """
@@ -27,18 +27,18 @@ fn sphere_scene_3d[T: DType](inout store: ComponentStore[T, 3]) raises:
     var mat_ground = Material[T, dim](
         Lambertian[T, dim](Color4[T](0.5, 0.5, 0.5))
     )
-    var ground = Sphere[T, dim](1000)
+    var ground = Sphere[T, dim](1_000_000)
     var ground_entity_id = store.create_entity()
     _ = store.add_components(
         ground_entity_id,
-        Point[T, dim](0, -1000, 0),
+        Point[T, dim](0, -1_000_000, 0),
         Geometry[T, dim](ground),
         mat_ground,
     )
 
     # Random spheres
-    for a in range(-11, 11):
-        for b in range(-11, 11):
+    for a in range(-grid_size, grid_size):
+        for b in range(-grid_size, grid_size):
             var choose_mat = random_float()
             var center = Point[T, dim](
                 a + 0.9 * random_float(), 0.2, b + 0.9 * random_float()

@@ -61,6 +61,7 @@ fn hit_bvh[
 
         if not bbox.hit(r, ray_t):
             return False
+        rec.hits += 1
 
         var binary_children_comp_id = store.entity_to_components[bvh_entity][
             ComponentType.BinaryChildren
@@ -110,7 +111,10 @@ fn hit_geometry[
         ]
         var material = store.material_components[material_comp_id]
 
-        return geometry.hit(r, ray_t, rec, position, material)
+        var hit = geometry.hit(r, ray_t, rec, position, material)
+        if hit:
+            rec.hits += 1
+        return hit
     except:
         print("Error in hit_geometry")
         return False

@@ -15,6 +15,7 @@ struct HitRecord[T: DType, dim: Int]:
     var mat: Material[T, dim]
     var t: Scalar[T]
     var front_face: Bool
+    var hits: Int
 
     fn __init__(inout self):
         self.p = Point[T, dim]()
@@ -22,6 +23,7 @@ struct HitRecord[T: DType, dim: Int]:
         self.mat = Material[T, dim](Lambertian[T, dim](Color4[T](0.0)))
         self.t = Scalar[T]()
         self.front_face = False
+        self.hits = 0
 
     fn set_face_normal(inout self, r: Ray[T, dim], outward_normal: Vec[T, dim]):
         """

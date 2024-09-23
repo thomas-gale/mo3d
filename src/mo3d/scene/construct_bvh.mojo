@@ -19,13 +19,9 @@ fn build_bvh_nodes_recursive[
     Construct a BVH node from a list of entities.
     """
     print(
-        "Building BVH nodes for entity: ",
+        "Building BVH for entity id: ",
         entity,
-        " checking entities [",
-        start,
-        ":",
-        end,
-        ")",
+        " contains entitie ids [" + str(start) + ":" + str(end) + ")",
     )
 
     # Build the bounding box of the span of source objects.
@@ -109,17 +105,10 @@ fn construct_bvh[
     ECS 'system' to construct a BVH from all components in store with position and geometry.
     Returns the root entity ID of the BVH.
     """
-
-    print("Constructing a BVH from all components with position and geometry")
-
+    print("Constructing BVH...")
     # Get all entities with position and geometry components
     var entities = store.get_entities_with_components(
         ComponentType.Position | ComponentType.Geometry
-    )
-
-    print(
-        "Number of entities with position and geometry components: ",
-        len(entities),
     )
 
     var root = store.create_entity()
@@ -131,5 +120,6 @@ fn construct_bvh[
         len(entities),
     )
     _ = entities
+    print("Constructed BVH! Root entity id:", root)
 
     return root

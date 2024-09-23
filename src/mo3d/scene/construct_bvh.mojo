@@ -21,7 +21,7 @@ fn build_bvh_nodes_recursive[
     print(
         "Building BVH for entity id: ",
         entity,
-        " contains entitie ids [" + str(start) + ":" + str(end) + ")",
+        " contains entitiy ids [" + str(start) + ":" + str(end) + ")",
     )
 
     # Build the bounding box of the span of source objects.

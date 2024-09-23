@@ -44,6 +44,8 @@ Key features aim to include an experimental ECS-based architecture for efficient
 - I need to profile the hotspots and try to think if there are improvements. This traversal implementation (on the small scenes I've been testing so far, is actually about 4x slower than the simple hittable list implementation I was using previously).
 - While it's slower for small scenes, for large scenes, the acceleration is approximately O(4*log2(n)). For example, while it's taking ~8s per frame for ~400 spheres, it's only taking ~22s for ~90K spheres.
 
+<img width="797" alt="Screenshot 2024-09-23 at 22 38 51" src="https://github.com/user-attachments/assets/5628f425-506b-4b9a-ac82-2b3810845343">
+
 ### 2024-09-18: basic migration to ecs!
 - ECS ComponentStore basic implementation working - getting component data out of it is still a little ugly (the renderer in camera is the only system using this component store right now)
 - Building a ECS scene is fairly straightfoward, `sphere_scene` shows an ECS migration of the current test scene.

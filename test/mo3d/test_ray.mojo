@@ -29,9 +29,9 @@ fn test_create_empty_ray() raises:
 fn test_hit_entity() raises:
     var store = ComponentStore[f32, 3]()
     basic_three_sphere_scene_3d(store)
-    assert_equal(len(store.entity_to_components), 3)
+    assert_equal(len(store.entity_to_components), 4)
     var root_entity = construct_bvh(store)
-    assert_equal(root_entity, 3)
+    assert_equal(root_entity, 4)
 
     var r = Ray[DType.float32, 3](
         Point[f32, 3](0.0, 1.0, 5.0), Vec[f32, 3](0.0, 0.0, -1.0)
@@ -45,9 +45,9 @@ fn test_hit_entity() raises:
 fn test_miss_entity() raises:
     var store = ComponentStore[f32, 3]()
     basic_three_sphere_scene_3d(store)
-    assert_equal(len(store.entity_to_components), 3)
+    assert_equal(len(store.entity_to_components), 4)
     var root_entity = construct_bvh(store)
-    assert_equal(root_entity, 3)
+    assert_equal(root_entity, 4)
 
     var r = Ray[DType.float32, 3](
         Point[f32, 3](6.0, 1.0, 5.0), Vec[f32, 3](0.0, 0.0, -1.0)

@@ -44,17 +44,15 @@ fn main() raises:
     alias fov = 20
     alias aperature = 0.6
     alias width = 800
-    # alias width = 1
     alias height = 450
-    # alias height = 1
     alias channels = 4
     alias max_depth = 8
     alias max_samples = 1024 * 1024
 
     # ECS
     var store = ComponentStore[float_type, 3]()
-    # basic_three_sphere_scene_3d[float_type](store)
-    sphere_scene_3d[float_type](store)
+    basic_three_sphere_scene_3d[float_type](store)
+    # sphere_scene_3d[float_type](store)
     var bvh_root_entity = construct_bvh(store)
 
     # Camera
@@ -100,7 +98,6 @@ fn main() raises:
         frame_duration = frame_duration / 10**9
         if frame_duration < 1.0 / Float64(max_fps):
             sleep(1.0 / Float64(max_fps) - frame_duration)
-        # break
 
     # DEBUG
     _ = store

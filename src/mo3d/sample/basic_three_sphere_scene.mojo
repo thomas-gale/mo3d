@@ -20,6 +20,19 @@ fn basic_three_sphere_scene_3d[
     """
     alias dim = 3
 
+    # Ground
+    var mat_ground = Material[T, dim](
+        Lambertian[T, dim](Color4[T](0.5, 0.5, 0.5))
+    )
+    var ground = Sphere[T, dim](1000)
+    var ground_entity_id = store.create_entity()
+    _ = store.add_components(
+        ground_entity_id,
+        Point[T, dim](0, -1000, 0),
+        Geometry[T, dim](ground),
+        mat_ground,
+    )
+
     var mat1 = Material[T, dim](Lambertian[T, dim](Color4[T](0.2, 0.8, 0.3)))
     var sphere1 = Sphere[T, dim](1.0)
     var sphere1_entity_id = store.create_entity()

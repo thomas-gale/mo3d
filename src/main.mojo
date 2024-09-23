@@ -19,8 +19,6 @@ from mo3d.ray.ray import Ray
 from mo3d.ray.color4 import Color4
 from mo3d.ray.hit_record import HitRecord
 
-# from mo3d.ray.hittable import Hittable
-# from mo3d.ray.hittable_list import HittableList
 from mo3d.material.material import Material
 from mo3d.material.lambertian import Lambertian
 from mo3d.material.metal import Metal
@@ -31,6 +29,8 @@ from mo3d.camera.camera import Camera
 from mo3d.window.sdl2_window import SDL2Window
 
 from mo3d.ecs.component_store import ComponentStore
+from mo3d.scene.construct_bvh import construct_bvh
+from mo3d.sample.basic_three_sphere_scene import basic_three_sphere_scene_3d
 from mo3d.sample.sphere_scene import sphere_scene_3d
 
 
@@ -44,14 +44,18 @@ fn main() raises:
     alias fov = 20
     alias aperature = 0.6
     alias width = 800
+    # alias width = 1
     alias height = 450
+    # alias height = 1
     alias channels = 4
     alias max_depth = 8
     alias max_samples = 1024 * 1024
 
     # ECS
     var store = ComponentStore[float_type, 3]()
-    sphere_scene_3d[float_type](store)
+    basic_three_sphere_scene_3d[float_type](store)
+    # sphere_scene_3d[float_type](store)
+    var bvh_root_entity = construct_bvh(store)
 
     # Camera
     var camera = Camera[
@@ -79,6 +83,7 @@ fn main() raises:
         start_time = now()
         camera.render(
             store,
+            bvh_root_entity,
             average_compute_time.cast[DType.int32]() / 10**6,
             average_redraw_time.cast[DType.int32]() / 10**3,
         )
@@ -95,6 +100,7 @@ fn main() raises:
         frame_duration = frame_duration / 10**9
         if frame_duration < 1.0 / Float64(max_fps):
             sleep(1.0 / Float64(max_fps) - frame_duration)
+        # break
 
     # DEBUG
     _ = store

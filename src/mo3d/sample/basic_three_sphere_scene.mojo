@@ -20,7 +20,7 @@ fn basic_three_sphere_scene_3d[
     """
     alias dim = 3
 
-    var mat1 = Material[T, dim](Dielectric[T, dim](1.5))
+    var mat1 = Material[T, dim](Lambertian[T, dim](Color4[T](0.2, 0.8, 0.3)))
     var sphere1 = Sphere[T, dim](1.0)
     var sphere1_entity_id = store.create_entity()
     _ = store.add_components(

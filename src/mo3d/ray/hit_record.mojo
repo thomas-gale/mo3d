@@ -31,3 +31,16 @@ struct HitRecord[T: DType, dim: Int]:
 
         self.front_face = r.dir.dot(outward_normal) < 0
         self.normal = outward_normal if self.front_face else -outward_normal
+
+    fn __str__(self) -> String:
+        return (
+            "HitRecord(p: "
+            + str(self.p)
+            + ", normal: "
+            + str(self.normal)
+            + ", t: "
+            + str(self.t)
+            + ", front_face: "
+            + str(self.front_face)
+            + ")"
+        )

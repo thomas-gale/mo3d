@@ -43,7 +43,7 @@ struct Sphere[T: DType, dim: Int](CollectionElement):
     fn hit(
         self,
         r: Ray[T, dim],
-        ray_t: Interval[T],
+        owned ray_t: Interval[T],
         inout rec: HitRecord[T, dim],
         offset: Point[T, dim],
         mat: Material[T, dim],

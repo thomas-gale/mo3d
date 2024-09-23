@@ -62,7 +62,7 @@ struct AABB[T: DType, dim: Int]:
         """
         return self._bounds[axis].min < other._bounds[axis].min
 
-    fn hit(self, r: Ray[T, dim], inout ray_t: Interval[T, 1]) -> Bool:
+    fn hit(self, r: Ray[T, dim], owned ray_t: Interval[T, 1]) -> Bool:
         for axis in range(dim):
             var ax = self.axis_interval(axis)
             var adinv = 1.0 / r.dir[axis]

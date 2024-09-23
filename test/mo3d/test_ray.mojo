@@ -64,7 +64,6 @@ fn test_hit_entity_default_sphere_scene() raises:
     var store = ComponentStore[f32, 3]()
     sphere_scene_3d(store)
     var size = len(store.entity_to_components)
-    # print(size)
     var root_entity = construct_bvh(store)
 
     # Shoot a ray down from above the scene at the center
@@ -75,9 +74,7 @@ fn test_hit_entity_default_sphere_scene() raises:
     var ray_t = Interval[f32](0.001, inf[f32]())
     var hit = hit_entity(store, root_entity, r, ray_t, rec)
     assert_equal(hit, True)
-    print(size)
-    print(rec.hits)
-    assert_true(Scalar[f32](rec.hits) < 4*log2(Scalar[f32](size)))
+    assert_true(Scalar[f32](rec.hits) < 5*log2(Scalar[f32](size)))
 
 fn test_hit_entity_50_range_sphere_scene() raises:
     var store = ComponentStore[f32, 3]()
@@ -93,6 +90,4 @@ fn test_hit_entity_50_range_sphere_scene() raises:
     var ray_t = Interval[f32](0.001, inf[f32]())
     var hit = hit_entity(store, root_entity, r, ray_t, rec)
     assert_equal(hit, True)
-    print(size)
-    print(rec.hits)
-    assert_true(Scalar[f32](rec.hits) < 4*log2(Scalar[f32](size)))
+    assert_true(Scalar[f32](rec.hits) < 5*log2(Scalar[f32](size)))

@@ -18,7 +18,10 @@ struct AABB[T: DType, dim: Int]:
             unsafe_uninitialized=True
         )
         for i in range(dim):
-            self._bounds[i] = Interval[T, 1](a[i], b[i])
+            if a[i] < b[i]:
+                self._bounds[i] = Interval[T, 1](a[i], b[i])
+            else:
+                self._bounds[i] = Interval[T, 1](b[i], a[i])
 
     fn __init__(inout self, owned box_a: Self, owned box_b: Self):
         self._bounds = InlineArray[Interval[T, 1], dim](
@@ -63,12 +66,15 @@ struct AABB[T: DType, dim: Int]:
         return self._bounds[axis].min < other._bounds[axis].min
 
     fn hit(self, r: Ray[T, dim], owned ray_t: Interval[T, 1]) -> Bool:
+        """
+        Check if the ray intersects the bounding box.
+        """
         for axis in range(dim):
             var ax = self.axis_interval(axis)
             var adinv = 1.0 / r.dir[axis]
 
             var t0 = (ax.min - r.orig[axis]) * adinv
-            var t1 = (ax.max - r.dir[axis]) * adinv
+            var t1 = (ax.max - r.orig[axis]) * adinv
 
             if t0 < t1:
                 if t0 > ray_t.min:
@@ -80,7 +86,7 @@ struct AABB[T: DType, dim: Int]:
                     ray_t.min = t1
                 if t0 < ray_t.max:
                     ray_t.max = t0
-
+            
             if ray_t.max <= ray_t.min:
                 return False
         return True

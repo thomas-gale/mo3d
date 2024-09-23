@@ -47,8 +47,6 @@ fn build_bvh_nodes_recursive[
     var axis = bbox.longest_axis()
     var span = end - start
 
-    # print("Axis: ", axis, " Span: ", span)
-
     if span == 1:
         # Leaf node, add a bvh wrapper around the entity
         var entity_binary_children = BinaryChildrenComponent(

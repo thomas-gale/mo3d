@@ -70,12 +70,8 @@ struct Camera[
         inout self,
     ) raises -> None:
         # Set default field of view, starting position (look from), target (look at) and orientation (up vector)
-        # self._look_from = Point[T, dim](13, 2, 3)
-        # self._look_at = Point[T, dim](0, 0, 0)
-
-        self._look_from = Point[T, dim](0, 0, 15)
-        self._look_at = Point[T, dim](0, 1, 0)
-
+        self._look_from = Point[T, dim](13, 2, 3)
+        self._look_at = Point[T, dim](0, 0, 0)
         self._vup = Vec[T, dim](0, 1, 0)
 
         # Determine viewport dimensions
@@ -236,39 +232,16 @@ struct Camera[
         compute_time_ms: Int32,
         redraw_time_ns: Int32,
         num_samples: Int = 1
-        # inout self, world: HittableList[T, dim], compute_time_ms: Int32, redraw_time_ns: Int32, num_samples: Int = 1
     ) raises:
         """
         Parallelize render, one row for each thread.
         TODO: Switch to one thread per pixel and compare performance (one we're running on GPU).
         """
-
         self._sensor_samples += 1
 
         # Don't render more than max_samples
         if self._sensor_samples > max_samples:
             return
-
-        # Get hittable components
-        # var hitables = store.get_entities_with_components(
-        #     ComponentType.Position
-        #     | ComponentType.Geometry
-        #     | ComponentType.Material
-        # )
-
-        # var hitable_positions = List[ComponentID]()
-        # var hitable_geometeries = List[ComponentID]()
-        # var hitable_materials = List[ComponentID]()
-        # for hitable in hitables:
-        #     hitable_positions.append(
-        #         store.entity_to_components[hitable[]][ComponentType.Position]
-        #     )
-        #     hitable_geometeries.append(
-        #         store.entity_to_components[hitable[]][ComponentType.Geometry]
-        #     )
-        #     hitable_materials.append(
-        #         store.entity_to_components[hitable[]][ComponentType.Material]
-        #     )
 
         # All captured references are unsafe references: https://docs.modular.com/mojo/roadmap#parameter-closure-captures-are-unsafe-references
         @parameter
@@ -285,9 +258,6 @@ struct Camera[
                         max_depth,
                         store,
                         bvh_root_entity,
-                        # hitable_positions,
-                        # hitable_geometeries,
-                        # hitable_materials,
                     )
                 pixel_color *= pixel_samples_scale.cast[T]()
 
@@ -338,27 +308,22 @@ struct Camera[
 
         parallelize[compute_row](height, height)
 
-        # Required because compute_row parametric captured values are unsafe references: https://docs.modular.com/mojo/roadmap#parameter-closure-captures-are-unsafe-references
-        # _ = hitable_positions
-        # _ = hitable_geometeries
-        # _ = hitable_materials
-
         # Some experimental code to render text to the texture
-        # var p = PIL()
-        # p.render_to_texture[T](
-        #     self._sensor_state,
-        #     width,
-        #     10,
-        #     10,
-        #     "average compute: " + str(compute_time_ms) + " ms",
-        # )
-        # p.render_to_texture(
-        #     self._sensor_state,
-        #     width,
-        #     10,
-        #     25,
-        #     "average redraw: " + str(redraw_time_ns) + " ns",
-        # )
+        var p = PIL()
+        p.render_to_texture[T](
+            self._sensor_state,
+            width,
+            10,
+            10,
+            "average compute: " + str(compute_time_ms) + " ms",
+        )
+        p.render_to_texture(
+            self._sensor_state,
+            width,
+            10,
+            25,
+            "average redraw: " + str(redraw_time_ns) + " ns",
+        )
 
     fn get_ray(self, i: Int, j: Int) -> Ray[T, dim]:
         var offset = Self._sample_square()
@@ -402,9 +367,6 @@ struct Camera[
         depth: Int,
         store: ComponentStore[T, dim],
         bvh_root_entity: EntityID,
-        # hitable_positions: List[ComponentID],
-        # hitable_geometeries: List[ComponentID],
-        # hitable_materials: List[ComponentID],
     ) -> Color4[T]:
         """
         This is the first ECS 'system' like function that we're implementing in mo3d.
@@ -412,26 +374,9 @@ struct Camera[
         if depth <= 0:
             return Color4[T](0, 0, 0, 0)
 
-        # TODO: Tidy massively (this 'system' is a mess)
-        # First stage find the closest hit (this used to be handled by the HittableList)
+        # BVH traversal
         var ray_t = Interval[T](0.001, inf[T]())
         var rec = HitRecord[T, dim]()
-        # var temp_rec = HitRecord[T, dim]()
-        # var hit_anything = False
-        # var closest_so_far = ray_t.max
-
-        # for entity in range(len(hitable_positions)):
-        #     var pos = store.position_components[hitable_positions[entity]]
-        #     var geom = store.geometry_components[hitable_geometeries[entity]]
-        #     var mat = store.material_components[hitable_materials[entity]]
-        #     if geom.hit(
-        #         r, Interval(ray_t.min, closest_so_far), temp_rec, pos, mat
-        #     ):
-        #         hit_anything = True
-        #         closest_so_far = temp_rec.t
-        #         rec = temp_rec
-
-        # BVH traversal
         var hit_anything = hit_entity(store, bvh_root_entity, r, ray_t, rec)
 
         # If we hit something, scatter the ray and recurse
@@ -445,9 +390,6 @@ struct Camera[
                         depth - 1,
                         store,
                         bvh_root_entity,
-                        # hitable_positions,
-                        # hitable_geometeries,
-                        # hitable_materials,
                     )
             except:
                 pass

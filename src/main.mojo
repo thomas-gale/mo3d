@@ -53,8 +53,8 @@ fn main() raises:
 
     # ECS
     var store = ComponentStore[float_type, 3]()
-    basic_three_sphere_scene_3d[float_type](store)
-    # sphere_scene_3d[float_type](store)
+    # basic_three_sphere_scene_3d[float_type](store)
+    sphere_scene_3d[float_type](store)
     var bvh_root_entity = construct_bvh(store)
 
     # Camera

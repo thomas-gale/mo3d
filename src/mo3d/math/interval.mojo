@@ -2,7 +2,6 @@ from math import inf
 
 
 @value
-@register_passable("trivial")
 struct Interval[T: DType, simd_size: Int = 1](CollectionElementNew):
     alias S = SIMD[T, simd_size]
     var min: Self.S

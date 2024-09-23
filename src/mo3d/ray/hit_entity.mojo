@@ -24,8 +24,6 @@ fn hit_entity[
     """
     ECS 'system' to intersect a ray with an entity in the component store.
     """
-    # print("Shooting ray at entity", entity)
-    # print("ray_t", str(ray_t))
     # Is the entity a BVH or Leaf Geometry?
     if store.entity_has_components(
         entity, ComponentType.BoundingBox | ComponentType.BinaryChildren
@@ -60,18 +58,9 @@ fn hit_bvh[
             ComponentType.BoundingBox
         ]
         var bbox = store.bounding_box_components[bbox_comp_id]
-        # print("bbox for ", bvh_entity, str(bbox))
 
         if not bbox.hit(r, ray_t):
-            # print("missed bvh entity:", bvh_entity)
             return False
-        # print("hit bvh entity:", bvh_entity)
-
-        # WIP: Darken the recorded material color for each level of recursion
-        # if rec.mat._mat.isa[Lambertian[T, dim]]():
-        #     rec.mat._mat[Lambertian[T, dim]].albedo *= 0.9
-        # elif rec.mat._mat.isa[Metal[T, dim]]():
-        #     rec.mat._mat[Metal[T, dim]].albedo *= 0.9
 
         var binary_children_comp_id = store.entity_to_components[bvh_entity][
             ComponentType.BinaryChildren
@@ -85,12 +74,10 @@ fn hit_bvh[
             store,
             binary_children.right,
             r,
-             Interval(ray_t.min, rec.t if hit_left else ray_t.max),
+            Interval(ray_t.min, rec.t if hit_left else ray_t.max), # If hit on left, limit right ray_t max to hit point on left
             rec,
         )
-
         return hit_left or hit_right
-        # return False
     except:
         print("Error in hit_bvh")
         return False
@@ -122,16 +109,6 @@ fn hit_geometry[
             ComponentType.Material
         ]
         var material = store.material_components[material_comp_id]
-
-        # var hit = geometry.hit(r, ray_t, rec, position, material)
-        # if hit:
-        #     pass
-        #     print("hit geometry entity:", geometry_entity)
-        #     print("rec.t", rec.t)
-        # else: 
-        #     pass
-        #     print("missed geometry entity:", geometry_entity)
-        # return hit
 
         return geometry.hit(r, ray_t, rec, position, material)
     except:

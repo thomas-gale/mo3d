@@ -70,6 +70,18 @@ fn test_hit_aabb() raises:
     var aabb = AABB[ft, 3](a, b)
 
     var r = Ray[ft, 3](Point[ft, 3](0.0, 0.0, 5.0), Vec[ft, 3](0.0, 0.0, -1.0))
-    var ray_t = Interval[ft](-10, 10)
+    var ray_t = Interval[ft](0.001, 100)
     var hit = aabb.hit(r, ray_t)
     assert_true(hit)
+
+fn test_miss_aabb() raises:
+    var a = Point[ft, 3](-1, -1, -1)
+    var b = Point[ft, 3](1, 1, 1)
+    var aabb = AABB[ft, 3](a, b)
+
+    var r = Ray[ft, 3](Point[ft, 3](0.0001, 3, 5.0), Vec[ft, 3](0.0001, 0.0001, -1.0))
+    var ray_t = Interval[ft](0.001, 100)
+    var hit = aabb.hit(r, ray_t)
+    assert_false(hit)
+
+

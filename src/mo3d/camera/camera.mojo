@@ -230,9 +230,9 @@ struct Camera[
         inout self,
         store: ComponentStore[T, dim],
         bvh_root_entity: EntityID,
-        compute_time_ms: Int32,
-        redraw_time_ns: Int32,
-        num_samples: Int = 1
+        compute_time_ms: Int64,
+        redraw_time_ns: Int64,
+        num_samples: Int = 1,
     ) raises:
         """
         Parallelize render, one row for each thread.

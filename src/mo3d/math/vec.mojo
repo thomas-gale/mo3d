@@ -146,6 +146,12 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
                 result += ", "
         return result
 
+    fn __abs__(self) -> Self:
+        var result = Self()
+        for i in range(size):
+            result._data[i] = abs(self._data[i])
+        return result
+
     fn __lt__(self, rhs: Self) -> Bool:
         """Lexical comparison."""
 
@@ -252,6 +258,13 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
         for i in range(size):
             result._data[i] = self._data[i] / rhs
         return result
+
+    fn __rtruediv__(self, lhs: SIMD[T, 1]) -> Self:
+        var result = Self()
+        for i in range(size):
+            result._data[i] = lhs / self._data[i] 
+        return result
+
 
     fn __itruediv__(inout self, rhs: SIMD[T, 1]):
         for i in range(size):

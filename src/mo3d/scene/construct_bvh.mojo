@@ -19,11 +19,11 @@ fn build_bvh_nodes_recursive[
     """
     Construct a BVH node from a list of entities.
     """
-    print(
-        "Building BVH for entity id: ",
-        entity,
-        " contains entitiy ids [" + str(start) + ":" + str(end) + ")",
-    )
+    # print(
+    #     "Building BVH for entity id: ",
+    #     entity,
+    #     " contains entitiy ids [" + str(start) + ":" + str(end) + ")",
+    # )
 
     # Build the bounding box of the span of source objects.
     var bbox = AABB[T, dim]()

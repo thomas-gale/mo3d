@@ -51,8 +51,8 @@ fn main() raises:
 
     # ECS
     var store = ComponentStore[float_type, 3]()
-    basic_three_sphere_scene_3d[float_type](store)
-    # sphere_scene_3d[float_type](store)
+    # basic_three_sphere_scene_3d[float_type](store)
+    sphere_scene_3d[float_type](store)
     var bvh_root_entity = construct_bvh(store)
 
     # Camera
@@ -69,10 +69,9 @@ fn main() raises:
 
     # Collect timing stats - TODO: Tidy and move
     var start_time = now()
-    var alpha = 0.1
     var frame_duration = 0.0
-    var average_compute_time = 0.0
-    var average_redraw_time = 0.0
+    var last_compute_time = 0.0
+    var last_redraw_time = 0.0
 
     # Create window and start the main loop
     var window = SDL2Window.create("mo3d", width, height)
@@ -82,20 +81,14 @@ fn main() raises:
         camera.render(
             store,
             bvh_root_entity,
-            average_compute_time.cast[DType.int32]() / 10**6,
-            average_redraw_time.cast[DType.int32]() / 10**3,
+            last_compute_time.cast[DType.int64]() / 10**6,
+            last_redraw_time.cast[DType.int64]() / 10**3,
         )
-        average_compute_time = (1.0 - alpha) * average_compute_time + alpha * (
-            now() - start_time
-        )
-        frame_duration = now() - start_time
+        last_compute_time = now() - start_time
         start_time = now()
         window.redraw[float_type](camera.get_state(), channels)
-        average_redraw_time = (1.0 - alpha) * average_redraw_time + alpha * (
-            now() - start_time
-        )
-        frame_duration += now() - start_time
-        frame_duration = frame_duration / 10**9
+        last_redraw_time = now() - start_time
+        frame_duration = (last_compute_time + last_redraw_time) / 10**9
         if frame_duration < 1.0 / Float64(max_fps):
             sleep(1.0 / Float64(max_fps) - frame_duration)
 
@@ -104,13 +97,13 @@ fn main() raises:
 
     # Print stats
     print(
-        "Average compute time: ",
-        str(average_compute_time / (1000 * 1000)),
+        "Last compute time: ",
+        str(last_compute_time / (1000 * 1000)),
         " ms",
     )
     print(
-        "Average redraw time: ",
-        str(average_redraw_time / (1000 * 1000)),
+        "Last redraw time: ",
+        str(last_redraw_time / (1000 * 1000)),
         " ms",
     )
     print("-- Goodbye, mo3d! --")

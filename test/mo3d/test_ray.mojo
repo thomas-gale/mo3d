@@ -50,10 +50,10 @@ fn test_miss_entity() raises:
     assert_equal(root_entity, 4)
 
     var r = Ray[DType.float32, 3](
-        Point[f32, 3](6.0, 1.0, 5.0), Vec[f32, 3](0.0, 0.0, -1.0)
+        Point[f32, 3](20.0, 20.0, 5.0), Vec[f32, 3](0.0, 0.0, -1.0)
     )
     var rec = HitRecord[f32, 3]()
-    var ray_t = Interval[f32](-10, 10)
+    var ray_t = Interval[f32](0.001, inf[f32]())
     var hit = hit_entity(store, root_entity, r, ray_t, rec)
     assert_equal(hit, False)
 

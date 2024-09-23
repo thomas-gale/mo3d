@@ -1,4 +1,5 @@
 from testing import assert_true, assert_false, assert_equal, assert_almost_equal
+from memory import UnsafePointer
 from os import getenv
 
 from mo3d.window.window import Window

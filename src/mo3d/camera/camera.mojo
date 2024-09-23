@@ -1,6 +1,7 @@
 from algorithm import parallelize, vectorize
 from math import inf, iota, pi
 from math.math import tan
+from memory import UnsafePointer
 from random import random_float64
 
 from max.tensor import Tensor

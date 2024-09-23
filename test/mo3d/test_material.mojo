@@ -25,8 +25,6 @@ fn test_lambertian_material_scatter_ray() raises:
     var m = Material[DType.float32, 3](Lambertian[DType.float32, 3](
         Color4[DType.float32](0.5, 0.5, 0.5, 1.0)
     ))
-    # var m_ptr = UnsafePointer[Material[DType.float32, 3].Variant].alloc(1)
-    # m_ptr[] = Material[DType.float32, 3].Variant(m)
     var hr = HitRecord[DType.float32, 3](
         Point[DType.float32, 3](),
         Vec[DType.float32, 3](0.0, 0.0, 1.0),
@@ -41,14 +39,9 @@ fn test_lambertian_material_scatter_ray() raises:
     var r_scattered = Ray[DType.float32, 3]()
     var attenuation = Color4[DType.float32]()
 
-    # We will need to perform various runtime 'isa' checks on each variant type...
-    # print(m_ptr)
     var scattered = m.scatter(
         r, hr, attenuation, r_scattered
     )
-    # var scattered = m_ptr[][Lambertian[DType.float32, 3]].scatter(
-    #     r, hr, attenuation, r_scattered
-    # )
 
     assert_true(scattered)
     assert_equal(attenuation, Color4[DType.float32](0.5, 0.5, 0.5, 1.0))

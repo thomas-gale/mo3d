@@ -1,5 +1,5 @@
 from algorithm import parallelize, vectorize
-from tensor import Tensor
+from memory import UnsafePointer
 
 from mo3d.math.interval import Interval
 from mo3d.ray.color4 import linear_to_gamma

@@ -1,4 +1,4 @@
-from tensor import Tensor
+from memory import UnsafePointer
 
 from mo3d.camera.camera import Camera
 

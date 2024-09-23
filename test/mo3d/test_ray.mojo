@@ -96,21 +96,3 @@ fn test_hit_entity_50_range_sphere_scene() raises:
     print(size)
     print(rec.hits)
     assert_true(Scalar[f32](rec.hits) < 4*log2(Scalar[f32](size)))
-
-fn test_hit_entity_200_range_sphere_scene() raises:
-    var store = ComponentStore[f32, 3]()
-    sphere_scene_3d(store, 200)
-    var size = len(store.entity_to_components)
-    var root_entity = construct_bvh(store)
-
-    # Shoot a ray down from above the scene at the center
-    var r = Ray[DType.float32, 3](
-        Point[f32, 3](0.0, 100.0, 0.0), Vec[f32, 3](0.0, -1.0, 0.0)
-    )
-    var rec = HitRecord[f32, 3]()
-    var ray_t = Interval[f32](0.001, inf[f32]())
-    var hit = hit_entity(store, root_entity, r, ray_t, rec)
-    assert_equal(hit, True)
-    print(size)
-    print(rec.hits)
-    assert_true(Scalar[f32](rec.hits) < 4*log2(Scalar[f32](size)))

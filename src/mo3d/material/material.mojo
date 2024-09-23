@@ -38,3 +38,13 @@ struct Material[T: DType, dim: Int]:
                 r_in, rec, attenuation, scattered
             )
         raise Error("Material type not supported")
+
+    fn __str__(self) -> String:
+        if self._mat.isa[Lambertian[T, dim]]():
+            return str(self._mat[Lambertian[T, dim]])
+        elif self._mat.isa[Metal[T, dim]]():
+            return str(self._mat[Metal[T, dim]])
+        elif self._mat.isa[Dielectric[T, dim]]():
+            return str(self._mat[Dielectric[T, dim]])
+        else:
+            return "Material(Unknown)"

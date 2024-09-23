@@ -22,3 +22,6 @@ struct Lambertian[T: DType, dim: Int](CollectionElement):
         scattered = Ray[T, dim](rec.p, scatter_direction, r_in.tm)
         attenuation = self.albedo
         return True
+
+    fn __str__(self) -> String:
+        return "Lambertian(albedo: " + str(self.albedo) + ")"

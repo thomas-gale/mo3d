@@ -23,3 +23,12 @@ struct Metal[T: DType, dim: Int](CollectionElement):
         scattered = Ray[T, dim](rec.p, reflected, r_in.tm)
         attenuation = self.albedo
         return scattered.dir.dot(rec.normal) > 0.0
+
+    fn __str__(self) -> String:
+        return (
+            "Metal(albedo: "
+            + str(self.albedo)
+            + ", fuzz: "
+            + str(self.fuzz)
+            + ")"
+        )

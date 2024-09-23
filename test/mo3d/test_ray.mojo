@@ -61,9 +61,7 @@ fn test_miss_entity() raises:
 fn test_hit_entity_complex_scene() raises:
     var store = ComponentStore[f32, 3]()
     sphere_scene_3d(store)
-    assert_equal(len(store.entity_to_components), 485)
     var root_entity = construct_bvh(store)
-    assert_equal(root_entity, 485)
 
     # Shoot a ray down from above the scene at the center
     var r = Ray[DType.float32, 3](

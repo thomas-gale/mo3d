@@ -99,8 +99,6 @@ fn sphere_scene_3d[T: DType](inout store: ComponentStore[T, 3], grid_size: Int =
                         Geometry[T, dim](sphere),
                         sphere_material,
                     )
-                    print("Light")
-    print("Here")
     # Big Spheres
     var mat1 = Material[T, dim](Dielectric[T, dim](1.5))
     var sphere1 = Sphere[T, dim](1.0)

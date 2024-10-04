@@ -23,5 +23,8 @@ struct Lambertian[T: DType, dim: Int](CollectionElement):
         attenuation = self.albedo
         return True
 
+    fn emission(self, rec : HitRecord[T,dim]) -> Color4[T]:
+        return Color4[T](0, 0, 0)
+
     fn __str__(self) -> String:
         return "Lambertian(albedo: " + str(self.albedo) + ")"

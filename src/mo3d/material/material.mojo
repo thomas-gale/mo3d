@@ -7,12 +7,13 @@ from mo3d.ray.hit_record import HitRecord
 from mo3d.material.lambertian import Lambertian
 from mo3d.material.metal import Metal
 from mo3d.material.dielectric import Dielectric
+from mo3d.material.diffuse_light import DiffuseLight
 
 
 @value
 struct Material[T: DType, dim: Int]:
     alias Variant = Variant[
-        Lambertian[T, dim], Metal[T, dim], Dielectric[T, dim]
+        Lambertian[T, dim], Metal[T, dim], Dielectric[T, dim], DiffuseLight[T, dim]
     ]
     var _mat: Self.Variant
 
@@ -36,6 +37,31 @@ struct Material[T: DType, dim: Int]:
         elif self._mat.isa[Dielectric[T, dim]]():
             return self._mat[Dielectric[T, dim]].scatter(
                 r_in, rec, attenuation, scattered
+            )
+        elif self._mat.isa[DiffuseLight[T, dim]]():
+            return self._mat[DiffuseLight[T, dim]].scatter(
+                r_in, rec, attenuation, scattered
+            )
+        raise Error("Material type not supported")
+
+    fn emission(self, rec : HitRecord[T,dim]) raises -> Color4[T]:
+        # TODO perform the runtime variant match
+        if self._mat.isa[Lambertian[T, dim]]():
+            return self._mat[Lambertian[T, dim]].emission(
+                rec
+            )
+        elif self._mat.isa[Metal[T, dim]]():
+            return self._mat[Metal[T, dim]].emission(
+                rec
+            )
+
+        elif self._mat.isa[Dielectric[T, dim]]():
+            return self._mat[Dielectric[T, dim]].emission(
+                rec
+            )
+        elif self._mat.isa[DiffuseLight[T, dim]]():
+            return self._mat[DiffuseLight[T, dim]].emission(
+                rec
             )
         raise Error("Material type not supported")
 

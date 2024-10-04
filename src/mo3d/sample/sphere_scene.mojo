@@ -90,7 +90,7 @@ fn sphere_scene_3d[T: DType](inout store: ComponentStore[T, 3], grid_size: Int =
                     )
                 else:
                     # light
-                    sphere_material = Material[T, dim](DiffuseLight[T, dim](Color4[T](1,1,1,1)))
+                    sphere_material = Material[T, dim](DiffuseLight[T, dim](Color4[T](6.0,6.0,6.0,1)))
                     var sphere = Sphere[T, dim](0.2)
                     var sphere_entity_id = store.create_entity()
                     _ = store.add_components(

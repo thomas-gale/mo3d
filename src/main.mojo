@@ -49,7 +49,7 @@ fn main() raises:
     alias max_depth = 8
     alias max_samples = 1024 * 1024
     alias background_light = Color4[float_type](0.5, 0.7, 1.0, 1.0)
-    alias background_dark = Color4[float_type](0.05, 0.1, 0.15, 1.0)
+    alias background_dark = Color4[float_type](0.03, 0.06, 0.08, 1.0)
 
     # ECS
     var store = ComponentStore[float_type, 3]()

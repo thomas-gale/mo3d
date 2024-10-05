@@ -51,6 +51,9 @@ struct Dielectric[T: DType, dim: Int](CollectionElement):
         r0 = r0 * r0
         return r0 + (1 - r0) * pow((1 - cosine), 5)
 
+    fn emission(self, rec : HitRecord[T,dim]) raises -> Color4[T]:
+        return Color4[T](0, 0, 0)
+
     fn __str__(self) -> String:
         return (
             "Dielectric(refraction_index: " + str(self.refraction_index) + ")"

@@ -38,7 +38,8 @@ struct Camera[
     channels: Int,
     max_depth: Int,
     max_samples: Int,
-    dim: Int = 3,
+    background: Color4[T],
+    dim: Int = 3
 ]:
     var _focal_length: Scalar[
         T
@@ -259,6 +260,7 @@ struct Camera[
                         max_depth,
                         store,
                         bvh_root_entity,
+                        self.background
                     )
                 pixel_color *= pixel_samples_scale.cast[T]()
 
@@ -368,6 +370,7 @@ struct Camera[
         depth: Int,
         store: ComponentStore[T, dim],
         bvh_root_entity: EntityID,
+        background : Color4[T]
     ) -> Color4[T]:
         """
         This is the first ECS 'system' like function that we're implementing in mo3d.
@@ -385,19 +388,18 @@ struct Camera[
             var scattered = Ray[T, dim]()
             var attenuation = Color4[T]()
             try:
+                emitted = rec.mat.emission(rec)
                 if rec.mat.scatter(r, rec, attenuation, scattered):
                     return attenuation * Self._ray_color(
                         scattered,
                         depth - 1,
                         store,
                         bvh_root_entity,
-                    )
+                        background
+                    ) + emitted
+                return emitted
             except:
                 pass
             return Color4[T](0, 0, 0, 0)
 
-        var unit_direction = Vec.unit(r.dir)
-        var a = 0.5 * (unit_direction[1] + 1.0)
-        return (1.0 - a) * Color4[T](1.0, 1.0, 1.0, 1.0) + a * Color4[T](
-            0.5, 0.7, 1.0, 1.0
-        )
+        return background

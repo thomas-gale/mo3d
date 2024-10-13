@@ -7,7 +7,6 @@ from random import random_float64
 from sys import simdwidthof
 from testing import assert_equal
 from time import now, sleep
-from utils import StaticIntTuple
 
 from max.tensor import Tensor
 

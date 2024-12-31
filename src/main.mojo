@@ -80,8 +80,8 @@ fn main() raises:
         camera.render(
             store,
             bvh_root_entity,
-            last_compute_time.cast[DType.int64]() / 10**6,
-            last_redraw_time.cast[DType.int64]() / 10**3,
+            last_compute_time.cast[DType.int64]() * 10**3,
+            last_redraw_time.cast[DType.int64]() * 10**6,
         )
         last_compute_time = perf_counter() - start_time
         start_time = perf_counter()
@@ -97,12 +97,12 @@ fn main() raises:
     # Print stats
     print(
         "Last compute time: ",
-        str(last_compute_time / (1000 * 1000)),
+        str(last_compute_time * 10**3),
         " ms",
     )
     print(
         "Last redraw time: ",
-        str(last_redraw_time / (1000 * 1000)),
+        str(last_redraw_time * 10**3),
         " ms",
     )
     print("-- Goodbye, mo3d! --")

@@ -7,6 +7,8 @@ from mo3d.ray.color4 import Color4
 from mo3d.material.material import Material
 from mo3d.material.lambertian import Lambertian
 
+from mo3d.texture.texture import Texture
+from mo3d.texture.texture import Solid
 
 @value
 struct HitRecord[T: DType, dim: Int]:
@@ -20,7 +22,9 @@ struct HitRecord[T: DType, dim: Int]:
     fn __init__(inout self):
         self.p = Point[T, dim]()
         self.normal = Vec[T, dim]()
-        self.mat = Material[T, dim](Lambertian[T, dim](Color4[T](0.0)))
+        self.mat = Material[T, dim](Lambertian[T, dim](
+            Texture[T, dim](Solid[T, dim](Color4[T](0.0)))
+        ))
         self.t = Scalar[T]()
         self.front_face = False
         self.hits = 0

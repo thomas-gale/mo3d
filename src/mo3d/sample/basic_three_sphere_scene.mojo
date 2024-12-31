@@ -10,6 +10,8 @@ from mo3d.material.material import Material
 from mo3d.material.lambertian import Lambertian
 from mo3d.material.metal import Metal
 from mo3d.material.dielectric import Dielectric
+from mo3d.texture.texture import Texture
+from mo3d.texture.solid import Solid
 
 
 fn basic_three_sphere_scene_3d[
@@ -21,9 +23,10 @@ fn basic_three_sphere_scene_3d[
     alias dim = 3
 
     # Ground
-    var mat_ground = Material[T, dim](
-        Lambertian[T, dim](Color4[T](0.5, 0.5, 0.5))
+    var tex_ground = Texture[T, dim](
+        Solid[T, dim](Color4[T](0.5, 0.5, 0.5))
     )
+    var mat_ground = Material[T, dim](tex_ground)
     var ground = Sphere[T, dim](1000)
     var ground_entity_id = store.create_entity()
     _ = store.add_components(
@@ -33,7 +36,8 @@ fn basic_three_sphere_scene_3d[
         mat_ground,
     )
 
-    var mat1 = Material[T, dim](Lambertian[T, dim](Color4[T](0.2, 0.8, 0.3)))
+    var tex1 = Texture[T, dim](Solid[T, dim](Color4[T](0.2, 0.8, 0.3)))
+    var mat1 = Material[T, dim](tex1)
     var sphere1 = Sphere[T, dim](1.0)
     var sphere1_entity_id = store.create_entity()
     _ = store.add_components(
@@ -43,7 +47,8 @@ fn basic_three_sphere_scene_3d[
         mat1,
     )
 
-    var mat2 = Material[T, dim](Lambertian[T, dim](Color4[T](0.4, 0.2, 0.1)))
+    var tex2 = Texture[T, dim](Solid[T, dim](Color4[T](0.4, 0.2, 0.1)))
+    var mat2 = Material[T, dim](tex2)
     var sphere2 = Sphere[T, dim](1.0)
     var sphere2_entity_id = store.create_entity()
     _ = store.add_components(

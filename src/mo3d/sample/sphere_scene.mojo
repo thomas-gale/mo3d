@@ -10,7 +10,8 @@ from mo3d.material.material import Material
 from mo3d.material.lambertian import Lambertian
 from mo3d.material.metal import Metal
 from mo3d.material.dielectric import Dielectric
-
+from mo3d.texture.texture import Texture
+from mo3d.texture.solid import Solid
 
 fn sphere_scene_3d[T: DType](inout store: ComponentStore[T, 3], grid_size: Int = 11) raises:
     """
@@ -24,8 +25,11 @@ fn sphere_scene_3d[T: DType](inout store: ComponentStore[T, 3], grid_size: Int =
         ).cast[T]()
 
     # Ground
+    var tex_ground = Texture[T, dim](
+        Solid[T, dim](Color4[T](0.5, 0.5, 0.5))
+    )
     var mat_ground = Material[T, dim](
-        Lambertian[T, dim](Color4[T](0.5, 0.5, 0.5))
+        Lambertian[T, dim](tex_ground)
     )
     var ground = Sphere[T, dim](1_000)
     var ground_entity_id = store.create_entity()
@@ -49,7 +53,10 @@ fn sphere_scene_3d[T: DType](inout store: ComponentStore[T, 3], grid_size: Int =
 
                 if choose_mat < 0.8:
                     # diffuse
-                    var albedo = Color4[T].random() * Color4[T].random()
+                    var albedo_colour = Color4[T].random() * Color4[T].random()
+                    var albedo = Texture[T, dim](
+                        Solid[T, dim](albedo_colour)
+                    )
                     sphere_material = Material[T, dim](
                         Lambertian[T, dim](albedo)
                     )
@@ -94,7 +101,8 @@ fn sphere_scene_3d[T: DType](inout store: ComponentStore[T, 3], grid_size: Int =
     var sphere1_entity_id = store.create_entity()
     _ = store.add_components(sphere1_entity_id, Point[T, dim](0, 1, 0), Geometry[T, dim](sphere1), mat1)
 
-    var mat2 = Material[T, dim](Lambertian[T, dim](Color4[T](0.4, 0.2, 0.1)))
+    var texture2 = Texture[T, dim](Solid[T,dim](Color4[T](0.4, 0.2, 0.1)))
+    var mat2 = Material[T, dim](Lambertian[T, dim](texture2))
     var sphere2 = Sphere[T, dim](1.0)
     var sphere2_entity_id = store.create_entity()
     _ = store.add_components(sphere2_entity_id, Point[T, dim](-4, 1, 0), Geometry[T, dim](sphere2), mat2)

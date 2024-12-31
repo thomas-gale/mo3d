@@ -6,8 +6,7 @@ from pathlib import Path
 from random import random_float64
 from sys import simdwidthof
 from testing import assert_equal
-from time import now, sleep
-from utils import StaticIntTuple
+from time import sleep, perf_counter
 
 from max.tensor import Tensor
 
@@ -68,7 +67,7 @@ fn main() raises:
     ]()
 
     # Collect timing stats - TODO: Tidy and move
-    var start_time = now()
+    var start_time = perf_counter()
     var frame_duration = 0.0
     var last_compute_time = 0.0
     var last_redraw_time = 0.0
@@ -77,17 +76,17 @@ fn main() raises:
     var window = SDL2Window.create("mo3d", width, height)
 
     while window.process_events(camera):
-        start_time = now()
+        start_time = perf_counter()
         camera.render(
             store,
             bvh_root_entity,
             last_compute_time.cast[DType.int64]() / 10**6,
             last_redraw_time.cast[DType.int64]() / 10**3,
         )
-        last_compute_time = now() - start_time
-        start_time = now()
+        last_compute_time = perf_counter() - start_time
+        start_time = perf_counter()
         window.redraw[float_type](camera.get_state(), channels)
-        last_redraw_time = now() - start_time
+        last_redraw_time = perf_counter() - start_time
         frame_duration = (last_compute_time + last_redraw_time) / 10**9
         if frame_duration < 1.0 / Float64(max_fps):
             sleep(1.0 / Float64(max_fps) - frame_duration)

@@ -1,5 +1,7 @@
 from random import random_float64
 
+from memory.arc import ArcPointer
+
 from mo3d.ecs.component_store import ComponentStore
 from mo3d.math.vec import Vec
 from mo3d.math.point import Point
@@ -12,6 +14,7 @@ from mo3d.material.metal import Metal
 from mo3d.material.dielectric import Dielectric
 from mo3d.texture.texture import Texture
 from mo3d.texture.solid import Solid
+from mo3d.texture.checker import Checker
 
 fn sphere_scene_3d[T: DType](inout store: ComponentStore[T, 3], grid_size: Int = 11) raises:
     """
@@ -25,8 +28,14 @@ fn sphere_scene_3d[T: DType](inout store: ComponentStore[T, 3], grid_size: Int =
         ).cast[T]()
 
     # Ground
+    var tex_ground_light = Texture[T, dim](
+        Solid[T, dim](Color4[T](0.8, 0.8, 0.8))
+    )
+    var tex_ground_dark = Texture[T, dim](
+        Solid[T, dim](Color4[T](0.15, 0.7, 0.15))
+    )
     var tex_ground = Texture[T, dim](
-        Solid[T, dim](Color4[T](0.5, 0.5, 0.5))
+        Checker(tex_ground_light, tex_ground_dark, 0.4)
     )
     var mat_ground = Material[T, dim](
         Lambertian[T, dim](tex_ground)

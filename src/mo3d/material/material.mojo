@@ -33,7 +33,6 @@ struct Material[T: DType, dim: Int]:
             return self._mat[Metal[T, dim]].scatter(
                 r_in, rec, attenuation, scattered
             )
-
         elif self._mat.isa[Dielectric[T, dim]]():
             return self._mat[Dielectric[T, dim]].scatter(
                 r_in, rec, attenuation, scattered
@@ -54,7 +53,6 @@ struct Material[T: DType, dim: Int]:
             return self._mat[Metal[T, dim]].emission(
                 rec
             )
-
         elif self._mat.isa[Dielectric[T, dim]]():
             return self._mat[Dielectric[T, dim]].emission(
                 rec

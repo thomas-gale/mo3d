@@ -33,5 +33,7 @@ struct Texture[type: DType, dim: Int]:
         # TODO perform the runtime variant match
         if self._tex.isa[Solid[type, dim]]():
             return str(self._tex[Solid[type, dim]])
+        elif self._tex.isa[Checker[type, dim]]():
+            return str(self._tex[Checker[type, dim]])
         else:
             return "Texture(Unknown)"

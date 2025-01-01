@@ -20,13 +20,6 @@ alias MaterialComponent = Material
 
 alias BoundingBoxComponent = AABB
 
-
-@value
-struct BinaryChildrenComponent:
-    var left: EntityID
-    var right: EntityID
-
-
 alias ComponentID = Int
 
 alias ComponentTypeID = Int
@@ -39,4 +32,3 @@ struct ComponentType:
     alias Geometry: ComponentTypeID = 1 << 3
     alias Material: ComponentTypeID = 1 << 4
     alias BoundingBox: ComponentTypeID = 1 << 5
-    alias BinaryChildren: ComponentTypeID = 1 << 6

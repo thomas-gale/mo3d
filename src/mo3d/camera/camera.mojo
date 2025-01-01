@@ -16,6 +16,8 @@ from mo3d.ray.ray import Ray
 from mo3d.ray.hit_record import HitRecord
 from mo3d.ray.hit_entity import hit_entity
 
+from mo3d.scene.construct_bvh import BVHNode
+
 from mo3d.ecs.entity import EntityID
 from mo3d.ecs.component import (
     ComponentID,
@@ -229,8 +231,7 @@ struct Camera[
 
     fn render(
         inout self,
-        store: ComponentStore[T, dim],
-        bvh_root_entity: EntityID,
+        bvh_root : BVHNode[T, dim],
         compute_time_ms: Int64,
         redraw_time_ns: Int64,
         num_samples: Int = 1,
@@ -258,8 +259,7 @@ struct Camera[
                     pixel_color += Self._ray_color(
                         r,
                         max_depth,
-                        store,
-                        bvh_root_entity,
+                        bvh_root,
                         self.background
                     )
                 pixel_color *= pixel_samples_scale.cast[T]()
@@ -368,8 +368,7 @@ struct Camera[
     fn _ray_color(
         r: Ray[T, dim],
         depth: Int,
-        store: ComponentStore[T, dim],
-        bvh_root_entity: EntityID,
+        bvh_root : BVHNode[T, dim],
         background : Color4[T]
     ) -> Color4[T]:
         """
@@ -381,7 +380,7 @@ struct Camera[
         # BVH traversal
         var ray_t = Interval[T](0.001, inf[T]())
         var rec = HitRecord[T, dim]()
-        var hit_anything = hit_entity(store, bvh_root_entity, r, ray_t, rec)
+        var hit_anything = hit_entity(bvh_root, r, ray_t, rec)
 
         # If we hit something, scatter the ray and recurse
         if hit_anything:
@@ -393,8 +392,7 @@ struct Camera[
                     return attenuation * Self._ray_color(
                         scattered,
                         depth - 1,
-                        store,
-                        bvh_root_entity,
+                        bvh_root,
                         background
                     ) + emitted
                 return emitted

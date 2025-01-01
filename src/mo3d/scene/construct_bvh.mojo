@@ -1,20 +1,46 @@
-from memory import UnsafePointer
+from memory.arc import ArcPointer
+from utils import Variant
+from collections import InlineArray
 
 from mo3d.geometry.aabb import AABB
 from mo3d.ecs.entity import EntityID
-from mo3d.ecs.component import ComponentType, BinaryChildrenComponent
+from mo3d.ecs.component import ComponentType
 from mo3d.ecs.component_store import ComponentStore
+
+from mo3d.geometry.geometry import Geometry
+from mo3d.material.material import Material
+
+from mo3d.math.point import Point
+
+@value 
+struct Hittable[T : DType, dim : Int]:
+    var geometry : Geometry[T, dim]
+    var material : Material[T, dim]
+    var position : Point[T, dim]
+
+@value
+struct BVHSplit[T: DType, dim: Int]:
+    var left : ArcPointer[BVHNode[T, dim]]
+    var right : ArcPointer[BVHNode[T, dim]]
+
+@value
+struct BVHNode[T: DType, dim: Int]:
+    alias Variant = Variant[
+        BVHSplit[T, dim], 
+        Hittable[T, dim]]
+    var _wrapped: Self.Variant
+    var box : AABB[T, dim]
+
 
 
 fn build_bvh_nodes_recursive[
     T: DType, dim: Int
 ](
-    entity: EntityID,
-    inout store: ComponentStore[T, dim],
-    entities: UnsafePointer[List[EntityID]],
+    store: ComponentStore[T, dim],
+    mut entities: List[EntityID],
     start: Int,
     end: Int,
-) raises:
+) raises -> BVHNode[T, dim]:
     """
     Construct a BVH node from a list of entities.
     """
@@ -27,7 +53,7 @@ fn build_bvh_nodes_recursive[
     # Build the bounding box of the span of source objects.
     var bbox = AABB[T, dim]()
     for i in range(start, end):
-        var entity = entities[][i]
+        var entity = entities[i]
         var entity_position = store.position_components[
             store.entity_to_components[entity][ComponentType.Position]
         ]
@@ -36,9 +62,6 @@ fn build_bvh_nodes_recursive[
         ]
         var entity_aabb = entity_geometry.aabb()
         bbox = AABB[T, dim](bbox, entity_aabb + entity_position)
-
-    # Update the bounding box of this new BVH node
-    _ = store.add_component(entity, bbox)
 
     var axis = bbox.longest_axis()
     var span = end - start
@@ -56,18 +79,18 @@ fn build_bvh_nodes_recursive[
 
     if span == 1:
         # Leaf node, add a bvh wrapper around the entity
-        var entity_binary_children = BinaryChildrenComponent(
-            entities[][start], entities[][start]
-        )
-        _ = store.add_component(entity, entity_binary_children)
-        return
-    elif span == 2:
-        # Leaf node, add a bvh wrapper around the entities
-        var entity_binary_children = BinaryChildrenComponent(
-            entities[][start], entities[][start + 1]
-        )
-        _ = store.add_component(entity, entity_binary_children)
-        return
+        var entity_geometry = store.geometry_components[
+            store.entity_to_components[start][ComponentType.Geometry]
+        ]
+        var entity_material = store.material_components[
+            store.entity_to_components[start][ComponentType.Material]
+        ]
+        var entity_position = store.position_components[
+            store.entity_to_components[start][ComponentType.Position]
+        ]
+        return BVHNode[T, dim](
+            Hittable(entity_geometry, entity_material, entity_position), 
+            bbox)
     else:
         # Sort to entities along the longest axis
         @parameter
@@ -84,7 +107,7 @@ fn build_bvh_nodes_recursive[
                 return False
 
         # Sort the entities along the longest axis within this span
-        var slice = entities[][start:end]
+        var slice = entities[start:end]
         sort[cmp](slice)
 
         # Prevent parametric cleanup...
@@ -92,26 +115,22 @@ fn build_bvh_nodes_recursive[
 
         var mid = start + span // 2
 
-        # Create left and right child nodes
-        var left_child = store.create_entity()
-        var right_child = store.create_entity()
-        var entity_binary_children = BinaryChildrenComponent(
-            left_child, right_child
-        )
-        _ = store.add_component(entity, entity_binary_children)
-
         # Recursively build the left and right child nodes
-        build_bvh_nodes_recursive[T, dim](
-            left_child, store, entities, start, mid
+        var left_child = build_bvh_nodes_recursive[T, dim](
+            store, entities, start, mid
         )
-        build_bvh_nodes_recursive[T, dim](
-            right_child, store, entities, mid, end
+        var right_child = build_bvh_nodes_recursive[T, dim](
+            store, entities, mid, end
+        )
+        return BVHNode[T, dim](
+            BVHSplit[T, dim](left_child, right_child),
+            bbox
         )
 
 
 fn construct_bvh[
     T: DType, dim: Int
-](inout store: ComponentStore[T, dim]) raises -> EntityID:
+](store: ComponentStore[T, dim]) raises -> BVHNode[T, dim]:
     """
     ECS 'system' to construct a BVH from all components in store with position and geometry.
     Returns the root entity ID of the BVH.
@@ -122,15 +141,11 @@ fn construct_bvh[
         ComponentType.Position | ComponentType.Geometry
     )
 
-    var root = store.create_entity()
-    build_bvh_nodes_recursive[T, dim](
-        root,
+    var root = build_bvh_nodes_recursive[T, dim](
         store,
-        UnsafePointer[List[EntityID]].address_of(entities),
+        entities,
         0,
         len(entities),
     )
-    _ = entities
-    print("Constructed BVH! Root entity id:", root)
-
+    print("Constructed BVH!")
     return root

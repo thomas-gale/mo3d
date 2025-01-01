@@ -54,7 +54,7 @@ fn main() raises:
     var store = ComponentStore[float_type, 3]()
     # sphere_scene_3d[float_type](store, 150)
     sphere_scene_3d[float_type](store, 4)
-    var bvh_root_entity = construct_bvh(store)
+    var bvh_root = construct_bvh(store)
 
     # Camera
     var camera = Camera[
@@ -81,8 +81,7 @@ fn main() raises:
     while window.process_events(camera):
         start_time = perf_counter()
         camera.render(
-            store,
-            bvh_root_entity,
+            bvh_root,
             last_compute_time.cast[DType.int64]() * 10**3,
             last_redraw_time.cast[DType.int64]() * 10**6,
         )

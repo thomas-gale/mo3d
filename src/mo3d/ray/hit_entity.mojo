@@ -6,15 +6,14 @@ from mo3d.material.material import Material
 from mo3d.material.lambertian import Lambertian
 from mo3d.material.metal import Metal
 from mo3d.ecs.entity import EntityID
-from mo3d.ecs.component import ComponentType, BinaryChildrenComponent
+from mo3d.ecs.component import ComponentType
 from mo3d.ecs.component_store import ComponentStore
-
+from mo3d.scene.construct_bvh import BVHNode, BVHSplit, Hittable
 
 fn hit_entity[
     T: DType, dim: Int
 ](
-    store: ComponentStore[T, dim],
-    entity: EntityID,
+    bvh_node : BVHNode[T, dim],
     r: Ray[T, dim],
     owned ray_t: Interval[T],
     inout rec: HitRecord[T, dim],
@@ -22,97 +21,53 @@ fn hit_entity[
     """
     ECS 'system' to intersect a ray with an entity in the component store.
     """
+    if not bvh_node.box.hit(r, ray_t):
+        return False
     # Is the entity a BVH or Leaf Geometry?
-    if store.entity_has_components(
-        entity, ComponentType.BoundingBox | ComponentType.BinaryChildren
-    ):
-        return hit_bvh(store, entity, r, ray_t, rec)
-    elif store.entity_has_components(
-        entity,
-        ComponentType.Position
-        | ComponentType.Geometry
-        | ComponentType.Material,
-    ):
-        return hit_geometry(store, entity, r, ray_t, rec)
+    if bvh_node._wrapped.isa[BVHSplit[T, dim]]():
+        return hit_bvh(bvh_node._wrapped[BVHSplit[T, dim]], r, ray_t, rec)
+    elif bvh_node._wrapped.isa[Hittable[T, dim]]():
+        return hit_hittable(bvh_node._wrapped[Hittable[T, dim]], r, ray_t, rec)
     else:
-        print("Entity is unhitable", entity)
+        print("bvh_node is unhitable")
         return False
 
 
 fn hit_bvh[
     T: DType, dim: Int
 ](
-    store: ComponentStore[T, dim],
-    bvh_entity: EntityID,
+    bvh : BVHSplit[T, dim],
     r: Ray[T, dim],
     owned ray_t: Interval[T],
     inout rec: HitRecord[T, dim],
 ) -> Bool:
     """
-    ECS 'system' to intersect a ray with a bvh entity in the component store.
+    Hit a ray again a split bvh node
     """
-    try:
-        var bbox_comp_id = store.entity_to_components[bvh_entity][
-            ComponentType.BoundingBox
-        ]
-        var bbox = store.bounding_box_components[bbox_comp_id]
+    rec.hits += 1
 
-        if not bbox.hit(r, ray_t):
-            return False
-        rec.hits += 1
-
-        var binary_children_comp_id = store.entity_to_components[bvh_entity][
-            ComponentType.BinaryChildren
-        ]
-        var binary_children = store.binary_children_components[
-            binary_children_comp_id
-        ]
-
-        var hit_left = hit_entity(store, binary_children.left, r, ray_t, rec)
-        var hit_right = hit_entity(
-            store,
-            binary_children.right,
-            r,
-            Interval(ray_t.min, rec.t if hit_left else ray_t.max), # If hit on left, limit right ray_t max to hit point on left
-            rec,
-        )
-        return hit_left or hit_right
-    except:
-        print("Error in hit_bvh")
-        return False
+    var hit_left = hit_entity(bvh.left[], r, ray_t, rec)
+    var hit_right = hit_entity(
+        bvh.right[],
+        r,
+        Interval(ray_t.min, rec.t if hit_left else ray_t.max), # If hit on left, limit right ray_t max to hit point on left
+        rec,
+    )
+    return hit_left or hit_right
 
 
-fn hit_geometry[
+fn hit_hittable[
     T: DType, dim: Int
 ](
-    store: ComponentStore[T, dim],
-    geometry_entity: EntityID,
+    hittable : Hittable[T, dim],
     r: Ray[T, dim],
     owned ray_t: Interval[T],
     inout rec: HitRecord[T, dim],
 ) -> Bool:
     """
-    ECS 'system' to intersect a ray with a geometric entity in the component store.
-    The component must have geometry, position and material components.
+    Hit a ray against hitable geometry / material pair
     """
-    try:
-        var position_comp_id = store.entity_to_components[geometry_entity][
-            ComponentType.Position
-        ]
-        var position = store.position_components[position_comp_id]
-        var geometry_comp_id = store.entity_to_components[geometry_entity][
-            ComponentType.Geometry
-        ]
-        var geometry = store.geometry_components[geometry_comp_id]
-        var material_comp_id = store.entity_to_components[geometry_entity][
-            ComponentType.Material
-        ]
-        var material = store.material_components[material_comp_id]
-
-        var hit = geometry.hit(r, ray_t, rec, position, material)
-        if hit:
-            rec.hits += 1
-        return hit
-    except:
-        print("Error in hit_geometry")
-        return False
+    var hit = hittable.geometry.hit(r, ray_t, rec, hittable.position, hittable.material)
+    if hit:
+        rec.hits += 1
+    return hit

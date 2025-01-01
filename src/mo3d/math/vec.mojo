@@ -1,7 +1,8 @@
 from algorithm import parallelize
 from collections import InlineArray
 from math import sqrt
-from random import random_float64
+
+from mo3d.random.rng import Rng
 
 
 struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
@@ -83,27 +84,27 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
         return self / self.length()
 
     @staticmethod
-    fn random_in_unit_disk() -> Self:
+    fn random_in_unit_disk(mut rng : Rng) -> Self:
         while True:
-            var p = Self.random(-1, 1)
+            var p = Self.random(rng, -1, 1)
             p[2] = 0
             if p.length_squared() < 1:
                 return p
 
     @staticmethod
-    fn random_in_unit_sphere() -> Self:
+    fn random_in_unit_sphere(mut rng : Rng) -> Self:
         while True:
-            var p = Self.random(-1, 1)
+            var p = Self.random(rng, -1, 1)
             if p.length_squared() < 1:
                 return p
 
     @staticmethod
-    fn random_unit_vector() -> Self:
-        return Self.random_in_unit_sphere().unit()
+    fn random_unit_vector(mut rng : Rng) -> Self:
+        return Self.random_in_unit_sphere(rng).unit()
 
     @staticmethod
-    fn random_on_hemisphere(normal: Self) -> Self:
-        var on_unit_sphere = Self.random_unit_vector()
+    fn random_on_hemisphere(mut rng : Rng, normal: Self) -> Self:
+        var on_unit_sphere = Self.random_unit_vector(rng)
         if on_unit_sphere.dot(normal) > 0:
             # In the same hemisphere as the normal
             return on_unit_sphere
@@ -122,19 +123,26 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
         return r_out_perp + r_out_parallel
 
     @staticmethod
-    fn random() -> Self:
+    fn random(mut rng : Rng) -> Self:
         var data = InlineArray[Scalar[T], size](unsafe_uninitialized=True)
         for i in range(size):
-            data[i] = random_float64().cast[T]()
+            @parameter
+            if T == T.float64:
+                data[i] = rng.float64().cast[T]()
+            else:
+                data[i] = rng.float32().cast[T]()
         return Self(data)
 
     @staticmethod
-    fn random(min: Scalar[T], max: Scalar[T]) -> Self:
-        var min_64 = min.cast[DType.float64]()
-        var max_64 = max.cast[DType.float64]()
+    fn random(mut rng : Rng, min: Scalar[T], max: Scalar[T]) -> Self:
+        var delta = max - min
         var data = InlineArray[Scalar[T], size](unsafe_uninitialized=True)
         for i in range(size):
-            data[i] = random_float64(min_64, max_64).cast[T]()
+            @parameter
+            if T == T.float64:
+                data[i] = min + (rng.float64().cast[T]() * delta)
+            else:
+                data[i] = min + (rng.float32().cast[T]() * delta)
         return Self(data)
 
     fn __str__(self) -> String:

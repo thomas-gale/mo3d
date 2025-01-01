@@ -17,6 +17,8 @@ from mo3d.texture.texture import Texture
 from mo3d.texture.solid import Solid
 from mo3d.texture.checker import Checker
 
+from mo3d.random.rng import Rng
+
 fn sphere_scene_3d[T: DType](inout store: ComponentStore[T, 3], grid_size: Int = 11) raises:
     """
     The classic end scene from the Ray Tracing in One Weekend by Peter Shirley.
@@ -50,6 +52,8 @@ fn sphere_scene_3d[T: DType](inout store: ComponentStore[T, 3], grid_size: Int =
         mat_ground,
     )
 
+    var rng = Rng(12345)
+
     # Random spheres
     for a in range(-grid_size, grid_size):
         for b in range(-grid_size, grid_size):
@@ -63,7 +67,7 @@ fn sphere_scene_3d[T: DType](inout store: ComponentStore[T, 3], grid_size: Int =
 
                 if choose_mat < 0.7:
                     # diffuse
-                    var albedo_colour = Color4[T].random() * Color4[T].random()
+                    var albedo_colour = Color4[T].random(rng) * Color4[T].random(rng)
                     var albedo = Texture[T, dim](
                         Solid[T, dim](albedo_colour)
                     )
@@ -80,7 +84,7 @@ fn sphere_scene_3d[T: DType](inout store: ComponentStore[T, 3], grid_size: Int =
                     )
                 elif choose_mat < 0.8:
                     # metal
-                    var albedo = Color4[T].random(0.5, 1)
+                    var albedo = Color4[T].random(rng, 0.5, 1)
                     var fuzz = random_float(0, 0.5)
                     sphere_material = Material[T, dim](
                         Metal[T, dim](albedo, fuzz)

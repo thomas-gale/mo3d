@@ -6,18 +6,21 @@ from mo3d.ray.hit_record import HitRecord
 from mo3d.texture.texture import Texture
 from mo3d.texture.solid import Solid
 
+from mo3d.random.rng import Rng
+
 @value
 struct Lambertian[T: DType, dim: Int](CollectionElement):
     var albedo: Texture[T, dim]
 
     fn scatter(
         self,
+        mut rng : Rng,
         r_in: Ray[T, dim],
         rec: HitRecord[T, dim],
         inout attenuation: Color4[T],
         inout scattered: Ray[T, dim],
     ) raises -> Bool:
-        var scatter_direction = rec.normal + Vec[T, dim].random_unit_vector()
+        var scatter_direction = rec.normal + Vec[T, dim].random_unit_vector(rng)
         # Catch degenerate scatter direction
         if scatter_direction.near_zero():
             scatter_direction = rec.normal

@@ -2,7 +2,6 @@ from algorithm import parallelize, vectorize
 from math import inf, iota, pi
 from math.math import tan
 from memory import UnsafePointer
-from random import random_float64
 
 from max.tensor import Tensor
 
@@ -17,6 +16,8 @@ from mo3d.ray.hit_record import HitRecord
 from mo3d.ray.hit_entity import hit_entity
 
 from mo3d.scene.construct_bvh import BVHNode
+
+from mo3d.random.rng import Rng
 
 from mo3d.ecs.entity import EntityID
 from mo3d.ecs.component import (
@@ -252,11 +253,13 @@ struct Camera[
             @parameter
             fn compute_row_vectorize[simd_width: Int](x: Int):
                 # Send a ray into the scene from this x, y coordinate
+                var rng = Rng(self._sensor_samples + (x << 24) + (y << 48))
                 var pixel_samples_scale = 1.0 / Scalar[T](num_samples)
                 var pixel_color = Color4[T](0, 0, 0, 0)
                 for _ in range(num_samples):
-                    var r = self.get_ray(x, y)
+                    var r = self.get_ray(rng, x, y)
                     pixel_color += Self._ray_color(
+                        rng,
                         r,
                         max_depth,
                         bvh_root,
@@ -328,35 +331,35 @@ struct Camera[
             "average redraw: " + str(redraw_time_ns) + " ns",
         )
 
-    fn get_ray(self, i: Int, j: Int) -> Ray[T, dim]:
-        var offset = Self._sample_square()
+    fn get_ray(self, mut rng : Rng, i: Int, j: Int) -> Ray[T, dim]:
+        var offset = Self._sample_square(rng)
 
         var pixel_sample = self._pixel00_loc + (
             (Scalar[T](i) + offset[0]) * self._pixel_delta_u
         ) + ((Scalar[T](j) + offset[1]) * self._pixel_delta_v)
 
-        var ray_origin = self._look_from if aperature <= 0.0 else self._defocus_disk_sample()
+        var ray_origin = self._look_from if aperature <= 0.0 else self._defocus_disk_sample(rng)
         var ray_direction = pixel_sample - ray_origin
-        var ray_time = random_float64().cast[T]()
+        var ray_time = rng.float64().cast[T]()
 
         return Ray(ray_origin, ray_direction, ray_time)
 
     @staticmethod
-    fn _sample_square() -> Vec[T, dim]:
+    fn _sample_square(mut rng : Rng) -> Vec[T, dim]:
         """
         Returns the vector to a random point in the [-.5,-.5]-[+.5,+.5] unit square.
         """
         return Vec[T, dim](
-            random_float64().cast[T]() - 0.5,
-            random_float64().cast[T]() - 0.5,
+            rng.float64().cast[T]() - 0.5,
+            rng.float64().cast[T]() - 0.5,
             0.0,
         )
 
-    fn _defocus_disk_sample(self) -> Point[T, dim]:
+    fn _defocus_disk_sample(self, mut rng : Rng) -> Point[T, dim]:
         """
         Returns a random point in the unit disk.
         """
-        var p = Vec[T, dim].random_in_unit_disk()
+        var p = Vec[T, dim].random_in_unit_disk(rng)
         return (
             self._look_from
             + self._defocus_disk_u * p[0]
@@ -366,6 +369,7 @@ struct Camera[
     @staticmethod
     @parameter
     fn _ray_color(
+        mut rng : Rng,
         r: Ray[T, dim],
         depth: Int,
         bvh_root : BVHNode[T, dim],
@@ -388,8 +392,9 @@ struct Camera[
             var attenuation = Color4[T]()
             try:
                 emitted = rec.mat.emission(rec)
-                if rec.mat.scatter(r, rec, attenuation, scattered):
+                if rec.mat.scatter(rng, r, rec, attenuation, scattered):
                     return attenuation * Self._ray_color(
+                        rng,
                         scattered,
                         depth - 1,
                         bvh_root,

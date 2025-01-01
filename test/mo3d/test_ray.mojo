@@ -46,7 +46,6 @@ fn test_miss_entity() raises:
     var store = ComponentStore[f32, 3]()
     basic_three_sphere_scene_3d(store)
     assert_equal(len(store.entity_to_components), 4)
-    var root_entity = construct_bvh(store)
     var bvh = construct_bvh(store)
 
     var r = Ray[DType.float32, 3](

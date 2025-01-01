@@ -11,7 +11,7 @@ alias f32 = DType.float32
 
 
 fn test_create_empty_component_store() raises:
-    var store = ComponentStore[f32, 3]()
+    var _store = ComponentStore[f32, 3]()
 
 
 fn test_add_entity_to_component_store() raises:

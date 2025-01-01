@@ -42,7 +42,7 @@ fn hit_bvh[
     inout rec: HitRecord[T, dim],
 ) -> Bool:
     """
-    Hit a ray again a split bvh node
+    Hit a ray again a split bvh node.
     """
     rec.hits += 1
 
@@ -65,7 +65,7 @@ fn hit_hittable[
     inout rec: HitRecord[T, dim],
 ) -> Bool:
     """
-    Hit a ray against hitable geometry / material pair
+    Hit a ray against hitable geometry / material pair.
     """
     var hit = hittable.geometry.hit(r, ray_t, rec, hittable.position, hittable.material)
     if hit:

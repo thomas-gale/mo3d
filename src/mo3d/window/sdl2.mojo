@@ -415,5 +415,5 @@ struct SDL:
         if error_ptr == UnsafePointer[UInt8]():  # Check if the pointer is null
             return "Unknown error"
 
-        var error_string = String(error_ptr)
+        var error_string = String(error_ptr[])
         return error_string

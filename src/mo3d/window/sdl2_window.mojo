@@ -39,7 +39,7 @@ struct SDL2Window(Window):
 
     fn __init__(
         inout self, name: String, width: Int, height: Int
-    ) raises -> None:
+    ) raises:
         self._name = name
         self._width = width
         self._height = height

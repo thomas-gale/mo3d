@@ -70,7 +70,7 @@ struct Camera[
 
     fn __init__(
         inout self,
-    ) raises -> None:
+    ) raises:
         # Set default field of view, starting position (look from), target (look at) and orientation (up vector)
         self._look_from = Point[T, dim](13, 2, 3)
         self._look_at = Point[T, dim](0, 0, 0)

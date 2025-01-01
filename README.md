@@ -39,6 +39,13 @@ Key features aim to include an experimental ECS-based architecture for efficient
 
 ## progress notes
 
+### 2025-01-01: merging the wonderful work of Robert - textures and emissives
+- We are updating to the latest version of mojo/max
+- https://github.com/thomas-gale/mo3d/pull/11
+- https://github.com/thomas-gale/mo3d/pull/13
+![image](https://github.com/user-attachments/assets/4bfb6217-ab20-456a-b38d-097356cf0449)
+
+
 ### 2024-09-23: slow bvh implementation using ecs.
 - Managed to get a basic bvh creation and traversal implementation working using the ECS.
 - I need to profile the hotspots and try to think if there are improvements. This traversal implementation (on the small scenes I've been testing so far, is actually about 4x slower than the simple hittable list implementation I was using previously).

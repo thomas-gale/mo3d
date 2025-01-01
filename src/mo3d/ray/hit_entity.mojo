@@ -1,5 +1,3 @@
-from utils import Span
-
 from mo3d.math.interval import Interval
 from mo3d.geometry.aabb import AABB
 from mo3d.ray.ray import Ray

@@ -24,6 +24,9 @@ struct Metal[T: DType, dim: Int](CollectionElement):
         attenuation = self.albedo
         return scattered.dir.dot(rec.normal) > 0.0
 
+    fn emission(self, rec : HitRecord[T,dim]) -> Color4[T]:
+        return Color4[T](0, 0, 0)
+
     fn __str__(self) -> String:
         return (
             "Metal(albedo: "

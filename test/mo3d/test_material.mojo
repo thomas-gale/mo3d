@@ -10,6 +10,8 @@ from mo3d.material.lambertian import Lambertian
 from mo3d.texture.texture import Texture
 from mo3d.texture.solid import Solid
 
+from mo3d.random.rng import Rng
+
 alias f32 = DType.float32
 
 fn test_create_lambertian_material() raises:
@@ -51,8 +53,10 @@ fn test_lambertian_material_scatter_ray() raises:
     var r_scattered = Ray[DType.float32, 3]()
     var attenuation = Color4[DType.float32]()
 
+    var rng = Rng(1)
+
     var scattered = m.scatter(
-        r, hr, attenuation, r_scattered
+        rng, r, hr, attenuation, r_scattered
     )
 
     assert_true(scattered)

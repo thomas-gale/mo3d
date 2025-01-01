@@ -25,5 +25,5 @@ build-setup = { cmd="sudo apt update && sudo apt install -y build-essential pyth
 
 [target.osx-arm64.tasks]
 setup = { cmd="brew install llvm sdl2", inputs=["pixi.toml"] }
-build-setup = { cmd="echo Skipping build-setup on mac for now", inputs=["pixi.toml"] }
+build-setup = { cmd="echo 'Skipping build-setup on mac for now'", inputs=["pixi.toml"] }
 # build-setup = { cmd="brew update && brew install build-essential python3-pil", inputs=["pixi.toml"] }

@@ -3,7 +3,6 @@ from complex import ComplexSIMD, ComplexFloat64
 from math import iota, inf
 from memory import UnsafePointer, bitcast
 from pathlib import Path
-from random import random_float64
 from sys import simdwidthof
 from testing import assert_equal
 from time import sleep, perf_counter

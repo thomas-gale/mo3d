@@ -1,6 +1,5 @@
 from collections import InlineArray
 from math.math import cos, sin
-from random import random_float64
 
 from mo3d.math.vec import Vec
 

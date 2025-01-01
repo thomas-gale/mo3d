@@ -31,6 +31,18 @@ struct BVHNode[T: DType, dim: Int]:
     var _wrapped: Self.Variant
     var box : AABB[T, dim]
 
+    fn count_hittables(self) -> Int:
+        if self._wrapped.isa[BVHSplit[T, dim]]():
+            return self._wrapped[BVHSplit[T, dim]].left[].count_hittables() +  self._wrapped[BVHSplit[T, dim]].right[].count_hittables()
+        else:
+            return 1
+
+    fn count_nodes(self) -> Int:
+        if self._wrapped.isa[BVHSplit[T, dim]]():
+            return 1 + self._wrapped[BVHSplit[T, dim]].left[].count_hittables() +  self._wrapped[BVHSplit[T, dim]].right[].count_hittables()
+        else:
+            return 0
+
 
 
 fn build_bvh_nodes_recursive[

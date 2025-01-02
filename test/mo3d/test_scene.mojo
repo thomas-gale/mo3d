@@ -13,30 +13,7 @@ fn test_construct_bvh() raises:
     basic_three_sphere_scene_3d(store)
     assert_equal(len(store.entity_to_components), 4)
 
-    var root_entity = construct_bvh(store)
-    assert_equal(root_entity, 4)
+    var bvh = construct_bvh(store)
 
-    assert_true(
-        store.entity_has_components(root_entity, ComponentType.BinaryChildren)
-    )
-    var root_binary_children = store.binary_children_components[
-        store.entity_to_components[root_entity][ComponentType.BinaryChildren]
-    ]
-    assert_equal(root_binary_children.left, 5)
-    assert_equal(root_binary_children.right, 6)
-
-    var left_binary_children = store.binary_children_components[
-        store.entity_to_components[root_binary_children.left][
-            ComponentType.BinaryChildren
-        ]
-    ]
-    assert_equal(left_binary_children.left, 0)
-    assert_equal(left_binary_children.right, 1)
-
-    var right_binary_children = store.binary_children_components[
-        store.entity_to_components[root_binary_children.right][
-            ComponentType.BinaryChildren
-        ]
-    ]
-    assert_equal(right_binary_children.left, 2)
-    assert_equal(right_binary_children.right, 3)
+    assert_equal(bvh.count_hittables(), 4)
+    assert_equal(bvh.count_nodes(), 5)

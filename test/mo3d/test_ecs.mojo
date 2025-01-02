@@ -5,13 +5,13 @@ from mo3d.geometry.geometry import Geometry
 from mo3d.geometry.sphere import Sphere
 
 from mo3d.ecs.component_store import ComponentStore
-from mo3d.ecs.component import ComponentID, ComponentTypeID, ComponentType, BinaryChildrenComponent
+from mo3d.ecs.component import ComponentID, ComponentTypeID, ComponentType
 
 alias f32 = DType.float32
 
 
 fn test_create_empty_component_store() raises:
-    var store = ComponentStore[f32, 3]()
+    var _store = ComponentStore[f32, 3]()
 
 
 fn test_add_entity_to_component_store() raises:
@@ -85,15 +85,3 @@ fn test_add_bvh_entity_to_component_store() raises:
     assert_almost_equal(bvh._bounds[2].min, -1.0)
     assert_almost_equal(bvh._bounds[2].max, 1.0)
 
-fn test_add_entity_with_children_to_component_store() raises:
-    var store = ComponentStore[f32, 3]()
-    var parent_entity = store.create_entity()
-    var child1_entity = store.create_entity()
-    var child2_entity = store.create_entity()
-
-    var binary_children_component = BinaryChildrenComponent(child1_entity, child2_entity)
-    _ = store.add_component(parent_entity, binary_children_component)
-
-    var query = store.get_entities_with_components(ComponentType.BinaryChildren)
-    assert_equal(len(query), 1)
-    assert_equal(query[0], parent_entity)

@@ -14,6 +14,7 @@ package = { cmd = "mkdir -p bin && magic run mojo package src/mo3d -o bin/mo3d.m
 test = { cmd = "magic run mojo test ./test", depends-on = ["package"], inputs=["src/**/*.mojo", "test/**/*.mojo"] }
 build = { cmd = "mkdir -p bin && magic run mojo build src/main.mojo -o bin/mo3d", depends-on = ["setup", "build-setup"], inputs=["src/**/*.mojo"], outputs = ["bin/mo3d"] }
 built = { cmd = "bin/mo3d", depends-on = ["build"] }
+perf = { cmd = "perf record -F 99 --call-graph bin/mo3d", depends-on = ["build"]  }
 
 [dependencies]
 max = ">=24.6.0.dev2024121016,<25"

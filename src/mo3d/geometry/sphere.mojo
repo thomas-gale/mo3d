@@ -44,14 +44,11 @@ struct Sphere[T: DType, dim: Int](CollectionElement):
         self,
         r: Ray[T, dim],
         owned ray_t: Interval[T],
-        inout rec: HitRecord[T, dim],
-        offset: Point[T, dim],
-        mat: Material[T, dim],
+        inout rec: HitRecord[T, dim]
     ) -> Bool:
-        var oc = offset - r.orig
         var a = r.dir.length_squared()
-        var h = r.dir.dot(oc)
-        var c = oc.length_squared() - self._radius * self._radius
+        var h = r.dir.dot(-r.orig)
+        var c = r.orig.length_squared() - self._radius * self._radius
 
         var discriminant = h * h - a * c
         if discriminant < 0:
@@ -68,26 +65,10 @@ struct Sphere[T: DType, dim: Int](CollectionElement):
 
         rec.t = root
         rec.p = r.at(rec.t)
-        var outward_normal = (rec.p - offset) / self._radius
+        var outward_normal = rec.p / self._radius
         rec.set_face_normal(r, outward_normal)
-        rec.mat = mat
 
         return True
 
     fn __str__(self) -> String:
         return "Sphere(radius=" + str(self._radius) + ")"
-
-
-fn hit_sphere[
-    T: DType, dim: Int
-](center: Point[T, dim], radius: Scalar[T], r: Ray[T, dim]) -> Scalar[T]:
-    var oc = center - r.orig
-    var a = r.dir.length_squared()
-    var h = r.dir.dot(oc)
-    var c = oc.length_squared() - radius * radius
-    var discriminant = h * h - a * c
-
-    if discriminant < 0:
-        return -1.0
-    else:
-        return (h - sqrt(discriminant)) / a

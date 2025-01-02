@@ -6,6 +6,7 @@ from mo3d.math.point import Point
 from mo3d.ray.color4 import Color4
 from mo3d.geometry.geometry import Geometry
 from mo3d.geometry.sphere import Sphere
+from mo3d.geometry.aabb import AABB
 from mo3d.material.material import Material
 from mo3d.material.lambertian import Lambertian
 from mo3d.material.metal import Metal
@@ -17,7 +18,7 @@ from mo3d.texture.checker import Checker
 
 from mo3d.random.rng import Rng
 
-fn sphere_scene_3d[T: DType](inout store: ComponentStore[T, 3], grid_size: Int = 11) raises:
+fn sample_scene_3d[T: DType](inout store: ComponentStore[T, 3], grid_size: Int = 14) raises:
     """
     The classic end scene from the Ray Tracing in One Weekend by Peter Shirley.
     """
@@ -50,16 +51,24 @@ fn sphere_scene_3d[T: DType](inout store: ComponentStore[T, 3], grid_size: Int =
 
     var rng = Rng(12345)
 
-    # Random spheres
+    # Random primitives
     for a in range(-grid_size, grid_size):
         for b in range(-grid_size, grid_size):
             var choose_mat = random_float(rng)
+            var choose_geom = random_float(rng)
             var center = Point[T, dim](
                 a + 0.9 * random_float(rng), 0.2, b + 0.9 * random_float(rng)
             )
 
             if (center - Point[T, dim](4, 0.2, 0)).length() > 0.9:
-                var sphere_material: Material[T, dim]
+                var entity_material: Material[T, dim]
+
+                var entity_geometry : Geometry[T,dim]
+                if choose_geom < 0.8:
+                    entity_geometry = Geometry[T,dim](Sphere[T, dim](0.2))
+                else:
+                    entity_geometry = Geometry[T,dim](
+                        AABB[T, dim](Vec[T, dim](-0.2), Vec[T, dim](0.2)))
 
                 if choose_mat < 0.7:
                     # diffuse
@@ -67,54 +76,30 @@ fn sphere_scene_3d[T: DType](inout store: ComponentStore[T, 3], grid_size: Int =
                     var albedo = Texture[T, dim](
                         Solid[T, dim](albedo_colour)
                     )
-                    sphere_material = Material[T, dim](
+                    entity_material = Material[T, dim](
                         Lambertian[T, dim](albedo)
-                    )
-                    var sphere = Sphere[T, dim](0.2)
-                    var sphere_entity_id = store.create_entity()
-                    _ = store.add_components(
-                        sphere_entity_id,
-                        center,
-                        Geometry[T, dim](sphere),
-                        sphere_material,
                     )
                 elif choose_mat < 0.8:
                     # metal
                     var albedo = Color4[T].random(rng, 0.5, 1)
                     var fuzz = random_float(rng, 0, 0.5)
-                    sphere_material = Material[T, dim](
+                    entity_material = Material[T, dim](
                         Metal[T, dim](albedo, fuzz)
-                    )
-                    var sphere = Sphere[T, dim](0.2)
-                    var sphere_entity_id = store.create_entity()
-                    _ = store.add_components(
-                        sphere_entity_id,
-                        center,
-                        Geometry[T, dim](sphere),
-                        sphere_material,
                     )
                 elif choose_mat < 0.9:
                     # glass
-                    sphere_material = Material[T, dim](Dielectric[T, dim](1.5))
-                    var sphere = Sphere[T, dim](0.2)
-                    var sphere_entity_id = store.create_entity()
-                    _ = store.add_components(
-                        sphere_entity_id,
-                        center,
-                        Geometry[T, dim](sphere),
-                        sphere_material,
-                    )
+                    entity_material = Material[T, dim](Dielectric[T, dim](1.5))
                 else:
                     # light
-                    sphere_material = Material[T, dim](DiffuseLight[T, dim](Color4[T](6.0,6.0,6.0,1)))
-                    var sphere = Sphere[T, dim](0.2)
-                    var sphere_entity_id = store.create_entity()
-                    _ = store.add_components(
-                        sphere_entity_id,
-                        center,
-                        Geometry[T, dim](sphere),
-                        sphere_material,
-                    )
+                    entity_material = Material[T, dim](DiffuseLight[T, dim](Color4[T](6.0,6.0,6.0,1)))
+                
+                var entity_id = store.create_entity()
+                _ = store.add_components(
+                    entity_id,
+                    center,
+                    entity_geometry,
+                    entity_material,
+                )
     # Big Spheres
     var mat1 = Material[T, dim](Dielectric[T, dim](1.5))
     var sphere1 = Sphere[T, dim](1.0)

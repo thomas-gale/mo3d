@@ -21,7 +21,7 @@ fn hit_entity[
     """
     ECS 'system' to intersect a ray with an entity in the component store.
     """
-    if not bvh_node.box.hit(r, ray_t):
+    if not bvh_node.box.any_hit(r, ray_t):
         return False
     # Is the entity a BVH or Leaf Geometry?
     if bvh_node._wrapped.isa[BVHSplit[T, dim]]():
@@ -67,7 +67,10 @@ fn hit_hittable[
     """
     Hit a ray against hitable geometry / material pair.
     """
-    var hit = hittable.geometry.hit(r, ray_t, rec, hittable.position, hittable.material)
+    var local_ray = r.offset(-hittable.position)
+    var hit = hittable.geometry.hit(local_ray, ray_t, rec)
     if hit:
+        rec.p += hittable.position
+        rec.mat = hittable.material
         rec.hits += 1
     return hit

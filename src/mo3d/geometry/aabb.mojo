@@ -5,6 +5,8 @@ from mo3d.math.vec import Vec
 from mo3d.math.point import Point
 from mo3d.ray.ray import Ray
 
+from mo3d.geometry.geometry import Hittable
+
 from mo3d.ray.hit_record import HitRecord
 
 @always_inline
@@ -15,7 +17,7 @@ fn sign[T: DType](num : Scalar[T]) -> Scalar[T]:
         return 1
 
 @value
-struct AABB[T: DType, dim: Int]:
+struct AABB[T: DType, dim: Int](Hittable):
     var _bounds: InlineArray[Interval[T, 1], dim]
 
     fn __init__(inout self):
@@ -47,6 +49,13 @@ struct AABB[T: DType, dim: Int]:
             new_box._bounds[i] = self._bounds[i] + vec[i]
         return new_box
 
+    fn center(self) -> Vec[T, dim]:
+        var res = Vec[T, dim](0)
+        @parameter
+        for i in range(dim):
+            res[i] = self._bounds[i].mid()
+        return res
+ 
     fn clone(self) -> Self:
         var new_box = Self()
         @parameter
@@ -123,46 +132,51 @@ struct AABB[T: DType, dim: Int]:
                 return False
         return True
 
-    fn hit(self, r: Ray[T, dim], owned ray_t: Interval[T, 1], inout rec: HitRecord[T, dim]) -> Bool:
+    fn aabb[T: DType, dim: Int](self) -> AABB[T,dim]:
+        return rebind[AABB[T, dim]](self)
+
+    fn hit[T: DType, dim: Int](self, r: Ray[T, dim], owned ray_t: Interval[T, 1], inout rec: HitRecord[T, dim]) -> Bool:
         """
         Check if the ray intersects the bounding box.
         """
+        var ray_in = rebind[Ray[Self.T, Self.dim]](r)
+        var ray_t_in = rebind[Interval[Self.T]](ray_t)
         var min_axis = -1
         var max_axis = -1
         @parameter
         for axis in range(dim):
             var ax = self.axis_interval(axis)
-            var adinv = 1.0 / r.dir[axis]
+            var adinv = 1.0 / ray_in.dir[axis]
 
-            var t0 = (ax.min - r.orig[axis]) * adinv
-            var t1 = (ax.max - r.orig[axis]) * adinv
+            var t0 = (ax.min - ray_in.orig[axis]) * adinv
+            var t1 = (ax.max - ray_in.orig[axis]) * adinv
 
             if t0 < t1:
-                if t0 > ray_t.min:
-                    ray_t.min = t0
+                if t0 > ray_t_in.min:
+                    ray_t_in.min = t0
                     min_axis = axis
-                if t1 < ray_t.max:
-                    ray_t.max = t1
+                if t1 < ray_t_in.max:
+                    ray_t_in.max = t1
                     max_axis = axis
             else:
-                if t1 > ray_t.min:
-                    ray_t.min = t1
+                if t1 > ray_t_in.min:
+                    ray_t_in.min = t1
                     min_axis = axis
-                if t0 < ray_t.max:
-                    ray_t.max = t0
+                if t0 < ray_t_in.max:
+                    ray_t_in.max = t0
                     max_axis = axis
             
             if ray_t.max <= ray_t.min:
                 return False
         if min_axis >= 0:
-            rec.t = ray_t.min
+            rec.t = rebind[Scalar[T]](ray_t_in.min)
             rec.p = r.at(rec.t)
             var normal = Vec[T, dim]()
             normal[min_axis] = sign(rec.p[min_axis])
             rec.set_face_normal(r, normal)
             return True
         elif max_axis >= 0:
-            rec.t = ray_t.max
+            rec.t = rebind[Scalar[T]](ray_t_in.max)
             rec.p = r.at(rec.t)
             var normal = Vec[T, dim]()
             normal[max_axis] = sign(rec.p[max_axis])

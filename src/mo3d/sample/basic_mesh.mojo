@@ -85,5 +85,3 @@ fn basic_mesh_scene_3d[
         Geometry[T, dim](mesh),
         mat_mesh,
     )
-
-    print("Box: " + str(mesh.aabb()))

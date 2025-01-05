@@ -7,6 +7,7 @@ from collections.list import List
 from mo3d.math.vec import Vec
 from mo3d.math.interval import Interval
 from mo3d.geometry.triangle import Triangle
+from mo3d.geometry.geometry import Hittable
 from mo3d.geometry.aabb import AABB
 from mo3d.ray.ray import Ray
 from mo3d.ray.hit_record import HitRecord
@@ -14,7 +15,7 @@ from mo3d.ray.hit_record import HitRecord
 import os
 
 @value
-struct Mesh[T : DType]:
+struct Mesh[T : DType](Hittable):
     var _triangles : ArcPointer[List[Triangle[T]]]
 
     fn __init__(out self, owned triangles : List[Triangle[T]]) raises:
@@ -58,21 +59,21 @@ struct Mesh[T : DType]:
         return Mesh[T](tris)
 
 
-    fn aabb(self) -> AABB[T, 3]:
+    fn aabb[T : DType, dim : Int](self) -> AABB[T, dim]:
         var box = AABB[T, 3]()
         for tri in self._triangles[]:
-            box.merge_in(tri[].aabb())
-        return box
+            box.merge_in(tri[].aabb[T, 3]())
+        return rebind[AABB[T, dim]](box)
 
-    fn hit(
+    fn hit[T : DType, dim : Int](
         self,
-        r: Ray[T, 3],
+        r: Ray[T, dim],
         owned ray_t: Interval[T],
-        inout rec: HitRecord[T, 3]
+        inout rec: HitRecord[T, dim]
     ) -> Bool:
         var any_hit = False
         for tri in self._triangles[]:
-            var res = tri[].hit(r, ray_t, rec)
+            var res = tri[].hit[T, dim](r, ray_t, rec)
             if res:
                 ray_t.max = rec.t
                 any_hit = True

@@ -13,9 +13,21 @@ from mo3d.geometry.mesh import Mesh
 
 from mo3d.material.material import Material
 
+# Unfortunatly traits currently cant have parameters thus
+# we have to have fully generic trait methods and rebind in the 
+# implementing classes
+trait Hittable(CollectionElement):
+    fn aabb[T : DType, dim : Int](self) -> AABB[T, dim]:
+        ...
+    fn hit[T : DType, dim : Int](
+        self,
+        r: Ray[T, dim],
+        owned ray_t: Interval[T],
+        mut rec: HitRecord[T, dim]) -> Bool:
+        ...
 
 @value
-struct Geometry[T: DType, dim: Int]:
+struct Geometry[T: DType, dim: Int](Hittable):
     alias Variant = Variant[Sphere[T, dim], AABB[T, dim], Triangle[T], Mesh[T]]
     var _hittable: Self.Variant
 
@@ -31,30 +43,20 @@ struct Geometry[T: DType, dim: Int]:
         else:
             raise Error("Geometry c'tor: Unsupported geometry type")
 
-    fn aabb(self) -> AABB[T, dim]:
+    fn aabb[T: DType, dim: Int](self) -> AABB[T, dim]:
         if self._hittable.isa[Sphere[T, dim]]():
-            return self._hittable[Sphere[T, dim]].aabb()
+            return self._hittable[Sphere[T, dim]].aabb[T,dim]()
         elif self._hittable.isa[AABB[T, dim]]():
-            return self._hittable[AABB[T, dim]]
+            return self._hittable[AABB[T, dim]].aabb[T,dim]()
         elif self._hittable.isa[Triangle[T]]():
-            @parameter
-            if dim == 3:
-                var box = rebind[AABB[T, dim]](self._hittable[Triangle[T]].aabb())
-                return box
-            print("Can only use triangles in 3 dimensions tracing")
-            return AABB[T, dim]()
+            return self._hittable[Triangle[T]].aabb[T,dim]()
         elif self._hittable.isa[Mesh[T]]():
-            @parameter
-            if dim == 3:
-                var box = rebind[AABB[T, dim]](self._hittable[Mesh[T]].aabb())
-                return box
-            print("Can only use meshes in 3 dimensions tracing")
-            return AABB[T, dim]()
+            return self._hittable[Mesh[T]].aabb[T,dim]()
         else:
             print("Geometry aabb: Unsupported geometry type")
             return AABB[T, dim]()
 
-    fn hit(
+    fn hit[T: DType, dim: Int](
         self,
         r: Ray[T, dim],
         owned ray_t: Interval[T],
@@ -65,25 +67,9 @@ struct Geometry[T: DType, dim: Int]:
         elif self._hittable.isa[AABB[T, dim]]():
             return self._hittable[AABB[T, dim]].hit(r, ray_t, rec)
         elif self._hittable.isa[Triangle[T]]():
-            @parameter
-            if dim == 3:
-                return self._hittable[Triangle[T]].hit(
-                    rebind[Ray[T, 3]](r),
-                    ray_t,
-                    rebind[HitRecord[T, 3]](rec)
-                )
-            print("Can only use triangles in 3 dimensions tracing")
-            return False
+            return self._hittable[Triangle[T]].hit(r, ray_t, rec)
         elif self._hittable.isa[Mesh[T]]():
-            @parameter
-            if dim == 3:
-                return self._hittable[Mesh[T]].hit(
-                    rebind[Ray[T, 3]](r),
-                    ray_t,
-                    rebind[HitRecord[T, 3]](rec)
-                )
-            print("Can only use triangles in 3 dimensions tracing")
-            return False
+            return self._hittable[Mesh[T]].hit(r, ray_t, rec)
         else:
             print("Hittable hit: Unsupported hittable type")
             return False

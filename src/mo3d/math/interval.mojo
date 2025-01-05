@@ -48,6 +48,9 @@ struct Interval[T: DType, simd_size: Int = 1](CollectionElementNew):
     fn contains(self, x: Self.S) -> SIMD[DType.bool, simd_size]:
         return (self.min <= x) and (x <= self.max)
 
+    fn mid(self) -> Self.S:
+        return 0.5 * (self.max + self.min)
+
     fn merge_in(inout self, x : Self.S):
         if x > self.max:
             self.max = x

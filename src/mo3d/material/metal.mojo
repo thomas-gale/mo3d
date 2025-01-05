@@ -3,6 +3,7 @@ from mo3d.ray.color4 import Color4
 from mo3d.ray.ray import Ray
 from mo3d.ray.hit_record import HitRecord
 
+from mo3d.random.rng import Rng
 
 @value
 struct Metal[T: DType, dim: Int](CollectionElement):
@@ -11,6 +12,7 @@ struct Metal[T: DType, dim: Int](CollectionElement):
 
     fn scatter(
         self,
+        mut rng : Rng,
         r_in: Ray[T, dim],
         rec: HitRecord[T, dim],
         inout attenuation: Color4[T],
@@ -18,7 +20,7 @@ struct Metal[T: DType, dim: Int](CollectionElement):
     ) -> Bool:
         var reflected = Vec[T, dim].reflect(r_in.dir, rec.normal)
         reflected = reflected.unit() + (
-            self.fuzz * Vec[T, dim].random_unit_vector()
+            self.fuzz * Vec[T, dim].random_unit_vector(rng)
         )
         scattered = Ray[T, dim](rec.p, reflected, r_in.tm)
         attenuation = self.albedo

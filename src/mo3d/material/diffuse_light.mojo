@@ -3,6 +3,7 @@ from mo3d.ray.color4 import Color4
 from mo3d.ray.ray import Ray
 from mo3d.ray.hit_record import HitRecord
 
+from mo3d.random.rng import Rng
 
 @value
 struct DiffuseLight[T: DType, dim: Int](CollectionElement):
@@ -10,6 +11,7 @@ struct DiffuseLight[T: DType, dim: Int](CollectionElement):
 
     fn scatter(
         self,
+        mut rng : Rng,
         r_in: Ray[T, dim],
         rec: HitRecord[T, dim],
         inout attenuation: Color4[T],

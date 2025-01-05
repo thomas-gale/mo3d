@@ -1,11 +1,11 @@
 from math import sqrt
-from random import random_float64
 
 from mo3d.math.vec import Vec
 from mo3d.ray.color4 import Color4
 from mo3d.ray.ray import Ray
 from mo3d.ray.hit_record import HitRecord
 
+from mo3d.random.rng import Rng
 
 @value
 struct Dielectric[T: DType, dim: Int](CollectionElement):
@@ -13,6 +13,7 @@ struct Dielectric[T: DType, dim: Int](CollectionElement):
 
     fn scatter(
         self,
+        mut rng : Rng,
         r_in: Ray[T, dim],
         rec: HitRecord[T, dim],
         inout attenuation: Color4[T],
@@ -33,7 +34,7 @@ struct Dielectric[T: DType, dim: Int](CollectionElement):
 
         if (
             cannot_refract
-            or Self.reflectance(cos_theta, ri) > random_float64().cast[T]()
+            or Self.reflectance(cos_theta, ri) > rng.float64().cast[T]()
         ):
             direction = Vec[T, dim].reflect(unit_direction, rec.normal)
         else:

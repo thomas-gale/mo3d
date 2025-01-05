@@ -18,6 +18,9 @@ struct Ray[type: DType, dim: Int]:
         self.dir = dir
         self.tm = tm
 
+    fn offset(self, vec : Vec[type, dim]) -> Ray[type, dim]:
+        return Ray(self.orig + vec, self.dir, self.tm)
+
     fn at(self, t: Scalar[type]) -> Point[type, dim]:
         return self.orig + self.dir * t
 

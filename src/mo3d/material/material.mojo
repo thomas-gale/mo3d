@@ -9,6 +9,7 @@ from mo3d.material.metal import Metal
 from mo3d.material.dielectric import Dielectric
 from mo3d.material.diffuse_light import DiffuseLight
 
+from mo3d.random.rng import Rng
 
 @value
 struct Material[T: DType, dim: Int]:
@@ -19,6 +20,7 @@ struct Material[T: DType, dim: Int]:
 
     fn scatter(
         self,
+        mut rng : Rng,
         r_in: Ray[T, dim],
         rec: HitRecord[T, dim],
         inout attenuation: Color4[T],
@@ -27,19 +29,19 @@ struct Material[T: DType, dim: Int]:
         # TODO perform the runtime variant match
         if self._mat.isa[Lambertian[T, dim]]():
             return self._mat[Lambertian[T, dim]].scatter(
-                r_in, rec, attenuation, scattered
+                rng, r_in, rec, attenuation, scattered
             )
         elif self._mat.isa[Metal[T, dim]]():
             return self._mat[Metal[T, dim]].scatter(
-                r_in, rec, attenuation, scattered
+                rng, r_in, rec, attenuation, scattered
             )
         elif self._mat.isa[Dielectric[T, dim]]():
             return self._mat[Dielectric[T, dim]].scatter(
-                r_in, rec, attenuation, scattered
+                rng, r_in, rec, attenuation, scattered
             )
         elif self._mat.isa[DiffuseLight[T, dim]]():
             return self._mat[DiffuseLight[T, dim]].scatter(
-                r_in, rec, attenuation, scattered
+                rng, r_in, rec, attenuation, scattered
             )
         raise Error("Material type not supported")
 

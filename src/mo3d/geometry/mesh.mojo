@@ -12,14 +12,16 @@ from mo3d.geometry.aabb import AABB
 from mo3d.ray.ray import Ray
 from mo3d.ray.hit_record import HitRecord
 
+from mo3d.scene.construct_bvh import BVHNode, construct_bvh_list
+
 import os
 
 @value
 struct Mesh[T : DType](Hittable):
-    var _triangles : ArcPointer[List[Triangle[T]]]
+    var _triangles : BVHNode[T, 3, Triangle[T]]
 
     fn __init__(out self, owned triangles : List[Triangle[T]]) raises:
-        self._triangles = ArcPointer(triangles)
+        self._triangles = construct_bvh_list[T, 3, Triangle[T]](triangles)
 
     @staticmethod
     fn load_from_binary_stl(filename : String) raises -> Mesh[T]: 
@@ -46,7 +48,7 @@ struct Mesh[T : DType](Hittable):
             var b = Vec[T, 3](vert_b_ptr[0].cast[T](), vert_b_ptr[1].cast[T](), vert_b_ptr[2].cast[T]())
             var c = Vec[T, 3](vert_c_ptr[0].cast[T](), vert_c_ptr[1].cast[T](), vert_c_ptr[2].cast[T]())
             try:
-                var t = Triangle[T](a, b, c)
+                var t = Triangle[T](a * 0.1, b * 0.1, c * 0.1)
                 print("Triangle: " +str(t))
                 tris.append(t)
             except:
@@ -60,10 +62,7 @@ struct Mesh[T : DType](Hittable):
 
 
     fn aabb[T : DType, dim : Int](self) -> AABB[T, dim]:
-        var box = AABB[T, 3]()
-        for tri in self._triangles[]:
-            box.merge_in(tri[].aabb[T, 3]())
-        return rebind[AABB[T, dim]](box)
+        return self._triangles.aabb[T, dim]()
 
     fn hit[T : DType, dim : Int](
         self,
@@ -71,14 +70,8 @@ struct Mesh[T : DType](Hittable):
         owned ray_t: Interval[T],
         inout rec: HitRecord[T, dim]
     ) -> Bool:
-        var any_hit = False
-        for tri in self._triangles[]:
-            var res = tri[].hit[T, dim](r, ray_t, rec)
-            if res:
-                ray_t.max = rec.t
-                any_hit = True
-        return any_hit
+        return self._triangles.hit(r, ray_t, rec)
 
 
     fn __str__(self) -> String:
-        return "Mesh with (" + str(len(self._triangles[])) + ") triangles"
+        return "Mesh with (" + str(self._triangles.count_hittables()) + ") triangles"

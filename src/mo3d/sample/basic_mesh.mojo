@@ -78,7 +78,8 @@ fn basic_mesh_scene_3d[
          Lambertian[T, dim](tex_mesh)
     )
     # Load a mesh
-    var mesh = Mesh[T].load_from_binary_stl("data/cube.stl")
+    var mesh = Mesh[T].load_from_binary_stl("data/Utah_teapot_(solid).stl")
+    #var mesh = Mesh[T].load_from_binary_stl("data/cube.stl")
     _ = store.add_components(
         store.create_entity(),
         Point[T, dim](0,0,0),

@@ -75,7 +75,8 @@ struct Triangle[T: DType](CollectionElement):
         var denom = self.w.dot(r.dir)
         if math.abs(denom) < 1e-8:
             return False
-        var t = self.w.dot(r.orig - self.base_point) / denom
+        var rel = self.base_point - r.orig
+        var t = self.w.dot(rel) / denom
         if not ray_t.contains(t):
             return False
         # Get local hit point and see if hits the triangle

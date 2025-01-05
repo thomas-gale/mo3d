@@ -25,6 +25,7 @@ struct AABB[T: DType, dim: Int]:
         self._bounds = InlineArray[Interval[T, 1], dim](
             unsafe_uninitialized=True
         )
+        @parameter
         for i in range(dim):
             if a[i] < b[i]:
                 self._bounds[i] = Interval[T, 1](a[i], b[i])
@@ -35,20 +36,35 @@ struct AABB[T: DType, dim: Int]:
         self._bounds = InlineArray[Interval[T, 1], dim](
             unsafe_uninitialized=True
         )
+        @parameter
         for i in range(dim):
             self._bounds[i] = Interval[T, 1](box_a._bounds[i], box_b._bounds[i])
 
     fn __add__(self, vec: Vec[T, dim]) -> Self:
         var new_box = Self()
+        @parameter
         for i in range(dim):
             new_box._bounds[i] = self._bounds[i] + vec[i]
         return new_box
 
     fn clone(self) -> Self:
         var new_box = Self()
+        @parameter
         for i in range(dim):
             new_box._bounds[i] = self._bounds[i]
         return new_box
+
+    fn merge_in(inout self, vec : Vec[T, dim]):
+        @parameter
+        for i in range(dim):
+            self._bounds[i].merge_in(vec[i])
+
+    fn pad_to(inout self, min : Scalar[T]):
+        @parameter
+        for i in range(dim):
+            if (self._bounds[i].size() < min):
+                self._bounds[i] = self._bounds[i].expand(min / 2)
+
 
     fn axis_interval(self, n: Int) -> Interval[T, 1]:
         if n < 0 or n >= dim:
@@ -60,6 +76,7 @@ struct AABB[T: DType, dim: Int]:
         # Returns the index of the longest axis of the bounding box.
         var longest_size: Scalar[T] = 0
         var longest_axis = 0
+        @parameter
         for i in range(dim):
             var size = self._bounds[i].size()
             if size > longest_size:

@@ -56,13 +56,14 @@ struct Triangle[T: DType](CollectionElement):
 
     fn aabb(self) -> AABB[T, 3]:
         """
-        Generate an axis-aligned bounding box for the sphere.
+        Generate an axis-aligned bounding box for the triangle.
         """
         var b = (self.base_point + self.u)
         var c = (self.base_point + self.v)
         var box = AABB[T, 3](b, c)
         box.merge_in(self.base_point)
-        box.pad_to(1e-8)
+        # If we pad less than this (in f32 we quickly hit the point we never hit the box)
+        box.pad_to(1e-6)
         return box
 
     fn hit(

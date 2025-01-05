@@ -59,6 +59,11 @@ struct AABB[T: DType, dim: Int]:
         for i in range(dim):
             self._bounds[i].merge_in(vec[i])
 
+    fn merge_in(inout self, aabb : AABB[T, dim]):
+        @parameter
+        for i in range(dim):
+            self._bounds[i].merge_in(aabb._bounds[i])
+
     fn pad_to(inout self, min : Scalar[T]):
         @parameter
         for i in range(dim):

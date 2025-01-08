@@ -13,29 +13,35 @@ from mo3d.geometry.mesh import Mesh
 
 from mo3d.material.material import Material
 
+
 # Unfortunatly traits currently cant have parameters thus
-# we have to have fully generic trait methods and rebind in the 
+# we have to have fully generic trait methods and rebind in the
 # implementing classes
 trait Hittable(CollectionElement):
     """
     The trait to be implemented by all entities that are to be tracable
     (so hit by rays).
     """
-    fn aabb[T : DType, dim : Int](self) -> AABB[T, dim]:
+
+    fn aabb[T: DType, dim: Int](self) -> AABB[T, dim]:
         """
-        Produce a AABB that bounds the hittable. 
+        Produce a AABB that bounds the hittable.
 
         This should be sufficent such that any ray that hits the hittable must enter
         the aabb first.
 
-        It is primarly used to construct BVH for faster rendering. 
+        It is primarly used to construct BVH for faster rendering.
         """
         ...
-    fn hit[T : DType, dim : Int](
+
+    fn hit[
+        T: DType, dim: Int
+    ](
         self,
         r: Ray[T, dim],
         owned ray_t: Interval[T],
-        mut rec: HitRecord[T, dim]) -> Bool:
+        mut rec: HitRecord[T, dim],
+    ) -> Bool:
         """
         Detect if a given ray (r) hits the geometry in the parameter range (ray_t).
 
@@ -44,6 +50,7 @@ trait Hittable(CollectionElement):
         """
         ...
 
+
 @value
 struct Geometry[T: DType, dim: Int](Hittable):
     """
@@ -51,6 +58,7 @@ struct Geometry[T: DType, dim: Int](Hittable):
     for now we make a varient type for the instances of hittable that we
     will want to support and make a manual dispatch chain.
     """
+
     alias Variant = Variant[Sphere[T, dim], AABB[T, dim], Triangle[T], Mesh[T]]
     var _hittable: Self.Variant
 
@@ -68,22 +76,24 @@ struct Geometry[T: DType, dim: Int](Hittable):
 
     fn aabb[T: DType, dim: Int](self) -> AABB[T, dim]:
         if self._hittable.isa[Sphere[T, dim]]():
-            return self._hittable[Sphere[T, dim]].aabb[T,dim]()
+            return self._hittable[Sphere[T, dim]].aabb[T, dim]()
         elif self._hittable.isa[AABB[T, dim]]():
-            return self._hittable[AABB[T, dim]].aabb[T,dim]()
+            return self._hittable[AABB[T, dim]].aabb[T, dim]()
         elif self._hittable.isa[Triangle[T]]():
-            return self._hittable[Triangle[T]].aabb[T,dim]()
+            return self._hittable[Triangle[T]].aabb[T, dim]()
         elif self._hittable.isa[Mesh[T]]():
-            return self._hittable[Mesh[T]].aabb[T,dim]()
+            return self._hittable[Mesh[T]].aabb[T, dim]()
         else:
             print("Geometry aabb: Unsupported geometry type")
             return AABB[T, dim]()
 
-    fn hit[T: DType, dim: Int](
+    fn hit[
+        T: DType, dim: Int
+    ](
         self,
         r: Ray[T, dim],
         owned ray_t: Interval[T],
-        inout rec: HitRecord[T, dim]
+        inout rec: HitRecord[T, dim],
     ) -> Bool:
         if self._hittable.isa[Sphere[T, dim]]():
             return self._hittable[Sphere[T, dim]].hit(r, ray_t, rec)

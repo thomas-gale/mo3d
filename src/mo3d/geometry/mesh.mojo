@@ -16,13 +16,28 @@ import os
 
 @value
 struct Mesh[T : DType](Hittable):
+    """ 
+    A mesh this is a BVH of triangles. No vertex mapping is currently
+    done to store vertex normals or UV coords so far.
+
+    The triangles are stored in a specialized BVH for faster tracing.
+    """
     var _triangles : BVHNode[T, 3, Triangle[T]]
 
     fn __init__(out self, owned triangles : List[Triangle[T]]) raises:
         self._triangles = construct_bvh_list[T, 3, Triangle[T]](triangles)
 
     @staticmethod
-    fn load_from_binary_stl(filename : String, scale : Scalar[T] = 1.0) raises -> Mesh[T]: 
+    fn load_from_binary_stl(filename : String, scale : Scalar[T] = 1.0) raises -> Mesh[T]:
+        """
+        Load the triangle mesh from a binary STL file excluding any degenerate
+        triangles.
+
+        As STL files are in uncertain units a scale factor is added to apply to
+        the vertices for convienience.
+
+        Will raise if file cannot be parsed.
+        """
         var file = open(filename, "r")
         # Header
         _ = file.seek(80)
@@ -34,7 +49,6 @@ struct Mesh[T : DType](Hittable):
         for _ in range(size[0]):
             # Skip normal for now 
             see = file.seek(12, os.SEEK_CUR)
-            print(see)
             var vert_a = InlineArray[Float32, 3](0)
             var vert_b = InlineArray[Float32, 3](0)
             var vert_c = InlineArray[Float32, 3](0)

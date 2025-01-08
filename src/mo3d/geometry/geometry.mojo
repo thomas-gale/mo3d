@@ -17,17 +17,40 @@ from mo3d.material.material import Material
 # we have to have fully generic trait methods and rebind in the 
 # implementing classes
 trait Hittable(CollectionElement):
+    """
+    The trait to be implemented by all entities that are to be tracable
+    (so hit by rays).
+    """
     fn aabb[T : DType, dim : Int](self) -> AABB[T, dim]:
+        """
+        Produce a AABB that bounds the hittable. 
+
+        This should be sufficent such that any ray that hits the hittable must enter
+        the aabb first.
+
+        It is primarly used to construct BVH for faster rendering. 
+        """
         ...
     fn hit[T : DType, dim : Int](
         self,
         r: Ray[T, dim],
         owned ray_t: Interval[T],
         mut rec: HitRecord[T, dim]) -> Bool:
+        """
+        Detect if a given ray (r) hits the geometry in the parameter range (ray_t).
+
+        If so record the conditions of the hit in the hit record (rec):
+        The position, paramter value etc.
+        """
         ...
 
 @value
 struct Geometry[T: DType, dim: Int](Hittable):
+    """
+    If is not possible to dispatch dynamically on a trait yet in mojo
+    for now we make a varient type for the instances of hittable that we
+    will want to support and make a manual dispatch chain.
+    """
     alias Variant = Variant[Sphere[T, dim], AABB[T, dim], Triangle[T], Mesh[T]]
     var _hittable: Self.Variant
 

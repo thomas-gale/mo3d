@@ -18,7 +18,10 @@ from mo3d.math.point import Point
 from mo3d.math.interval import Interval
 
 @value 
-struct HittableGeneric[T : DType, dim : Int](Hittable):
+struct HittableEntity[T : DType, dim : Int](Hittable):
+    """
+    The needed data from hittable entities to trace them.
+    """
     var geometry : Geometry[T, dim]
     var material : Material[T, dim]
     var position : Point[T, dim]
@@ -160,6 +163,9 @@ fn build_bvh_nodes_recursive[
 fn construct_bvh_list[
     T: DType, dim: Int, H : Hittable
 ](hittables: List[H]) raises -> BVHNode[T, dim, H]:
+    """
+    Construct a BVH from the given list of hittable entities.
+    """
     var indices = List[Int](len(hittables))
     var box_cache = List[AABB[T, dim]]()
     for i in range(len(hittables)):
@@ -175,7 +181,7 @@ fn construct_bvh_list[
 
 fn construct_bvh_store[
     T: DType, dim: Int
-](store: ComponentStore[T, dim]) raises -> BVHNode[T, dim, HittableGeneric[T, dim]]:
+](store: ComponentStore[T, dim]) raises -> BVHNode[T, dim, HittableEntity[T, dim]]:
     """
     ECS 'system' to construct a BVH from all components in store with position and geometry.
     Returns the root entity ID of the BVH.
@@ -186,7 +192,7 @@ fn construct_bvh_store[
         ComponentType.Position | ComponentType.Geometry
     )
 
-    var hittables = List[HittableGeneric[T, dim]]()
+    var hittables = List[HittableEntity[T, dim]]()
     for entity_id in entity_ids:
         var geometry = store.geometry_components[
             store.entity_to_components[entity_id[]][ComponentType.Geometry]
@@ -197,9 +203,9 @@ fn construct_bvh_store[
         var position = store.position_components[
             store.entity_to_components[entity_id[]][ComponentType.Position]
         ]
-        hittables.append(HittableGeneric(geometry, material, position))
+        hittables.append(HittableEntity(geometry, material, position))
 
 
-    var root = construct_bvh_list[T, dim, HittableGeneric[T, dim]](hittables)
+    var root = construct_bvh_list[T, dim, HittableEntity[T, dim]](hittables)
     print("Constructed BVH!")
     return root

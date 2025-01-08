@@ -17,7 +17,7 @@ fn basic_mesh_scene_3d[
     T: DType
 ](inout store: ComponentStore[T, 3]) raises:
     """
-    The classic end scene from the Ray Tracing in One Weekend by Peter Shirley.
+    A scene with a loaded mesh and a ground plane.
     """
     alias dim = 3
 
@@ -37,49 +37,13 @@ fn basic_mesh_scene_3d[
         mat_ground,
     )
 
-    # # Make a triangle
-    # var tex1 = Texture[T, dim](Solid[T, dim](Color4[T](0.2, 0.8, 0.3)))
-    # var mat1 = Material[T, dim](
-    #      Lambertian[T, dim](tex1)
-    # )
-    # var tri1 = Triangle[T](
-    #     Point[T, dim](-4, 1, 0),
-    #     Point[T, dim](0, 1, 0),
-    #     Point[T, dim](0, 0, 0)
-    #     )
-    # var tri1_entity_id = store.create_entity()
-    # _ = store.add_components(
-    #     tri1_entity_id,
-    #     Point[T, dim](0, 0, 0),
-    #     Geometry[T, dim](tri1),
-    #     mat1,
-    # )
-
-    # # Add tiny spheres on the vertices
-    # var tex_vert = Texture[T, dim](Solid[T, dim](Color4[T](0.8, 0.2, 0.2)))
-    # var mat_vert = Material[T, dim](
-    #      Lambertian[T, dim](tex_vert)
-    # )
-    # var verts = List(Point[T, dim](-4, 1, 0),
-    #     Point[T, dim](0, 1, 0),
-    #     Point[T, dim](0, 0, 0))
-    # var sphere = Sphere[T, dim](0.1)
-    # for p in verts:
-    #     _ = store.add_components(
-    #         store.create_entity(),
-    #         p[],
-    #         Geometry[T, dim](sphere),
-    #         mat_vert,
-    #     )
-
-
     var tex_mesh = Texture[T, dim](Solid[T, dim](Color4[T](0.8, 0.2, 0.2)))
     var mat_mesh = Material[T, dim](
          Lambertian[T, dim](tex_mesh)
     )
     # Load a mesh
-    var mesh = Mesh[T].load_from_binary_stl("data/Utah_teapot_(solid).stl")
-    #var mesh = Mesh[T].load_from_binary_stl("data/cube.stl")
+    var mesh = Mesh[T].load_from_binary_stl("data/Utah_teapot_(solid).stl", 0.1)
+    print("Loaded: " + str(mesh))
     _ = store.add_components(
         store.create_entity(),
         Point[T, dim](0,0,0),

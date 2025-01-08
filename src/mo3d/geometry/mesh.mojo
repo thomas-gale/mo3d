@@ -1,5 +1,3 @@
-from memory.arc import ArcPointer
-from memory.unsafe_pointer import UnsafePointer
 from collections.inline_array import InlineArray
 
 from collections.list import List
@@ -24,40 +22,36 @@ struct Mesh[T : DType](Hittable):
         self._triangles = construct_bvh_list[T, 3, Triangle[T]](triangles)
 
     @staticmethod
-    fn load_from_binary_stl(filename : String) raises -> Mesh[T]: 
+    fn load_from_binary_stl(filename : String, scale : Scalar[T] = 1.0) raises -> Mesh[T]: 
         var file = open(filename, "r")
         # Header
         _ = file.seek(80)
-        var size_ptr = UnsafePointer[UInt32].alloc(1)
-        _ = file.read(size_ptr, 1)
-        var size = size_ptr[]
+        var size = InlineArray[UInt32, 1](0)
+        _ = file.read(size.unsafe_ptr(), 1)
 
         var tris = List[Triangle[T]]()
 
-        for _ in range(size):
+        for _ in range(size[0]):
             # Skip normal for now 
             see = file.seek(12, os.SEEK_CUR)
             print(see)
-            var vert_a_ptr = UnsafePointer[Float32].alloc(3)
-            var vert_b_ptr = UnsafePointer[Float32].alloc(3)
-            var vert_c_ptr = UnsafePointer[Float32].alloc(3)
-            _ = file.read(vert_a_ptr, 3)
-            _ = file.read(vert_b_ptr, 3)
-            _ = file.read(vert_c_ptr, 3)
-            var a = Vec[T, 3](vert_a_ptr[0].cast[T](), vert_a_ptr[1].cast[T](), vert_a_ptr[2].cast[T]())
-            var b = Vec[T, 3](vert_b_ptr[0].cast[T](), vert_b_ptr[1].cast[T](), vert_b_ptr[2].cast[T]())
-            var c = Vec[T, 3](vert_c_ptr[0].cast[T](), vert_c_ptr[1].cast[T](), vert_c_ptr[2].cast[T]())
+            var vert_a = InlineArray[Float32, 3](0)
+            var vert_b = InlineArray[Float32, 3](0)
+            var vert_c = InlineArray[Float32, 3](0)
+            _ = file.read(vert_a.unsafe_ptr(), 3)
+            _ = file.read(vert_b.unsafe_ptr(), 3)
+            _ = file.read(vert_c.unsafe_ptr(), 3)
+            var a = Vec[T, 3](vert_a[0].cast[T](), vert_a[1].cast[T](), vert_a[2].cast[T]())
+            var b = Vec[T, 3](vert_b[0].cast[T](), vert_b[1].cast[T](), vert_b[2].cast[T]())
+            var c = Vec[T, 3](vert_c[0].cast[T](), vert_c[1].cast[T](), vert_c[2].cast[T]())
             try:
-                var t = Triangle[T](a * 0.1, b * 0.1, c * 0.1)
-                print("Triangle: " +str(t))
+                var t = Triangle[T](a * scale, b * scale, c * scale)
                 tris.append(t)
             except:
-                print("Degenerate triangle skipped")
+                # Skip degenerate triangles
+                pass
             # Skip tag 
             _ = file.seek(2, os.SEEK_CUR)
-
-        print("Loaded " + str(len(tris)) + " triangles from " + str(filename))
-
         return Mesh[T](tris)
 
 

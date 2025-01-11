@@ -70,3 +70,11 @@ struct Dielectric[T: DType, dim: Int](CollectionElement):
         var data = Python.dict()
         data["refration_index"] = self.refraction_index
         return data
+
+    @staticmethod
+    fn _load_py_json(py_obj : PythonObject) raises -> Self:
+        """
+        Load from python object representing the item dumped out to json
+        """
+        return Dielectric[T,dim](
+            float(py_obj["refration_index"]).cast[T]())

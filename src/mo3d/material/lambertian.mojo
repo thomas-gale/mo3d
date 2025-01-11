@@ -44,3 +44,11 @@ struct Lambertian[T: DType, dim: Int](CollectionElement):
         var data = Python.dict()
         data["albedo"] = self.albedo._dump_py_json()
         return data
+
+    @staticmethod
+    fn _load_py_json(py_obj : PythonObject) raises -> Self:
+        """
+        Load from python object representing the item dumped out to json
+        """
+        return Lambertian[T,dim](
+            Texture[T, dim]._load_py_json(py_obj["albedo"]))

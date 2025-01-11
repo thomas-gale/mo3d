@@ -46,3 +46,13 @@ struct Checker[type: DType, dim: Int](CollectionElement):
         data["odd_texture"] = self.odd_texture[]._dump_py_json()
         data["scale"] = self.scale
         return data
+
+    @staticmethod
+    fn _load_py_json(py_obj : PythonObject) raises -> Self:
+        """
+        Load from python object representing the item dumped out to json
+        """
+        return Checker[type,dim](
+            Texture[type, dim]._load_py_json(py_obj["even_texture"]),
+            Texture[type, dim]._load_py_json(py_obj["odd_texture"]),
+            float(py_obj["scale"]).cast[type]())

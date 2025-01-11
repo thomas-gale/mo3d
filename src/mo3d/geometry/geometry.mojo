@@ -75,3 +75,16 @@ struct Geometry[T: DType, dim: Int]:
             data = Python.dict()
             data["type"] = "unknown"
         return data
+
+    @staticmethod
+    fn _load_py_json(py_obj : PythonObject) raises -> Self:
+        """
+        Load from python object representing the item dumped out to json
+        """
+        var type = str(py_obj["type"])
+        if type == "sphere":
+            return Self(Sphere[T, dim]._load_py_json(py_obj))
+        elif type == "aabb":
+            return Self(AABB[T, dim]._load_py_json(py_obj))
+        else:
+            raise Error("Unknown geometry")

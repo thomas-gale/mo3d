@@ -49,3 +49,12 @@ struct Metal[T: DType, dim: Int](CollectionElement):
         data["albedo"] = self.albedo._dump_py_json()
         data["fuzz"] = self.fuzz
         return data
+
+    @staticmethod
+    fn _load_py_json(py_obj : PythonObject) raises -> Self:
+        """
+        Load from python object representing the item dumped out to json
+        """
+        return Metal[T,dim](
+            Color4[T]._load_py_json(py_obj["albedo"]),
+            float(py_obj["fuzz"]).cast[T]())

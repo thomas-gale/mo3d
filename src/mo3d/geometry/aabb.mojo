@@ -183,3 +183,12 @@ struct AABB[T: DType, dim: Int]:
         data["min"] = self.min_pt()._dump_py_json()
         data["max"] = self.max_pt()._dump_py_json()
         return data
+
+    @staticmethod
+    fn _load_py_json(py_obj : PythonObject) raises -> Self:
+        """
+        Load from python object representing the item dumped out to json
+        """
+        return AABB[T,dim](
+            Point[T, dim]._load_py_json(py_obj["min"]),
+            Point[T, dim]._load_py_json(py_obj["max"]))

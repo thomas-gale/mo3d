@@ -29,3 +29,11 @@ struct Solid[type: DType, dim: Int](CollectionElement):
         var data = Python.dict()
         data["colour"] = self.colour._dump_py_json()
         return data
+
+    @staticmethod
+    fn _load_py_json(py_obj : PythonObject) raises -> Self:
+        """
+        Load from python object representing the item dumped out to json
+        """
+        return Solid[type,dim](
+            Color4[type]._load_py_json(py_obj["colour"]))

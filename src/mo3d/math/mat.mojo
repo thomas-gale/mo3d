@@ -115,3 +115,15 @@ struct Mat[T: DType, dim: Int]:
                 py_row.append(self._data[i * dim + j])
             py_rows.append(py_row)
         return py_rows
+
+    @staticmethod
+    fn _load_py_json(py_obj : PythonObject) raises -> Self:
+        """
+        Load from python object representing the item dumped out to json
+        """
+        var mat = Mat[T,dim]()
+        for i in range(dim):
+            var row = mat[i]
+            for j in range(dim):
+                mat._data[i * dim + j] = float(row[j]).cast[T]()
+        return mat

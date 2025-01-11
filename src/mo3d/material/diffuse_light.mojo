@@ -35,3 +35,11 @@ struct DiffuseLight[T: DType, dim: Int](CollectionElement):
         var data = Python.dict()
         data["emit"] = self.emit._dump_py_json()
         return data
+
+    @staticmethod
+    fn _load_py_json(py_obj : PythonObject) raises -> Self:
+        """
+        Load from python object representing the item dumped out to json
+        """
+        return DiffuseLight[T,dim](
+            Color4[T]._load_py_json(py_obj["emit"]))

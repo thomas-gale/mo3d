@@ -289,3 +289,14 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
         for i in range(size):
             py_vec.append(self._data[i])
         return py_vec
+
+    @staticmethod
+    fn _load_py_json(py_obj : PythonObject) raises -> Self:
+        """
+        Load from python object representing the item dumped out to json
+        """
+        var vec = Vec[T,size]()
+        for i in range(size):
+            vec._data[i] = float(py_obj[i]).cast[T]()
+        return vec
+        

@@ -53,6 +53,14 @@ fn main() raises:
     var store = ComponentStore[float_type, 3]()
     # sphere_scene_3d[float_type](store, 150)
     sample_scene_3d[float_type](store, 4)
+    
+    # To load the scene from a file
+    # var store = ComponentStore[float_type, 3].load("scene.json"
+
+    # To dump the scene
+    # store.dump("scene.json")
+
+
     var bvh_root = construct_bvh(store)
 
     # Camera

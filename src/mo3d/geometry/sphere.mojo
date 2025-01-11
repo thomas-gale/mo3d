@@ -82,3 +82,11 @@ struct Sphere[T: DType, dim: Int](CollectionElement):
         var data = Python.dict()
         data["radius"] = self._radius
         return data
+
+    @staticmethod
+    fn _load_py_json(py_obj : PythonObject) raises -> Self:
+        """
+        Load from python object representing the item dumped out to json
+        """
+        return Sphere[T,dim](
+            float(py_obj["radius"]).cast[T]())

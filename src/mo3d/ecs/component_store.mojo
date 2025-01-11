@@ -310,8 +310,10 @@ struct ComponentStore[T: DType, dim: Int]:
     fn dumps(self, file : String) raises:
         var json = Python.import_module("json")
         var builtins = Python.import_module("builtins")
-        var store = ComponentStore[T, dim]()
-        json.dumps(self._dump_py_json(), builtins.open(file, "w"))
+        var data = Python.dict()
+        data["version"] = 0
+        data["entities"] = self._dump_py_json()
+        json.dumps(data, builtins.open(file, "w"), sort_keys=True)
 
 
 

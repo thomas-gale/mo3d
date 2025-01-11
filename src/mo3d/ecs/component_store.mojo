@@ -18,6 +18,9 @@ from mo3d.ecs.component import (
     BoundingBoxComponent
 )
 
+from python import Python
+from python.python_object import PythonObject
+
 
 @value
 struct ComponentStore[T: DType, dim: Int]:
@@ -277,3 +280,38 @@ struct ComponentStore[T: DType, dim: Int]:
             if self.entity_has_components(entity_id[], component_type_mask):
                 entities.append(entity_id[])
         return entities
+
+    fn _dump_py_json(self) raises -> PythonObject:
+        """
+        Python object representing the store to dump out to json
+        """
+        var store_dict = Python.dict()
+        for entity_id in self.entity_to_components:
+            store_dict[entity_id[]] = Python.dict()
+
+        for position_id in self.position_component_to_entities:
+            var entity_id = self.position_component_to_entities[position_id[]]
+            store_dict[entity_id]["Position"] = self.position_components[position_id[]]._dump_py_json()
+        for velocity_id in self.velocity_component_to_entities:
+            var entity_id = self.velocity_component_to_entities[velocity_id[]]
+            store_dict[entity_id]["Velocity"] = self.velocity_components[velocity_id[]]._dump_py_json()
+        for orientation_id in self.orientation_component_to_entities:
+            var entity_id = self.orientation_component_to_entities[orientation_id[]]
+            store_dict[entity_id]["Orientation"] = self.orientation_components[orientation_id[]]._dump_py_json()
+        for geometry_id in self.geometry_component_to_entities:
+            var entity_id = self.geometry_component_to_entities[geometry_id[]]
+            store_dict[entity_id]["Geometry"] = self.geometry_components[geometry_id[]]._dump_py_json()
+        for material_id in self.material_component_to_entities:
+            var entity_id = self.material_component_to_entities[material_id[]]
+            store_dict[entity_id]["Material"] = self.material_components[material_id[]]._dump_py_json()
+        
+        return store_dict
+
+    fn dumps(self, file : String) raises:
+        var json = Python.import_module("json")
+        var builtins = Python.import_module("builtins")
+        var store = ComponentStore[T, dim]()
+        json.dumps(self._dump_py_json(), builtins.open(file, "w"))
+
+
+

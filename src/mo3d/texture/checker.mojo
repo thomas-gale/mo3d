@@ -5,6 +5,9 @@ from mo3d.math.point import Point
 
 from mo3d.texture.texture import Texture
 
+from python import Python
+from python import PythonObject
+
 @value
 struct Checker[type: DType, dim: Int](CollectionElement):
     var even_texture : ArcPointer[Texture[type, dim]]
@@ -33,3 +36,13 @@ struct Checker[type: DType, dim: Int](CollectionElement):
             + str(self.odd_texture[])
             + ")"
         )
+
+    fn _dump_py_json(self) raises -> PythonObject:
+        """
+        Python object representing the item to dump out to json
+        """
+        var data = Python.dict()
+        data["even_texture"] = self.even_texture[]._dump_py_json()
+        data["odd_texture"] = self.odd_texture[]._dump_py_json()
+        data["scale"] = self.scale
+        return data

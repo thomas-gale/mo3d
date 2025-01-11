@@ -7,6 +7,9 @@ from mo3d.ray.ray import Ray
 
 from mo3d.ray.hit_record import HitRecord
 
+from python import Python
+from python import PythonObject
+
 @always_inline
 fn sign[T: DType](num : Scalar[T]) -> Scalar[T]:
     if num < 0:
@@ -149,6 +152,20 @@ struct AABB[T: DType, dim: Int]:
         else:
             return False
 
+    fn max_pt(self) -> Point[T, dim]:
+        var pt = Point[T, dim]()
+        @parameter
+        for i in range(dim):
+            pt[i] = self._bounds[i].max
+        return pt
+
+    fn min_pt(self) -> Point[T, dim]:
+        var pt = Point[T, dim]()
+        @parameter
+        for i in range(dim):
+            pt[i] = self._bounds[i].min
+        return pt
+
     fn __str__(self) -> String:
         var s: String = "AABB("
         for i in range(dim):
@@ -157,3 +174,12 @@ struct AABB[T: DType, dim: Int]:
                 s += ", "
         s += ")"
         return s
+
+    fn _dump_py_json(self) raises -> PythonObject:
+        """
+        Python object representing the item to dump out to json
+        """
+        var data = Python.dict()
+        data["min"] = self.min_pt()._dump_py_json()
+        data["max"] = self.max_pt()._dump_py_json()
+        return data

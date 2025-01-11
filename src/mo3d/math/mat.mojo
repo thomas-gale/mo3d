@@ -4,6 +4,10 @@ from math.math import cos, sin
 from mo3d.math.vec import Vec
 
 
+from python import Python
+from python import PythonObject
+
+
 @value
 struct Mat[T: DType, dim: Int]:
     var _data: InlineArray[Scalar[T], dim * dim]
@@ -99,3 +103,15 @@ struct Mat[T: DType, dim: Int]:
         for i in range(dim):
             result[i] = self[i].dot(rhs)
         return result
+
+    fn _dump_py_json(self) raises -> PythonObject:
+        """
+        Python object representing the item to dump out to json
+        """
+        var py_rows = Python.list()
+        for i in range(dim):
+            var py_row = Python.list()
+            for j in range(dim):
+                py_row.append(self._data[i * dim + j])
+            py_rows.append(py_row)
+        return py_rows

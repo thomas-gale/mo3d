@@ -11,6 +11,9 @@ from mo3d.geometry.aabb import AABB
 
 from mo3d.material.material import Material
 
+from python import Python
+from python import PythonObject
+
 
 @value
 struct Geometry[T: DType, dim: Int]:
@@ -55,3 +58,20 @@ struct Geometry[T: DType, dim: Int]:
             return str(self._hittable[AABB[T, dim]])
         else:
             return "Geometry(Unknown)"
+
+
+    fn _dump_py_json(self) raises -> PythonObject:
+        """
+        Python object representing the item to dump out to json
+        """
+        var data : PythonObject
+        if self._hittable.isa[Sphere[T, dim]]():
+            data = self._hittable[Sphere[T, dim]]._dump_py_json()
+            data["type"] = "sphere"
+        elif self._hittable.isa[AABB[T, dim]]():
+            data = self._hittable[AABB[T, dim]]._dump_py_json()
+            data["type"] = "aabb"
+        else:
+            data = Python.dict()
+            data["type"] = "unknown"
+        return data

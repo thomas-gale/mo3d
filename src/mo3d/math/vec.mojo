@@ -4,6 +4,9 @@ from math import sqrt
 
 from mo3d.random.rng import Rng
 
+from python import Python
+from python import PythonObject
+
 
 struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
     var _data: InlineArray[Scalar[T], size]
@@ -277,3 +280,12 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
     fn __itruediv__(inout self, rhs: SIMD[T, 1]):
         for i in range(size):
             self._data[i] /= rhs
+
+    fn _dump_py_json(self) raises -> PythonObject:
+        """
+        Python object representing the item to dump out to json
+        """
+        var py_vec = Python.list()
+        for i in range(size):
+            py_vec.append(self._data[i])
+        return py_vec

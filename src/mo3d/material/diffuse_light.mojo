@@ -5,6 +5,9 @@ from mo3d.ray.hit_record import HitRecord
 
 from mo3d.random.rng import Rng
 
+from python import Python
+from python import PythonObject
+
 @value
 struct DiffuseLight[T: DType, dim: Int](CollectionElement):
     var emit: Color4[T]
@@ -24,3 +27,11 @@ struct DiffuseLight[T: DType, dim: Int](CollectionElement):
 
     fn __str__(self) -> String:
         return "Diffuse Light(emitting: " + str(self.emit) + ")"
+
+    fn _dump_py_json(self) raises -> PythonObject:
+        """
+        Python object representing the item to dump out to json
+        """
+        var data = Python.dict()
+        data["emit"] = self.emit._dump_py_json()
+        return data

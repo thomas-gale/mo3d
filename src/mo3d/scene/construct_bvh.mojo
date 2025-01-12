@@ -1,6 +1,6 @@
 from memory.arc import ArcPointer
 from utils import Variant
-from collections import InlineArray
+from collections import InlineArray, Optional
 
 from mo3d.geometry.aabb import AABB
 from mo3d.ecs.entity import EntityID
@@ -11,12 +11,14 @@ from mo3d.geometry.geometry import Geometry
 from mo3d.material.material import Material
 
 from mo3d.math.point import Point
+from mo3d.math.mat import RotMat
 
 @value 
 struct Hittable[T : DType, dim : Int]:
     var geometry : Geometry[T, dim]
     var material : Material[T, dim]
     var position : Point[T, dim]
+    var orientation : Optional[RotMat[T, dim]]
 
 @value
 struct BVHSplit[T: DType, dim: Int]:
@@ -72,8 +74,13 @@ fn build_bvh_nodes_recursive[
         var entity_geometry = store.geometry_components[
             store.entity_to_components[entity][ComponentType.Geometry]
         ]
-        var entity_aabb = entity_geometry.aabb()
-        bbox = AABB[T, dim](bbox, entity_aabb + entity_position)
+        var entity_aabb = entity_geometry.aabb() + entity_position
+        if (store.entity_has_components(entity, ComponentType.Orientation)):
+            var entity_orientation = store.orientation_components[
+                store.entity_to_components[entity][ComponentType.Orientation]
+            ]
+            entity_aabb = entity_aabb.transform_expand(entity_orientation)
+        bbox = AABB[T, dim](bbox, entity_aabb)
 
     var axis = bbox.longest_axis()
     var span = end - start
@@ -100,8 +107,14 @@ fn build_bvh_nodes_recursive[
         var entity_position = store.position_components[
             store.entity_to_components[start][ComponentType.Position]
         ]
+        var entity_orientation = Optional[RotMat[T, dim]]();
+        if (store.entity_has_components(start, ComponentType.Orientation)):
+            entity_orientation = store.orientation_components[
+                store.entity_to_components[start][ComponentType.Orientation]
+            ]
+
         return BVHNode[T, dim](
-            Hittable(entity_geometry, entity_material, entity_position), 
+            Hittable(entity_geometry, entity_material, entity_position, entity_orientation), 
             bbox)
     else:
         # Sort to entities along the longest axis

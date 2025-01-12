@@ -96,6 +96,22 @@ struct Mat[T: DType, dim: Int]:
 
     fn __mul__(self, rhs: Vec[T, dim]) -> Vec[T, dim]:
         var result = Vec[T, dim]()
+        @parameter
         for i in range(dim):
             result[i] = self[i].dot(rhs)
         return result
+
+
+    fn mul_transpose(self, rhs: Vec[T, dim]) -> Vec[T, dim]:
+        var result = Vec[T, dim]()
+        @parameter
+        for i in range(dim):
+            @parameter
+            for j in range(dim):
+                result[i] += self._data[dim * j + i] * rhs[j]
+        return result
+
+
+# A matrix that we are asserting is a rotation matrix 
+# (special orthogonal)
+alias RotMat = Mat

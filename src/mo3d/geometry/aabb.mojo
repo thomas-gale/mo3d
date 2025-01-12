@@ -3,6 +3,7 @@ from collections import InlineArray
 from mo3d.math.interval import Interval
 from mo3d.math.vec import Vec
 from mo3d.math.point import Point
+from mo3d.math.mat import Mat
 from mo3d.ray.ray import Ray
 
 from mo3d.ray.hit_record import HitRecord
@@ -148,6 +149,41 @@ struct AABB[T: DType, dim: Int]:
             return True
         else:
             return False
+
+    def points(self) -> InlineArray[Point[T, dim], dim ** 2]:
+        var points = InlineArray[Point[T, dim], dim ** 2]()
+        @parameter
+        for val in range(2**dim):
+            @parameter
+            for i in range(dim):
+                if (val & 2**i) == 0:
+                    points[val][i] = self._bounds[i].min
+                else:
+                    points[val][i] = self._bounds[i].max
+        return points
+    
+    fn merge_in(inout self, vec : Vec[T, dim]):
+        @parameter
+        for i in range(dim):
+            self._bounds[i].merge_in(vec[i])
+
+    def transform_expand(self, mat : Mat[T, dim]) -> AABB[T, dim]:
+        """
+        Get a AABB that wil contain the result of transforming this one.
+        """
+        var transformed = AABB[T, dim]()
+        # We cant use points directly with parameter so inline it ourselfs
+        @parameter
+        for val in range(2**dim):
+            var point = Point[T, dim]()
+            @parameter
+            for i in range(dim):
+                if (val & 2**i) == 0:
+                    point[i] = self._bounds[i].min
+                else:
+                    point[i] = self._bounds[i].max
+            transformed.merge_in(point)
+        return transformed
 
     fn __str__(self) -> String:
         var s: String = "AABB("

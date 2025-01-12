@@ -68,8 +68,13 @@ fn hit_hittable[
     Hit a ray against hitable geometry / material pair.
     """
     var local_ray = r.offset(-hittable.position)
+    if hittable.orientation:
+        local_ray = local_ray.rotate(hittable.orientation.value())
     var hit = hittable.geometry.hit(local_ray, ray_t, rec)
     if hit:
+        if hittable.orientation:
+            rec.p = hittable.orientation.value().mul_transpose(rec.p)
+            rec.normal = hittable.orientation.value().mul_transpose(rec.normal)
         rec.p += hittable.position
         rec.mat = hittable.material
         rec.hits += 1

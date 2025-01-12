@@ -1,5 +1,5 @@
 from mo3d.math.vec import Vec
-from mo3d.math.mat import Mat
+from mo3d.math.mat import RotMat
 from mo3d.math.point import Point
 from mo3d.material.material import Material
 from mo3d.geometry.geometry import Geometry
@@ -12,7 +12,7 @@ alias PositionComponent = Point
 
 alias VelocityComponent = Vec
 
-alias OrientationComponent = Mat
+alias OrientationComponent = RotMat
 
 alias GeometryComponent = Geometry
 

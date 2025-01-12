@@ -184,6 +184,28 @@ struct ComponentStore[T: DType, dim: Int]:
 
         return component_id
 
+    fn _add_orientation_component(
+        inout self, entity_id: EntityID, component: OrientationComponent[T, dim]
+    ) raises -> ComponentID:
+        if (
+            self.entity_to_component_type_mask[entity_id]
+            & ComponentType.Orientation
+        ):
+            raise Error("Entity already has am orientation component")
+
+        self.orientation_components.append(component)
+        var component_id = ComponentID(len(self.orientation_components) - 1)
+        self.orientation_component_to_entities[component_id] = entity_id
+
+        self.entity_to_components[entity_id][
+            ComponentType.Orientation
+        ] = component_id
+        self.entity_to_component_type_mask[
+            entity_id
+        ] |= ComponentType.Orientation
+
+        return component_id
+
     fn create_entity(inout self) -> EntityID:
         """
         This implementation is not thread safe.
@@ -224,6 +246,10 @@ struct ComponentStore[T: DType, dim: Int]:
         elif component.isa[BoundingBoxComponent[T, dim]]():
             return self._add_bounding_box_component(
                 entity_id, component[BoundingBoxComponent[T, dim]]
+            )
+        elif component.isa[OrientationComponent[T, dim]]():
+            return self._add_orientation_component(
+                entity_id, component[OrientationComponent[T, dim]]
             )
         else:
             raise Error("Unknown component type")

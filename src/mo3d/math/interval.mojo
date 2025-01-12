@@ -60,3 +60,9 @@ struct Interval[T: DType, simd_size: Int = 1](CollectionElementNew):
 
     fn expand(self, delta: Self.S) -> Self:
         return Self(self.min - delta, self.max + delta)
+
+    fn merge_in(inout self, x : Self.S):
+        if x > self.max:
+            self.max = x
+        if x < self.min:
+            self.min = x

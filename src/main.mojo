@@ -51,9 +51,19 @@ fn main() raises:
 
     # ECS
     var store = ComponentStore[float_type, 3]()
+
+    # sphere_scene_3d[float_type](store, 150)
+    sample_scene_3d[float_type](store, 4)
+    
+    # To load the scene from a file
+    # var store = ComponentStore[float_type, 3].load("scene.json"
+
+    # To dump the scene
+    # store.dump("scene.json")
+    
     # sample_scene_3d[float_type](store, 150)
     # sample_scene_3d[float_type](store, 4)
-    basic_mesh_scene_3d[float_type](store)
+    # basic_mesh_scene_3d[float_type](store)
     var bvh_root = construct_bvh_store(store)
 
     # Camera

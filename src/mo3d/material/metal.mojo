@@ -5,6 +5,9 @@ from mo3d.ray.hit_record import HitRecord
 
 from mo3d.random.rng import Rng
 
+from python import Python
+from python import PythonObject
+
 @value
 struct Metal[T: DType, dim: Int](CollectionElement):
     var albedo: Color4[T]
@@ -37,3 +40,21 @@ struct Metal[T: DType, dim: Int](CollectionElement):
             + str(self.fuzz)
             + ")"
         )
+
+    fn _dump_py_json(self) raises -> PythonObject:
+        """
+        Python object representing the item to dump out to json
+        """
+        var data = Python.dict()
+        data["albedo"] = self.albedo._dump_py_json()
+        data["fuzz"] = self.fuzz
+        return data
+
+    @staticmethod
+    fn _load_py_json(py_obj : PythonObject) raises -> Self:
+        """
+        Load from python object representing the item dumped out to json
+        """
+        return Metal[T,dim](
+            Color4[T]._load_py_json(py_obj["albedo"]),
+            float(py_obj["fuzz"]).cast[T]())

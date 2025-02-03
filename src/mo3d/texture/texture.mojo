@@ -6,6 +6,9 @@ from mo3d.math.point import Point
 from mo3d.texture.solid import Solid
 from mo3d.texture.checker import Checker
 
+from python import Python
+from python import PythonObject
+
 @value
 struct Texture[type: DType, dim: Int]:
     alias Variant = Variant[
@@ -37,3 +40,32 @@ struct Texture[type: DType, dim: Int]:
             return str(self._tex[Checker[type, dim]])
         else:
             return "Texture(Unknown)"
+
+    fn _dump_py_json(self) raises -> PythonObject:
+        """
+        Python object representing the item to dump out to json
+        """
+        var data : PythonObject
+        if self._tex.isa[Solid[type, dim]]():
+            data = self._tex[Solid[type, dim]]._dump_py_json()
+            data["type"] = "solid"
+        elif self._tex.isa[Checker[type, dim]]():
+            data = self._tex[Checker[type, dim]]._dump_py_json()
+            data["type"] = "checker"
+        else:
+            data = Python.dict()
+            data["type"] = "unknown"
+        return data
+
+    @staticmethod
+    fn _load_py_json(py_obj : PythonObject) raises -> Self:
+        """
+        Load from python object representing the item dumped out to json
+        """
+        var type_s = str(py_obj["type"])
+        if type_s == "solid":
+            return Self(Solid[type, dim]._load_py_json(py_obj))
+        elif type_s == "checker":
+            return Self(Checker[type, dim]._load_py_json(py_obj))
+        else:
+            raise Error("Unknown geometry")

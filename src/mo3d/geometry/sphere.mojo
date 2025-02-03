@@ -13,6 +13,8 @@ from mo3d.geometry.geometry import Hittable
 from mo3d.material.material import Material
 from mo3d.material.lambertian import Lambertian
 
+from python import Python
+from python import PythonObject
 
 @value
 struct Sphere[T: DType, dim: Int](Hittable):
@@ -75,3 +77,19 @@ struct Sphere[T: DType, dim: Int](Hittable):
 
     fn __str__(self) -> String:
         return "Sphere(radius=" + str(self._radius) + ")"
+
+    fn _dump_py_json(self) raises -> PythonObject:
+        """
+        Python object representing the item to dump out to json
+        """
+        var data = Python.dict()
+        data["radius"] = self._radius
+        return data
+
+    @staticmethod
+    fn _load_py_json(py_obj : PythonObject) raises -> Self:
+        """
+        Load from python object representing the item dumped out to json
+        """
+        return Sphere[T,dim](
+            float(py_obj["radius"]).cast[T]())

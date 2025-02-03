@@ -13,6 +13,9 @@ from mo3d.geometry.mesh import Mesh
 
 from mo3d.material.material import Material
 
+from python import Python
+from python import PythonObject
+
 
 # Unfortunatly traits currently cant have parameters thus
 # we have to have fully generic trait methods and rebind in the
@@ -118,3 +121,33 @@ struct Geometry[T: DType, dim: Int](Hittable):
             return str(self._hittable[Mesh[T]])
         else:
             return "Geometry(Unknown)"
+
+
+    fn _dump_py_json(self) raises -> PythonObject:
+        """
+        Python object representing the item to dump out to json
+        """
+        var data : PythonObject
+        if self._hittable.isa[Sphere[T, dim]]():
+            data = self._hittable[Sphere[T, dim]]._dump_py_json()
+            data["type"] = "sphere"
+        elif self._hittable.isa[AABB[T, dim]]():
+            data = self._hittable[AABB[T, dim]]._dump_py_json()
+            data["type"] = "aabb"
+        else:
+            data = Python.dict()
+            data["type"] = "unknown"
+        return data
+
+    @staticmethod
+    fn _load_py_json(py_obj : PythonObject) raises -> Self:
+        """
+        Load from python object representing the item dumped out to json
+        """
+        var type = str(py_obj["type"])
+        if type == "sphere":
+            return Self(Sphere[T, dim]._load_py_json(py_obj))
+        elif type == "aabb":
+            return Self(AABB[T, dim]._load_py_json(py_obj))
+        else:
+            raise Error("Unknown geometry")

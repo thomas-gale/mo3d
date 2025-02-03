@@ -7,6 +7,9 @@ from mo3d.ray.hit_record import HitRecord
 
 from mo3d.random.rng import Rng
 
+from python import Python
+from python import PythonObject
+
 @value
 struct Dielectric[T: DType, dim: Int](CollectionElement):
     var refraction_index: Scalar[T]
@@ -59,3 +62,19 @@ struct Dielectric[T: DType, dim: Int](CollectionElement):
         return (
             "Dielectric(refraction_index: " + str(self.refraction_index) + ")"
         )
+
+    fn _dump_py_json(self) raises -> PythonObject:
+        """
+        Python object representing the item to dump out to json
+        """
+        var data = Python.dict()
+        data["refration_index"] = self.refraction_index
+        return data
+
+    @staticmethod
+    fn _load_py_json(py_obj : PythonObject) raises -> Self:
+        """
+        Load from python object representing the item dumped out to json
+        """
+        return Dielectric[T,dim](
+            float(py_obj["refration_index"]).cast[T]())

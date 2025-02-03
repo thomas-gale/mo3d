@@ -69,7 +69,7 @@ fn test_add_bvh_entity_to_component_store() raises:
     _ = store.add_component(entity_id, position)
     var sphere = Sphere[f32, 3](1)
     _ = store.add_component(entity_id, Geometry[f32, 3](sphere))
-    _ = store.add_component(entity_id, sphere.aabb())
+    _ = store.add_component(entity_id, sphere.aabb[f32, 3]())
 
     var query = store.get_entities_with_components(ComponentType.BoundingBox)
     assert_equal(len(query), 1)

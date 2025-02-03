@@ -359,7 +359,7 @@ struct ComponentStore[T: DType, dim: Int]:
                         entity_id, 
                         GeometryComponent[T, dim]._load_py_json(py_entity["Geometry"]))
                     _ = store._add_bounding_box_component(entity_id, 
-                        store.geometry_components[geom_id].aabb())
+                        store.geometry_components[geom_id].aabb[T, dim]())
                 if "Material" in py_entity:
                     _ = store._add_material_component(
                         entity_id, 

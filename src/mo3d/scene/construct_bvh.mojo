@@ -205,7 +205,12 @@ fn construct_bvh_store[
         var position = store.position_components[
             store.entity_to_components[entity_id[]][ComponentType.Position]
         ]
-        hittables.append(HittableEntity(geometry, material, position))
+        var orientation = Optional[RotMat[T, dim]]();
+        if (store.entity_has_components(entity_id[], ComponentType.Orientation)):
+            orientation = store.orientation_components[
+                store.entity_to_components[entity_id[]][ComponentType.Orientation]
+            ]
+        hittables.append(HittableEntity(geometry, material, position, orientation))
 
 
     var root = construct_bvh_list[T, dim, HittableEntity[T, dim]](hittables)

@@ -200,11 +200,6 @@ struct AABB[T: DType, dim: Int](Hittable):
                 else:
                     points[val][i] = self._bounds[i].max
         return points
-    
-    fn merge_in(inout self, vec : Vec[T, dim]):
-        @parameter
-        for i in range(dim):
-            self._bounds[i].merge_in(vec[i])
 
     def transform_expand(self, mat : Mat[T, dim]) -> AABB[T, dim]:
         """

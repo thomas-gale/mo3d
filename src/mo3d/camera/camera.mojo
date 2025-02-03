@@ -13,7 +13,6 @@ from mo3d.math.point import Point
 from mo3d.ray.color4 import Color4
 from mo3d.ray.ray import Ray
 from mo3d.ray.hit_record import HitRecord
-from mo3d.ray.hit_entity import hit_entity
 
 from mo3d.scene.construct_bvh import BVHNode
 
@@ -384,7 +383,7 @@ struct Camera[
         # BVH traversal
         var ray_t = Interval[T](0.001, inf[T]())
         var rec = HitRecord[T, dim]()
-        var hit_anything = hit_entity(bvh_root, r, ray_t, rec)
+        var hit_anything = bvh_root.hit[T, dim](r, ray_t, rec)
 
         # If we hit something, scatter the ray and recurse
         if hit_anything:

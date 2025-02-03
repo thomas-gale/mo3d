@@ -27,10 +27,10 @@ from mo3d.camera.camera import Camera
 from mo3d.window.sdl2_window import SDL2Window
 
 from mo3d.ecs.component_store import ComponentStore
-from mo3d.scene.construct_bvh import construct_bvh
+from mo3d.scene.construct_bvh import construct_bvh_store
 from mo3d.sample.basic_three_sphere_scene import basic_three_sphere_scene_3d
 from mo3d.sample.sample_scene import sample_scene_3d
-
+from mo3d.sample.basic_mesh import basic_mesh_scene_3d
 
 fn main() raises:
     print("-- Hello, mo3d! --")
@@ -51,9 +51,10 @@ fn main() raises:
 
     # ECS
     var store = ComponentStore[float_type, 3]()
-    # sphere_scene_3d[float_type](store, 150)
-    sample_scene_3d[float_type](store, 4)
-    var bvh_root = construct_bvh(store)
+    # sample_scene_3d[float_type](store, 150)
+    # sample_scene_3d[float_type](store, 4)
+    basic_mesh_scene_3d[float_type](store)
+    var bvh_root = construct_bvh_store(store)
 
     # Camera
     var camera = Camera[
@@ -65,7 +66,7 @@ fn main() raises:
         channels=channels,
         max_depth=max_depth,
         max_samples=max_samples,
-        background=background_dark
+        background=background_light
     ]()
 
     # Collect timing stats - TODO: Tidy and move

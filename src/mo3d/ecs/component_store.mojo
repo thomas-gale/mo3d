@@ -18,6 +18,9 @@ from mo3d.ecs.component import (
     BoundingBoxComponent
 )
 
+from python import Python
+from python.python_object import PythonObject
+
 
 @value
 struct ComponentStore[T: DType, dim: Int]:
@@ -119,6 +122,26 @@ struct ComponentStore[T: DType, dim: Int]:
             ComponentType.Velocity
         ] = component_id
         self.entity_to_component_type_mask[entity_id] |= ComponentType.Velocity
+
+        return component_id
+
+    fn _add_orientation_component(
+        inout self, entity_id: EntityID, component: OrientationComponent[T, dim]
+    ) raises -> ComponentID:
+        if (
+            self.entity_to_component_type_mask[entity_id]
+            & ComponentType.Orientation
+        ):
+            raise Error("Entity already has a orientation component")
+
+        self.orientation_components.append(component)
+        var component_id = ComponentID(len(self.orientation_components) - 1)
+        self.orientation_component_to_entities[component_id] = entity_id
+
+        self.entity_to_components[entity_id][
+            ComponentType.Orientation
+        ] = component_id
+        self.entity_to_component_type_mask[entity_id] |= ComponentType.Orientation
 
         return component_id
 
@@ -303,3 +326,89 @@ struct ComponentStore[T: DType, dim: Int]:
             if self.entity_has_components(entity_id[], component_type_mask):
                 entities.append(entity_id[])
         return entities
+
+    fn _dump_py_json(self) raises -> PythonObject:
+        """
+        Python object representing the store to dump out to json
+        """
+        var store_dict = Python.dict()
+        for entity_id in self.entity_to_components:
+            store_dict[entity_id[]] = Python.dict()
+
+        for position_id in self.position_component_to_entities:
+            var entity_id = self.position_component_to_entities[position_id[]]
+            store_dict[entity_id]["Position"] = self.position_components[position_id[]]._dump_py_json()
+        for velocity_id in self.velocity_component_to_entities:
+            var entity_id = self.velocity_component_to_entities[velocity_id[]]
+            store_dict[entity_id]["Velocity"] = self.velocity_components[velocity_id[]]._dump_py_json()
+        for orientation_id in self.orientation_component_to_entities:
+            var entity_id = self.orientation_component_to_entities[orientation_id[]]
+            store_dict[entity_id]["Orientation"] = self.orientation_components[orientation_id[]]._dump_py_json()
+        for geometry_id in self.geometry_component_to_entities:
+            var entity_id = self.geometry_component_to_entities[geometry_id[]]
+            store_dict[entity_id]["Geometry"] = self.geometry_components[geometry_id[]]._dump_py_json()
+        for material_id in self.material_component_to_entities:
+            var entity_id = self.material_component_to_entities[material_id[]]
+            store_dict[entity_id]["Material"] = self.material_components[material_id[]]._dump_py_json()
+        
+        return store_dict
+
+    @staticmethod
+    fn _load_py_json(py_obj : PythonObject) raises -> Self:
+        """
+        Load from python object representing the item dumped out to json
+        """
+        var max_id : EntityID = 0
+        var store = ComponentStore[T, dim]();
+        for py_id in py_obj:
+            max_id = max(max_id, int(str(py_id)))
+        for entity_id in range(max_id + 1):
+            store.entity_to_components[entity_id] = Dict[ComponentTypeID, ComponentID]()
+            store.entity_to_component_type_mask[entity_id] = 0
+            py_entity_id = str(entity_id)
+            if py_entity_id in py_obj:
+                var py_entity = py_obj[py_entity_id]
+                if "Position" in py_entity:
+                    _ = store._add_position_component(
+                        entity_id, 
+                        Point[T, dim]._load_py_json(py_entity["Position"]))
+                if "Velocity" in py_entity:
+                    _ = store._add_velocity_component(
+                        entity_id, 
+                        Vec[T, dim]._load_py_json(py_entity["Velocity"]))
+                if "Orientation" in py_entity:
+                    _ = store._add_orientation_component(
+                        entity_id, 
+                        Mat[T, dim]._load_py_json(py_entity["Orientation"]))
+                if "Geometry" in py_entity:
+                    var geom_id = store._add_geometry_component(
+                        entity_id, 
+                        GeometryComponent[T, dim]._load_py_json(py_entity["Geometry"]))
+                    _ = store._add_bounding_box_component(entity_id, 
+                        store.geometry_components[geom_id].aabb[T, dim]())
+                if "Material" in py_entity:
+                    _ = store._add_material_component(
+                        entity_id, 
+                        MaterialComponent[T, dim]._load_py_json(py_entity["Material"]))
+        return store
+
+    fn dump(self, file : String) raises:
+        var json = Python.import_module("json")
+        var builtins = Python.import_module("builtins")
+        var data = Python.dict()
+        data["version"] = 0
+        data["entities"] = self._dump_py_json()
+        json.dump(data, builtins.open(file, "w"), indent=2, sort_keys=True)
+
+    @staticmethod
+    fn load(file : String) raises -> Self:
+        var json = Python.import_module("json")
+        var builtins = Python.import_module("builtins")
+        var py_obj = json.load(builtins.open(file, "r"))
+        if py_obj["version"] != 0:
+            raise Error("Invalid version")
+        return Self._load_py_json(py_obj["entities"])
+
+        
+
+

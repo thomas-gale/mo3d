@@ -1,6 +1,6 @@
 from memory.arc import ArcPointer
 from utils import Variant
-from collections import InlineArray, Dict
+from collections import InlineArray, Dict, Optional
 from math.math import iota
 
 from mo3d.geometry.aabb import AABB
@@ -15,6 +15,7 @@ from mo3d.ray.ray import Ray
 from mo3d.ray.hit_record import HitRecord
 
 from mo3d.math.point import Point
+from mo3d.math.mat import RotMat
 from mo3d.math.interval import Interval
 
 @value 
@@ -25,6 +26,7 @@ struct HittableEntity[T : DType, dim : Int](Hittable):
     var geometry : Geometry[T, dim]
     var material : Material[T, dim]
     var position : Point[T, dim]
+    var orientation : Optional[RotMat[T, dim]]
 
     fn aabb[T : DType, dim : Int](self) -> AABB[T, dim]:
         return rebind[AABB[T, dim]](
@@ -203,7 +205,12 @@ fn construct_bvh_store[
         var position = store.position_components[
             store.entity_to_components[entity_id[]][ComponentType.Position]
         ]
-        hittables.append(HittableEntity(geometry, material, position))
+        var orientation = Optional[RotMat[T, dim]]();
+        if (store.entity_has_components(entity_id[], ComponentType.Orientation)):
+            orientation = store.orientation_components[
+                store.entity_to_components[entity_id[]][ComponentType.Orientation]
+            ]
+        hittables.append(HittableEntity(geometry, material, position, orientation))
 
 
     var root = construct_bvh_list[T, dim, HittableEntity[T, dim]](hittables)

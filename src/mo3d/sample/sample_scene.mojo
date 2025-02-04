@@ -1,7 +1,9 @@
 from memory.arc import ArcPointer
+from collections import Optional
 
 from mo3d.ecs.component_store import ComponentStore
 from mo3d.math.vec import Vec
+from mo3d.math.mat import RotMat
 from mo3d.math.point import Point
 from mo3d.ray.color4 import Color4
 from mo3d.geometry.geometry import Geometry
@@ -62,13 +64,17 @@ fn sample_scene_3d[T: DType](inout store: ComponentStore[T, 3], grid_size: Int =
 
             if (center - Point[T, dim](4, 0.2, 0)).length() > 0.9:
                 var entity_material: Material[T, dim]
-
                 var entity_geometry : Geometry[T,dim]
+                var entity_orientation = Optional[RotMat[T, dim]]()
                 if choose_geom < 0.8:
                     entity_geometry = Geometry[T,dim](Sphere[T, dim](0.2))
                 else:
                     entity_geometry = Geometry[T,dim](
                         AABB[T, dim](Vec[T, dim](-0.2), Vec[T, dim](0.2)))
+                    # Add an orientation rotated around y axis
+                    var angle = random_float(rng, 0, 3.14)
+                    entity_orientation = RotMat.rotate_3(
+                        RotMat[T, dim].eye(), angle, Vec[T, dim](0, 1, 0))
 
                 if choose_mat < 0.7:
                     # diffuse
@@ -98,8 +104,13 @@ fn sample_scene_3d[T: DType](inout store: ComponentStore[T, 3], grid_size: Int =
                     entity_id,
                     center,
                     entity_geometry,
-                    entity_material,
+                    entity_material
                 )
+                if entity_orientation:
+                    _ = store.add_components(
+                        entity_id,
+                        entity_orientation.value()
+                    )
     # Big Spheres
     var mat1 = Material[T, dim](Dielectric[T, dim](1.5))
     var sphere1 = Sphere[T, dim](1.0)

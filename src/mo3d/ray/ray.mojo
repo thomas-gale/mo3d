@@ -1,4 +1,5 @@
 from mo3d.math.vec import Vec
+from mo3d.math.mat import RotMat
 from mo3d.math.point import Point
 
 
@@ -20,6 +21,9 @@ struct Ray[type: DType, dim: Int]:
 
     fn offset(self, vec : Vec[type, dim]) -> Ray[type, dim]:
         return Ray(self.orig + vec, self.dir, self.tm)
+
+    fn rotate(self, mat : RotMat[type, dim]) -> Ray[type, dim]:
+        return Ray(mat * self.orig, mat * self.dir, self.tm)
 
     fn at(self, t: Scalar[type]) -> Point[type, dim]:
         return self.orig + self.dir * t

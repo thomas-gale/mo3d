@@ -248,6 +248,10 @@ struct ComponentStore[T: DType, dim: Int]:
             return self._add_bounding_box_component(
                 entity_id, component[BoundingBoxComponent[T, dim]]
             )
+        elif component.isa[OrientationComponent[T, dim]]():
+            return self._add_orientation_component(
+                entity_id, component[OrientationComponent[T, dim]]
+            )
         else:
             raise Error("Unknown component type")
 

@@ -250,7 +250,7 @@ struct Camera[
         Parallelize render, one row for each thread.
         TODO: Switch to one thread per pixel and compare performance (one we're running on GPU).
         """
-        self._sensor_samples += 1
+        self._sensor_samples += num_samples
 
         # Don't render more than max_samples
         if self._sensor_samples > max_samples:

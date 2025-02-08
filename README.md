@@ -8,7 +8,7 @@
 
 # mo3d
 
-![latest_showcase_image](https://github.com/user-attachments/assets/4fa7dce1-aa7a-4fe7-bad6-ec5a68070c39)
+![latest_showcase_image](https://github.com/user-attachments/assets/57204500-dbf7-4deb-b7a2-65e31d210eba)
 
 ### [mojo](https://docs.modular.com/mojo/manual/) 3d library
 
@@ -38,6 +38,10 @@ Key features aim to include an experimental ECS-based architecture for efficient
 - main app `magic run start`
 
 ## progress notes
+
+### 2025-02-03: more optimisations and features from Rob - cuboids/meshes/serialisation/convergance improvements.
+
+![mo3d_001](https://github.com/user-attachments/assets/57204500-dbf7-4deb-b7a2-65e31d210eba)
 
 ### 2025-01-01: merging the wonderful work of Robert - textures and emissives
 - We are updating to the latest version of mojo/max

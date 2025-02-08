@@ -76,7 +76,7 @@ fn test_add_bvh_entity_to_component_store() raises:
     var bvh = store.bounding_box_components[
         store.entity_to_components[query[0]][ComponentType.BoundingBox]
     ]
-    print(str(bvh))
+    print(String(bvh))
 
     assert_almost_equal(bvh._bounds[0].min, -1.0)
     assert_almost_equal(bvh._bounds[0].max, 1.0)

@@ -111,7 +111,7 @@ struct Keysym:
     var mod: UInt16
     var unused: UInt32
 
-    fn __init__(inout self):
+    fn __init__(mut self):
         self.scancode = 0
         self.keycode = 0
         self.mod = 0
@@ -172,7 +172,7 @@ struct Keyevent:
     var padding3: UInt8
     var keysym: Keysym
 
-    def __init__(inout self):
+    def __init__(mut self):
         self.type = 0
         self.timestamp = 0
         self.windowID = 0
@@ -190,22 +190,22 @@ struct Event:
     var _padding2: Int64
     var _padding3: Int64
 
-    fn __init__(inout self):
+    fn __init__(mut self):
         self.type = 0
         self._padding = 0
         self._padding2 = 0
         self._padding3 = 0
 
-    def as_keyboard(inout self) -> UnsafePointer[Keyevent]:
+    def as_keyboard(mut self) -> UnsafePointer[Keyevent]:
         return UnsafePointer.address_of(self).bitcast[Keyevent]()
 
-    def as_mousemotion(inout self) -> UnsafePointer[MouseMotionEvent]:
+    def as_mousemotion(mut self) -> UnsafePointer[MouseMotionEvent]:
         return UnsafePointer.address_of(self).bitcast[MouseMotionEvent]()
 
-    def as_mousebutton(inout self) -> UnsafePointer[MouseButtonEvent]:
+    def as_mousebutton(mut self) -> UnsafePointer[MouseButtonEvent]:
         return UnsafePointer.address_of(self).bitcast[MouseButtonEvent]()
 
-    def as_mousewheel(inout self) -> UnsafePointer[MouseWheelEvent]:
+    def as_mousewheel(mut self) -> UnsafePointer[MouseWheelEvent]:
         return UnsafePointer.address_of(self).bitcast[MouseWheelEvent]()
 
 
@@ -285,10 +285,10 @@ alias c_SDL_DestroyTexture = fn (UnsafePointer[SDL_Texture]) -> None
 alias c_SDL_LockTexture = fn (
     UnsafePointer[SDL_Texture],
     UnsafePointer[SDL_Rect],
-    inout UnsafePointer[
+    mut UnsafePointer[
         SIMD[DType.uint8, 1]
     ],  # Pixel data: We can't increase this from 1 as we don't know if SDL will guarantee that the bytes are aligned
-    inout UnsafePointer[
+    mut UnsafePointer[
         Int32
     ],  # Pitch (this value doesn't seem to be working - returning ptr to 0x400 which is not valid)
 ) -> Int32
@@ -336,7 +336,7 @@ struct SDL:
 
     var GetError: c_SDL_GetError
 
-    fn __init__(inout self):
+    fn __init__(mut self):
         var lib_path = get_sdl_lib_path()
         var SDL = ffi.DLHandle(lib_path)
 

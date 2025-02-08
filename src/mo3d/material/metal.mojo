@@ -18,8 +18,8 @@ struct Metal[T: DType, dim: Int](CollectionElement):
         mut rng : Rng,
         r_in: Ray[T, dim],
         rec: HitRecord[T, dim],
-        inout attenuation: Color4[T],
-        inout scattered: Ray[T, dim],
+        mut attenuation: Color4[T],
+        mut scattered: Ray[T, dim],
     ) -> Bool:
         var reflected = Vec[T, dim].reflect(r_in.dir, rec.normal)
         reflected = reflected.unit() + (
@@ -35,9 +35,9 @@ struct Metal[T: DType, dim: Int](CollectionElement):
     fn __str__(self) -> String:
         return (
             "Metal(albedo: "
-            + str(self.albedo)
+            + String(self.albedo)
             + ", fuzz: "
-            + str(self.fuzz)
+            + String(self.fuzz)
             + ")"
         )
 
@@ -57,4 +57,4 @@ struct Metal[T: DType, dim: Int](CollectionElement):
         """
         return Metal[T,dim](
             Color4[T]._load_py_json(py_obj["albedo"]),
-            float(py_obj["fuzz"]).cast[T]())
+            Float64(py_obj["fuzz"]).cast[T]())

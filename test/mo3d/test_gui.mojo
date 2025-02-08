@@ -11,7 +11,7 @@ fn test_import_pil() raises:
 fn test_pil_render_text() raises:
     var p = PIL()
     var txt_img = p._text_to_image("Hello, World!")
-    print(str(txt_img))
+    print(String(txt_img))
     assert_true(txt_img is not None)
 
 

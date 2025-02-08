@@ -88,9 +88,9 @@ fn test_unit() raises:
     assert_almost_equal(v.unit().length(), 1.0)
 
 
-fn test_str() raises:
+fn test_String() raises:
     var v = Vec[DType.float32, 3](1.0, 2.0, 3.0)
-    assert_equal(str(v), "1.0, 2.0, 3.0")
+    assert_equal(String(v), "1.0, 2.0, 3.0")
 
 
 fn test_comparison() raises:

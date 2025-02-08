@@ -14,7 +14,7 @@ from mo3d.texture.solid import Solid
 
 fn basic_three_sphere_scene_3d[
     T: DType
-](inout store: ComponentStore[T, 3]) raises:
+](mut store: ComponentStore[T, 3]) raises:
     """
     The classic end scene from the Ray Tracing in One Weekend by Peter Shirley.
     """

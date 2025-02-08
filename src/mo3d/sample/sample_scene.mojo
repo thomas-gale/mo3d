@@ -20,13 +20,13 @@ from mo3d.texture.checker import Checker
 
 from mo3d.random.rng import Rng
 
-fn sample_scene_3d[T: DType](inout store: ComponentStore[T, 3], grid_size: Int = 14) raises:
+fn sample_scene_3d[T: DType](mut store: ComponentStore[T, 3], grid_size: Int = 14) raises:
     """
     The classic end scene from the Ray Tracing in One Weekend by Peter Shirley.
     """
     alias dim = 3
 
-    fn random_float(mut rng : Rng, min: Scalar[T] = 0, max: Scalar[T] = 1.0) -> Scalar[T]:
+    fn random_Float64(mut rng : Rng, min: Scalar[T] = 0, max: Scalar[T] = 1.0) -> Scalar[T]:
         return min + (rng.float64().cast[T]() * (max - min))
 
     # Ground
@@ -56,10 +56,10 @@ fn sample_scene_3d[T: DType](inout store: ComponentStore[T, 3], grid_size: Int =
     # Random primitives
     for a in range(-grid_size, grid_size):
         for b in range(-grid_size, grid_size):
-            var choose_mat = random_float(rng)
-            var choose_geom = random_float(rng)
+            var choose_mat = random_Float64(rng)
+            var choose_geom = random_Float64(rng)
             var center = Point[T, dim](
-                a + 0.9 * random_float(rng), 0.2, b + 0.9 * random_float(rng)
+                a + 0.9 * random_Float64(rng), 0.2, b + 0.9 * random_Float64(rng)
             )
 
             if (center - Point[T, dim](4, 0.2, 0)).length() > 0.9:
@@ -72,7 +72,7 @@ fn sample_scene_3d[T: DType](inout store: ComponentStore[T, 3], grid_size: Int =
                     entity_geometry = Geometry[T,dim](
                         AABB[T, dim](Vec[T, dim](-0.2), Vec[T, dim](0.2)))
                     # Add an orientation rotated around y axis
-                    var angle = random_float(rng, 0, 3.14)
+                    var angle = random_Float64(rng, 0, 3.14)
                     entity_orientation = RotMat.rotate_3(
                         RotMat[T, dim].eye(), angle, Vec[T, dim](0, 1, 0))
 
@@ -88,7 +88,7 @@ fn sample_scene_3d[T: DType](inout store: ComponentStore[T, 3], grid_size: Int =
                 elif choose_mat < 0.8:
                     # metal
                     var albedo = Color4[T].random(rng, 0.5, 1)
-                    var fuzz = random_float(rng, 0, 0.5)
+                    var fuzz = random_Float64(rng, 0, 0.5)
                     entity_material = Material[T, dim](
                         Metal[T, dim](albedo, fuzz)
                     )

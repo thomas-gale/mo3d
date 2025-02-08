@@ -39,7 +39,7 @@ struct Triangle[T: DType](Hittable):
     var v : Vec[T, 3]
 
     fn __init__(
-        inout self,
+        mut self,
         a: Vec[T, 3],
         b: Vec[T, 3],
         c: Vec[T, 3],
@@ -72,7 +72,7 @@ struct Triangle[T: DType](Hittable):
         self,
         r: Ray[T, dim],
         owned ray_t: Interval[T],
-        inout rec: HitRecord[T, dim]
+        mut rec: HitRecord[T, dim]
     ) -> Bool:
         # Get intersection with the plane
         var ray_in = rebind[Ray[Self.T, 3]](r)
@@ -97,6 +97,6 @@ struct Triangle[T: DType](Hittable):
         return True
 
     fn __str__(self) -> String:
-        return "Triangle(a=" + str(self.base_point) 
-          + ", b=" + str(self.base_point + self.u)
-          + ", c=" + str(self.base_point + self.v) + ")"
+        return "Triangle(a=" + String(self.base_point) 
+          + ", b=" + String(self.base_point + self.u)
+          + ", c=" + String(self.base_point + self.v) + ")"

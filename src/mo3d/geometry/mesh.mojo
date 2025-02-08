@@ -76,10 +76,10 @@ struct Mesh[T : DType](Hittable):
         self,
         r: Ray[T, dim],
         owned ray_t: Interval[T],
-        inout rec: HitRecord[T, dim]
+        mut rec: HitRecord[T, dim]
     ) -> Bool:
         return self._triangles.hit(r, ray_t, rec)
 
 
     fn __str__(self) -> String:
-        return "Mesh with (" + str(self._triangles.count_hittables()) + ") triangles"
+        return "Mesh with (" + String(self._triangles.count_hittables()) + ") triangles"

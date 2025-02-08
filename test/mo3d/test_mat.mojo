@@ -26,7 +26,7 @@ fn test_create_eye_mat_size_3_float32() raises:
 fn test_str_eye_mat_size_3_float32() raises:
     var m = Mat[DType.float32, 3].eye()
 
-    assert_equal(str(m), "1.0, 0.0, 0.0\n0.0, 1.0, 0.0\n0.0, 0.0, 1.0\n")
+    assert_equal(String(m), "1.0, 0.0, 0.0\n0.0, 1.0, 0.0\n0.0, 0.0, 1.0\n")
 
 
 fn test_set_vec_mat_size_3_float32() raises:

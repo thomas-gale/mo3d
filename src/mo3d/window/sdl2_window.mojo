@@ -38,7 +38,7 @@ struct SDL2Window(Window):
     var _event: Event
 
     fn __init__(
-        inout self, name: String, width: Int, height: Int
+        mut self, name: String, width: Int, height: Int
     ) raises:
         self._name = name
         self._width = width
@@ -94,7 +94,7 @@ struct SDL2Window(Window):
     fn create(name: String, height: Int, width: Int) raises -> Self:
         return SDL2Window(name, height, width)
 
-    fn process_events(inout self, inout camera: Camera) -> Bool:
+    fn process_events(mut self, mut camera: Camera) -> Bool:
         """
         Process all SDL2 events, setting state on the camera (TODO: should this be decoupled?) and return True if the window should remain open.
         """
@@ -139,7 +139,7 @@ struct SDL2Window(Window):
         if lock_code != 0:
             raise Error(
                 "Failed to lock texture: "
-                + str(lock_code)
+                + String(lock_code)
                 + self._sdl.get_sdl_error_as_string()
             )
 

@@ -25,7 +25,7 @@ struct Sphere[T: DType, dim: Int](Hittable):
     var _radius: Scalar[T]
 
     fn __init__(
-        inout self,
+        mut self,
         radius: Scalar[T],
     ):
         """
@@ -47,7 +47,7 @@ struct Sphere[T: DType, dim: Int](Hittable):
         self,
         r: Ray[T, dim],
         owned ray_t: Interval[T],
-        inout rec: HitRecord[T, dim]
+        mut rec: HitRecord[T, dim]
     ) -> Bool:
         var ray_in = rebind[Ray[Self.T, Self.dim]](r)
         var ray_t_in = rebind[Interval[Self.T]](ray_t)
@@ -76,7 +76,7 @@ struct Sphere[T: DType, dim: Int](Hittable):
         return True
 
     fn __str__(self) -> String:
-        return "Sphere(radius=" + str(self._radius) + ")"
+        return "Sphere(radius=" + String(self._radius) + ")"
 
     fn _dump_py_json(self) raises -> PythonObject:
         """
@@ -92,4 +92,4 @@ struct Sphere[T: DType, dim: Int](Hittable):
         Load from python object representing the item dumped out to json
         """
         return Sphere[T,dim](
-            float(py_obj["radius"]).cast[T]())
+            Float64(py_obj["radius"]).cast[T]())

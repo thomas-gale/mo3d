@@ -17,8 +17,8 @@ struct DiffuseLight[T: DType, dim: Int](CollectionElement):
         mut rng : Rng,
         r_in: Ray[T, dim],
         rec: HitRecord[T, dim],
-        inout attenuation: Color4[T],
-        inout scattered: Ray[T, dim],
+        mut attenuation: Color4[T],
+        mut scattered: Ray[T, dim],
     ) -> Bool:
         return False
 
@@ -26,7 +26,7 @@ struct DiffuseLight[T: DType, dim: Int](CollectionElement):
         return self.emit
 
     fn __str__(self) -> String:
-        return "Diffuse Light(emitting: " + str(self.emit) + ")"
+        return "Diffuse Light(emitting: " + String(self.emit) + ")"
 
     fn _dump_py_json(self) raises -> PythonObject:
         """

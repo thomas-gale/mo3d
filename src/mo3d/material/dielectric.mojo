@@ -19,8 +19,8 @@ struct Dielectric[T: DType, dim: Int](CollectionElement):
         mut rng : Rng,
         r_in: Ray[T, dim],
         rec: HitRecord[T, dim],
-        inout attenuation: Color4[T],
-        inout scattered: Ray[T, dim],
+        mut attenuation: Color4[T],
+        mut scattered: Ray[T, dim],
     ) -> Bool:
         attenuation = Color4[T](1.0)
         var ri = (
@@ -60,7 +60,7 @@ struct Dielectric[T: DType, dim: Int](CollectionElement):
 
     fn __str__(self) -> String:
         return (
-            "Dielectric(refraction_index: " + str(self.refraction_index) + ")"
+            "Dielectric(refraction_index: " + String(self.refraction_index) + ")"
         )
 
     fn _dump_py_json(self) raises -> PythonObject:
@@ -77,4 +77,4 @@ struct Dielectric[T: DType, dim: Int](CollectionElement):
         Load from python object representing the item dumped out to json
         """
         return Dielectric[T,dim](
-            float(py_obj["refration_index"]).cast[T]())
+            Float64(py_obj["refration_index"]).cast[T]())

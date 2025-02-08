@@ -109,12 +109,12 @@ fn main() raises:
     # Print stats
     print(
         "Last compute time: ",
-        str(last_compute_time * 10**3),
+        String(last_compute_time * 10**3),
         " ms",
     )
     print(
         "Last redraw time: ",
-        str(last_redraw_time * 10**3),
+        String(last_redraw_time * 10**3),
         " ms",
     )
     print("-- Goodbye, mo3d! --")

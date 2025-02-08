@@ -20,8 +20,8 @@ struct Lambertian[T: DType, dim: Int](CollectionElement):
         mut rng : Rng,
         r_in: Ray[T, dim],
         rec: HitRecord[T, dim],
-        inout attenuation: Color4[T],
-        inout scattered: Ray[T, dim],
+        mut attenuation: Color4[T],
+        mut scattered: Ray[T, dim],
     ) raises -> Bool:
         var scatter_direction = rec.normal + Vec[T, dim].random_unit_vector(rng)
         # Catch degenerate scatter direction
@@ -35,7 +35,7 @@ struct Lambertian[T: DType, dim: Int](CollectionElement):
         return Color4[T](0, 0, 0)
 
     fn __str__(self) -> String:
-        return "Lambertian(albedo: " + str(self.albedo) + ")"
+        return "Lambertian(albedo: " + String(self.albedo) + ")"
 
     fn _dump_py_json(self) raises -> PythonObject:
         """

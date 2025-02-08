@@ -15,7 +15,7 @@ from mo3d.texture.solid import Solid
 
 fn basic_mesh_scene_3d[
     T: DType
-](inout store: ComponentStore[T, 3]) raises:
+](mut store: ComponentStore[T, 3]) raises:
     """
     A scene with a loaded mesh and a ground plane.
     """
@@ -43,7 +43,7 @@ fn basic_mesh_scene_3d[
     )
     # Load a mesh
     var mesh = Mesh[T].load_from_binary_stl("data/Utah_teapot_(solid).stl", 0.1)
-    print("Loaded: " + str(mesh))
+    print("Loaded: " + String(mesh))
     _ = store.add_components(
         store.create_entity(),
         Point[T, dim](0,0,0),

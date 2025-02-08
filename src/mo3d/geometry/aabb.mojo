@@ -39,12 +39,16 @@ struct AABB[T: DType, dim: Int](Hittable):
                 self._bounds[i] = Interval[T, 1](b[i], a[i])
 
     fn __init__(mut self, owned box_a: Self, owned box_b: Self):
+        # Avoid leaving the original variables in a partially moved state
+        var bounds_a = box_a._bounds
+        var bounds_b = box_b._bounds
+
         self._bounds = InlineArray[Interval[T, 1], dim](
             unsafe_uninitialized=True
         )
         @parameter
         for i in range(dim):
-            self._bounds[i] = Interval[T, 1](box_a._bounds[i], box_b._bounds[i])
+            self._bounds[i] = Interval[T, 1](bounds_a[i], bounds_b[i])
 
     fn __add__(self, vec: Vec[T, dim]) -> Self:
         var new_box = Self()

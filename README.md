@@ -33,6 +33,7 @@ Key features aim to include an experimental ECS-based architecture for efficient
 ![Basic Architecture](./doc/mo3d-basic-architecture.svg)
 
 ## dev
+- prerequisites: `llvm sdl2` (`brew install llvm sdl2`/`sudo apt install llvm libsdl2-dev`/`sudo pacman -S llvm sdl2`)
 - install [`magic`](https://docs.modular.com/magic/#install-magic)
 - see available tasks with `magic run list`
 - main app `magic run start`

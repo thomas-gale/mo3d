@@ -62,6 +62,9 @@ struct Camera[
     var _pixel_delta_u: Vec[T, dim]  # Offset to pixel to the right
     var _pixel_delta_v: Vec[T, dim]  # Offset to pixel below
 
+    # The current accumelated sensor reading - this is owned by us
+    var _sensor_accum: UnsafePointer[Scalar[T]]
+   
     # The state of the sensor of the camera (this data is copied to the window texture)
     var _sensor_state: UnsafePointer[Scalar[T]]
     var _sensor_samples: Int
@@ -118,10 +121,14 @@ struct Camera[
         self._defocus_disk_v = v * defocus_radius
 
         # Initialize the render state of the camera 'sensor'
+        self._sensor_accum = UnsafePointer[Scalar[T]].alloc(
+            height * width * channels
+        )
         self._sensor_state = UnsafePointer[Scalar[T]].alloc(
             height * width * channels
         )
         for i in range(height * width * channels):
+            (self._sensor_accum + i)[] = 0.0
             (self._sensor_state + i)[] = 1.0
         self._sensor_samples = 0
 
@@ -137,6 +144,7 @@ struct Camera[
 
     fn __del__(owned self):
         self._sensor_state.free()
+        self._sensor_accum.free()
         print("Camera destroyed")
 
     fn update_view_matrix(
@@ -170,6 +178,8 @@ struct Camera[
             return
 
         self._sensor_samples = 0  # Reset samples (so that sensor doesn't accumulate a blend of old/new positions)
+        for i in range(height * width * channels):
+            (self._sensor_accum + i)[] = 0.0
 
         # Get the homogenous position of the camera and pivot point
         var position = Vec[T, dim](
@@ -267,47 +277,13 @@ struct Camera[
                 pixel_color *= pixel_samples_scale.cast[T]()
 
                 # Progressively store the color in the render state
-                (
-                    self._sensor_state + (y * (width * channels) + x * channels)
-                )[] *= Scalar[T](self._sensor_samples - 1) / Scalar[T](
-                    self._sensor_samples
-                )
-                (
-                    self._sensor_state + (y * (width * channels) + x * channels)
-                )[] += pixel_color[3] / Scalar[T](self._sensor_samples)
-
-                (
-                    self._sensor_state
-                    + (y * (width * channels) + x * channels + 1)
-                )[] *= Scalar[T](self._sensor_samples - 1) / Scalar[T](
-                    self._sensor_samples
-                )
-                (
-                    self._sensor_state
-                    + (y * (width * channels) + x * channels + 1)
-                )[] += pixel_color[2] / Scalar[T](self._sensor_samples)
-
-                (
-                    self._sensor_state
-                    + (y * (width * channels) + x * channels + 2)
-                )[] *= Scalar[T](self._sensor_samples - 1) / Scalar[T](
-                    self._sensor_samples
-                )
-                (
-                    self._sensor_state
-                    + (y * (width * channels) + x * channels + 2)
-                )[] += pixel_color[1] / Scalar[T](self._sensor_samples)
-
-                (
-                    self._sensor_state
-                    + (y * (width * channels) + x * channels + 3)
-                )[] *= Scalar[T](self._sensor_samples - 1) / Scalar[T](
-                    self._sensor_samples
-                )
-                (
-                    self._sensor_state
-                    + (y * (width * channels) + x * channels + 3)
-                )[] += pixel_color[0] / Scalar[T](self._sensor_samples)
+                var accum_scale = 1.0 / Scalar[T](self._sensor_samples)
+                var base_sensor_ptr = self._sensor_state + (y * (width * channels) + x * channels)
+                var base_accum_ptr = self._sensor_accum + (y * (width * channels) + x * channels)
+                @parameter
+                for i in range(channels):
+                    (base_accum_ptr+i)[] += pixel_color[channels - i - 1] * pixel_samples_scale
+                    (base_sensor_ptr+i)[] = (base_accum_ptr + i)[] * accum_scale
 
             vectorize[compute_row_vectorize, 1](width)
 

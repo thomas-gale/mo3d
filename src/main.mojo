@@ -32,8 +32,22 @@ from mo3d.sample.basic_three_sphere_scene import basic_three_sphere_scene_3d
 from mo3d.sample.sample_scene import sample_scene_3d
 from mo3d.sample.basic_mesh import basic_mesh_scene_3d
 
+# WIP - experimenting.
+from max.engine.info import get_version
+from sys import has_accelerator, has_nvidia_gpu_accelerator, is_gpu
+
 fn main() raises:
     print("-- Hello, mo3d! --")
+
+    print(get_version())
+    print("Has accelerator:", has_accelerator())
+    print("Has nvidia gpu accelerator:", has_nvidia_gpu_accelerator())
+    print("Is gpu:", is_gpu())
+
+    # Can't currently compose max kernals in mojo - need to jump up to python level :sad:
+    # https://forum.modular.com/t/examples-of-custom-cpu-gpu-operations-in-mojo/348/10
+
+    return
 
     # Settings
     alias float_type = DType.float32

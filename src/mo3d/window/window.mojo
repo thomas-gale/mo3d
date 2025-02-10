@@ -11,7 +11,7 @@ trait Window:
         """
         ...
 
-    fn process_events(inout self, inout camera: Camera) -> Bool:
+    fn process_events(mut self, mut camera: Camera) -> Bool:
         """
         Apply events to the camera.
         Returns True if the window should remain open.

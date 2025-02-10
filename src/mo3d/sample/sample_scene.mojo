@@ -20,13 +20,18 @@ from mo3d.texture.checker import Checker
 
 from mo3d.random.rng import Rng
 
-fn sample_scene_3d[T: DType](inout store: ComponentStore[T, 3], grid_size: Int = 14) raises:
+
+fn sample_scene_3d[
+    T: DType
+](mut store: ComponentStore[T, 3], grid_size: Int = 14) raises:
     """
     The classic end scene from the Ray Tracing in One Weekend by Peter Shirley.
     """
     alias dim = 3
 
-    fn random_float(mut rng : Rng, min: Scalar[T] = 0, max: Scalar[T] = 1.0) -> Scalar[T]:
+    fn random_float(
+        mut rng: Rng, min: Scalar[T] = 0, max: Scalar[T] = 1.0
+    ) -> Scalar[T]:
         return min + (rng.float64().cast[T]() * (max - min))
 
     # Ground
@@ -39,9 +44,7 @@ fn sample_scene_3d[T: DType](inout store: ComponentStore[T, 3], grid_size: Int =
     var tex_ground = Texture[T, dim](
         Checker(tex_ground_light, tex_ground_dark, 0.4)
     )
-    var mat_ground = Material[T, dim](
-        Lambertian[T, dim](tex_ground)
-    )
+    var mat_ground = Material[T, dim](Lambertian[T, dim](tex_ground))
     var ground = Sphere[T, dim](1_000)
     var ground_entity_id = store.create_entity()
     _ = store.add_components(
@@ -64,24 +67,26 @@ fn sample_scene_3d[T: DType](inout store: ComponentStore[T, 3], grid_size: Int =
 
             if (center - Point[T, dim](4, 0.2, 0)).length() > 0.9:
                 var entity_material: Material[T, dim]
-                var entity_geometry : Geometry[T,dim]
+                var entity_geometry: Geometry[T, dim]
                 var entity_orientation = Optional[RotMat[T, dim]]()
                 if choose_geom < 0.8:
-                    entity_geometry = Geometry[T,dim](Sphere[T, dim](0.2))
+                    entity_geometry = Geometry[T, dim](Sphere[T, dim](0.2))
                 else:
-                    entity_geometry = Geometry[T,dim](
-                        AABB[T, dim](Vec[T, dim](-0.2), Vec[T, dim](0.2)))
+                    entity_geometry = Geometry[T, dim](
+                        AABB[T, dim](Vec[T, dim](-0.2), Vec[T, dim](0.2))
+                    )
                     # Add an orientation rotated around y axis
                     var angle = random_float(rng, 0, 3.14)
                     entity_orientation = RotMat.rotate_3(
-                        RotMat[T, dim].eye(), angle, Vec[T, dim](0, 1, 0))
+                        RotMat[T, dim].eye(), angle, Vec[T, dim](0, 1, 0)
+                    )
 
                 if choose_mat < 0.7:
                     # diffuse
-                    var albedo_colour = Color4[T].random(rng) * Color4[T].random(rng)
-                    var albedo = Texture[T, dim](
-                        Solid[T, dim](albedo_colour)
-                    )
+                    var albedo_colour = Color4[T].random(rng) * Color4[
+                        T
+                    ].random(rng)
+                    var albedo = Texture[T, dim](Solid[T, dim](albedo_colour))
                     entity_material = Material[T, dim](
                         Lambertian[T, dim](albedo)
                     )
@@ -97,33 +102,46 @@ fn sample_scene_3d[T: DType](inout store: ComponentStore[T, 3], grid_size: Int =
                     entity_material = Material[T, dim](Dielectric[T, dim](1.5))
                 else:
                     # light
-                    entity_material = Material[T, dim](DiffuseLight[T, dim](Color4[T](6.0,6.0,6.0,1)))
-                
+                    entity_material = Material[T, dim](
+                        DiffuseLight[T, dim](Color4[T](6.0, 6.0, 6.0, 1))
+                    )
+
                 var entity_id = store.create_entity()
                 _ = store.add_components(
-                    entity_id,
-                    center,
-                    entity_geometry,
-                    entity_material
+                    entity_id, center, entity_geometry, entity_material
                 )
                 if entity_orientation:
                     _ = store.add_components(
-                        entity_id,
-                        entity_orientation.value()
+                        entity_id, entity_orientation.value()
                     )
     # Big Spheres
     var mat1 = Material[T, dim](Dielectric[T, dim](1.5))
     var sphere1 = Sphere[T, dim](1.0)
     var sphere1_entity_id = store.create_entity()
-    _ = store.add_components(sphere1_entity_id, Point[T, dim](0, 1, 0), Geometry[T, dim](sphere1), mat1)
+    _ = store.add_components(
+        sphere1_entity_id,
+        Point[T, dim](0, 1, 0),
+        Geometry[T, dim](sphere1),
+        mat1,
+    )
 
-    var texture2 = Texture[T, dim](Solid[T,dim](Color4[T](0.4, 0.2, 0.1)))
+    var texture2 = Texture[T, dim](Solid[T, dim](Color4[T](0.4, 0.2, 0.1)))
     var mat2 = Material[T, dim](Lambertian[T, dim](texture2))
     var sphere2 = Sphere[T, dim](1.0)
     var sphere2_entity_id = store.create_entity()
-    _ = store.add_components(sphere2_entity_id, Point[T, dim](-4, 1, 0), Geometry[T, dim](sphere2), mat2)
+    _ = store.add_components(
+        sphere2_entity_id,
+        Point[T, dim](-4, 1, 0),
+        Geometry[T, dim](sphere2),
+        mat2,
+    )
 
     var mat3 = Material[T, dim](Metal[T, dim](Color4[T](0.7, 0.6, 0.5), 0.0))
     var sphere3 = Sphere[T, dim](1.0)
     var sphere3_entity_id = store.create_entity()
-    _ = store.add_components(sphere3_entity_id, Point[T, dim](4, 1, 0), Geometry[T, dim](sphere3), mat3)
+    _ = store.add_components(
+        sphere3_entity_id,
+        Point[T, dim](4, 1, 0),
+        Geometry[T, dim](sphere3),
+        mat3,
+    )

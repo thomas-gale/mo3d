@@ -74,7 +74,7 @@ struct Camera[
     var _last_y: Int32  # Last y position of the mouse
 
     fn __init__(
-        inout self,
+        mut self,
     ) raises:
         # Set default field of view, starting position (look from), target (look at) and orientation (up vector)
         self._look_from = Point[T, dim](13, 2, 3)
@@ -148,7 +148,7 @@ struct Camera[
         print("Camera destroyed")
 
     fn update_view_matrix(
-        inout self,
+        mut self,
     ) raises -> None:
         self._rot[2] = (self._look_from - self._look_at).unit()
         self._rot[0] = Vec.cross_3(self._vup, self._rot[2]).unit()
@@ -169,7 +169,7 @@ struct Camera[
             self._pixel_delta_u + self._pixel_delta_v
         )
 
-    fn arcball(inout self, x: Int32, y: Int32) raises -> None:
+    fn arcball(mut self, x: Int32, y: Int32) raises -> None:
         """
         Rotate the camera around the center of the scene.
         Attribution: https://asliceofrendering.com/camera/2019/11/30/ArcballCamera/.
@@ -228,19 +228,19 @@ struct Camera[
         self._last_x = x
         self._last_y = y
 
-    fn start_dragging(inout self, x: Int32, y: Int32) -> None:
+    fn start_dragging(mut self, x: Int32, y: Int32) -> None:
         self._last_x = x
         self._last_y = y
         self._dragging = True
 
-    fn stop_dragging(inout self) -> None:
+    fn stop_dragging(mut self) -> None:
         self._dragging = False
 
     fn get_state(self) -> UnsafePointer[Scalar[T]]:
         return self._sensor_state
 
     fn render(
-        inout self,
+        mut self,
         bvh_root : BVHNode[T, dim],
         compute_time_ms: Int64,
         redraw_time_ns: Int64,
@@ -296,14 +296,14 @@ struct Camera[
             width,
             10,
             10,
-            "average compute: " + str(compute_time_ms) + " ms",
+            "average compute: " + String(compute_time_ms) + " ms",
         )
         p.render_to_texture(
             self._sensor_state,
             width,
             10,
             25,
-            "average redraw: " + str(redraw_time_ns) + " ns",
+            "average redraw: " + String(redraw_time_ns) + " ns",
         )
 
     fn get_ray(self, mut rng : Rng, i: Int, j: Int) -> Ray[T, dim]:

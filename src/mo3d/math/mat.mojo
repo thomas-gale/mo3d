@@ -12,7 +12,7 @@ from python import PythonObject
 struct Mat[T: DType, dim: Int]:
     var _data: InlineArray[Scalar[T], dim * dim]
 
-    fn __init__(inout self):
+    fn __init__(mut self):
         self._data = InlineArray[Scalar[T], dim * dim](
             unsafe_uninitialized=True
         )
@@ -20,7 +20,7 @@ struct Mat[T: DType, dim: Int]:
             for j in range(dim):
                 self._data[i * dim + j] = Scalar[T](0)
 
-    fn __init__(inout self, *args: Vec[T, dim]):
+    fn __init__(mut self, *args: Vec[T, dim]):
         # We don't know for sure that the user has passed in the right number of Vecs, so we'll just initialize the matrix to 0 for safety.
         self._data = InlineArray[Scalar[T], dim * dim](0.0)
         var i = 0
@@ -46,14 +46,14 @@ struct Mat[T: DType, dim: Int]:
             result[i] = self._data[dim * index + i]
         return result
 
-    fn __setitem__(inout self, index: Int, value: Vec[T, dim]):
+    fn __setitem__(mut self, index: Int, value: Vec[T, dim]):
         for i in range(dim):
             self._data[dim * index + i] = value[i]
 
     fn __str__(self) -> String:
         var result = String("")
         for i in range(dim):
-            result += str(self[i]) + "\n"
+            result += String(self[i]) + "\n"
         return result
 
     @staticmethod
@@ -135,7 +135,7 @@ struct Mat[T: DType, dim: Int]:
         for i in range(dim):
             var row = mat[i]
             for j in range(dim):
-                mat._data[i * dim + j] = float(row[j]).cast[T]()
+                mat._data[i * dim + j] = Float64(row[j]).cast[T]()
         return mat
 
 

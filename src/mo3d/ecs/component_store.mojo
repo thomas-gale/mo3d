@@ -62,7 +62,7 @@ struct ComponentStore[T: DType, dim: Int]:
     var entity_to_components: Dict[EntityID, Dict[ComponentTypeID, ComponentID]]
     var entity_to_component_type_mask: Dict[EntityID, ComponentTypeID]
 
-    fn __init__(inout self):
+    fn __init__(mut self):
         self.position_components = List[PositionComponent[T, dim]]()
         self.position_component_to_entities = Dict[ComponentID, EntityID]()
 
@@ -87,7 +87,7 @@ struct ComponentStore[T: DType, dim: Int]:
         self.entity_to_component_type_mask = Dict[EntityID, ComponentTypeID]()
 
     fn _add_position_component(
-        inout self, entity_id: EntityID, component: PositionComponent[T, dim]
+        mut self, entity_id: EntityID, component: PositionComponent[T, dim]
     ) raises -> ComponentID:
         if (
             self.entity_to_component_type_mask[entity_id]
@@ -106,7 +106,7 @@ struct ComponentStore[T: DType, dim: Int]:
         return component_id
 
     fn _add_velocity_component(
-        inout self, entity_id: EntityID, component: VelocityComponent[T, dim]
+        mut self, entity_id: EntityID, component: VelocityComponent[T, dim]
     ) raises -> ComponentID:
         if (
             self.entity_to_component_type_mask[entity_id]
@@ -126,7 +126,7 @@ struct ComponentStore[T: DType, dim: Int]:
         return component_id
 
     fn _add_orientation_component(
-        inout self, entity_id: EntityID, component: OrientationComponent[T, dim]
+        mut self, entity_id: EntityID, component: OrientationComponent[T, dim]
     ) raises -> ComponentID:
         if (
             self.entity_to_component_type_mask[entity_id]
@@ -146,7 +146,7 @@ struct ComponentStore[T: DType, dim: Int]:
         return component_id
 
     fn _add_geometry_component(
-        inout self, entity_id: EntityID, component: GeometryComponent[T, dim]
+        mut self, entity_id: EntityID, component: GeometryComponent[T, dim]
     ) raises -> ComponentID:
         if (
             self.entity_to_component_type_mask[entity_id]
@@ -166,7 +166,7 @@ struct ComponentStore[T: DType, dim: Int]:
         return component_id
 
     fn _add_material_component(
-        inout self, entity_id: EntityID, component: MaterialComponent[T, dim]
+        mut self, entity_id: EntityID, component: MaterialComponent[T, dim]
     ) raises -> ComponentID:
         if (
             self.entity_to_component_type_mask[entity_id]
@@ -186,7 +186,7 @@ struct ComponentStore[T: DType, dim: Int]:
         return component_id
 
     fn _add_bounding_box_component(
-        inout self, entity_id: EntityID, component: BoundingBoxComponent[T, dim]
+        mut self, entity_id: EntityID, component: BoundingBoxComponent[T, dim]
     ) raises -> ComponentID:
         if (
             self.entity_to_component_type_mask[entity_id]
@@ -207,7 +207,7 @@ struct ComponentStore[T: DType, dim: Int]:
 
         return component_id
 
-    fn create_entity(inout self) -> EntityID:
+    fn create_entity(mut self) -> EntityID:
         """
         This implementation is not thread safe.
         """
@@ -219,7 +219,7 @@ struct ComponentStore[T: DType, dim: Int]:
         return entity_id
 
     fn add_component(
-        inout self, entity_id: EntityID, component: Self.ComponentVariants
+        mut self, entity_id: EntityID, component: Self.ComponentVariants
     ) raises -> ComponentID:
         """
         This implementation is probably not thread safe.
@@ -256,7 +256,7 @@ struct ComponentStore[T: DType, dim: Int]:
             raise Error("Unknown component type")
 
     fn add_components(
-        inout self,
+        mut self,
         entity_id: EntityID,
         components: List[Self.ComponentVariants],
     ) raises -> List[ComponentID]:
@@ -266,7 +266,7 @@ struct ComponentStore[T: DType, dim: Int]:
         return component_ids
 
     fn add_components(
-        inout self,
+        mut self,
         entity_id: EntityID,
         *components: Self.ComponentVariants,
     ) raises -> List[ComponentID]:
@@ -339,11 +339,11 @@ struct ComponentStore[T: DType, dim: Int]:
         var max_id : EntityID = 0
         var store = ComponentStore[T, dim]();
         for py_id in py_obj:
-            max_id = max(max_id, int(str(py_id)))
+            max_id = max(max_id, Int(String(py_id)))
         for entity_id in range(max_id + 1):
             store.entity_to_components[entity_id] = Dict[ComponentTypeID, ComponentID]()
             store.entity_to_component_type_mask[entity_id] = 0
-            py_entity_id = str(entity_id)
+            py_entity_id = String(entity_id)
             if py_entity_id in py_obj:
                 var py_entity = py_obj[py_entity_id]
                 if "Position" in py_entity:

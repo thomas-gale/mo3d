@@ -24,10 +24,10 @@ fn sign[T: DType](num : Scalar[T]) -> Scalar[T]:
 struct AABB[T: DType, dim: Int](Hittable):
     var _bounds: InlineArray[Interval[T, 1], dim]
 
-    fn __init__(inout self):
+    fn __init__(mut self):
         self._bounds = InlineArray[Interval[T, 1], dim](Interval[T, 1]())
 
-    fn __init__(inout self, a: Point[T, dim], b: Point[T, dim]):
+    fn __init__(mut self, a: Point[T, dim], b: Point[T, dim]):
         self._bounds = InlineArray[Interval[T, 1], dim](
             unsafe_uninitialized=True
         )
@@ -38,13 +38,17 @@ struct AABB[T: DType, dim: Int](Hittable):
             else:
                 self._bounds[i] = Interval[T, 1](b[i], a[i])
 
-    fn __init__(inout self, owned box_a: Self, owned box_b: Self):
+    fn __init__(mut self, owned box_a: Self, owned box_b: Self):
+        # Avoid leaving the original variables in a partially moved state
+        var bounds_a = box_a._bounds
+        var bounds_b = box_b._bounds
+
         self._bounds = InlineArray[Interval[T, 1], dim](
             unsafe_uninitialized=True
         )
         @parameter
         for i in range(dim):
-            self._bounds[i] = Interval[T, 1](box_a._bounds[i], box_b._bounds[i])
+            self._bounds[i] = Interval[T, 1](bounds_a[i], bounds_b[i])
 
     fn __add__(self, vec: Vec[T, dim]) -> Self:
         var new_box = Self()
@@ -67,17 +71,17 @@ struct AABB[T: DType, dim: Int](Hittable):
             new_box._bounds[i] = self._bounds[i]
         return new_box
 
-    fn merge_in(inout self, vec : Vec[T, dim]):
+    fn merge_in(mut self, vec : Vec[T, dim]):
         @parameter
         for i in range(dim):
             self._bounds[i].merge_in(vec[i])
 
-    fn merge_in(inout self, aabb : AABB[T, dim]):
+    fn merge_in(mut self, aabb : AABB[T, dim]):
         @parameter
         for i in range(dim):
             self._bounds[i].merge_in(aabb._bounds[i])
 
-    fn pad_to(inout self, min : Scalar[T]):
+    fn pad_to(mut self, min : Scalar[T]):
         @parameter
         for i in range(dim):
             if (self._bounds[i].size() < min):
@@ -139,7 +143,7 @@ struct AABB[T: DType, dim: Int](Hittable):
     fn aabb[T: DType, dim: Int](self) -> AABB[T,dim]:
         return rebind[AABB[T, dim]](self)
 
-    fn hit[T: DType, dim: Int](self, r: Ray[T, dim], owned ray_t: Interval[T, 1], inout rec: HitRecord[T, dim]) -> Bool:
+    fn hit[T: DType, dim: Int](self, r: Ray[T, dim], owned ray_t: Interval[T, 1], mut rec: HitRecord[T, dim]) -> Bool:
         """
         Check if the ray intersects the bounding box.
         """
@@ -236,7 +240,7 @@ struct AABB[T: DType, dim: Int](Hittable):
     fn __str__(self) -> String:
         var s: String = "AABB("
         for i in range(dim):
-            s += str(self._bounds[i])
+            s += String(self._bounds[i])
             if i < dim - 1:
                 s += ", "
         s += ")"

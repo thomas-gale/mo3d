@@ -65,7 +65,7 @@ struct Geometry[T: DType, dim: Int](Hittable):
     alias Variant = Variant[Sphere[T, dim], AABB[T, dim], Triangle[T], Mesh[T]]
     var _hittable: Self.Variant
 
-    fn __init__(inout self, hittable: Self.Variant) raises:
+    fn __init__(mut self, hittable: Self.Variant) raises:
         if hittable.isa[Sphere[T, dim]]():
             self._hittable = hittable
         elif hittable.isa[AABB[T, dim]]():
@@ -96,7 +96,7 @@ struct Geometry[T: DType, dim: Int](Hittable):
         self,
         r: Ray[T, dim],
         owned ray_t: Interval[T],
-        inout rec: HitRecord[T, dim],
+        mut rec: HitRecord[T, dim],
     ) -> Bool:
         if self._hittable.isa[Sphere[T, dim]]():
             return self._hittable[Sphere[T, dim]].hit(r, ray_t, rec)
@@ -112,13 +112,13 @@ struct Geometry[T: DType, dim: Int](Hittable):
 
     fn __str__(self) -> String:
         if self._hittable.isa[Sphere[T, dim]]():
-            return str(self._hittable[Sphere[T, dim]])
+            return String(self._hittable[Sphere[T, dim]])
         elif self._hittable.isa[AABB[T, dim]]():
-            return str(self._hittable[AABB[T, dim]])
+            return String(self._hittable[AABB[T, dim]])
         elif self._hittable.isa[Triangle[T]]():
-            return str(self._hittable[Triangle[T]])
+            return String(self._hittable[Triangle[T]])
         elif self._hittable.isa[Mesh[T]]():
-            return str(self._hittable[Mesh[T]])
+            return String(self._hittable[Mesh[T]])
         else:
             return "Geometry(Unknown)"
 
@@ -144,7 +144,7 @@ struct Geometry[T: DType, dim: Int](Hittable):
         """
         Load from python object representing the item dumped out to json
         """
-        var type = str(py_obj["type"])
+        var type = String(py_obj["type"])
         if type == "sphere":
             return Self(Sphere[T, dim]._load_py_json(py_obj))
         elif type == "aabb":

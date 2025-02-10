@@ -11,13 +11,13 @@ from python import PythonObject
 struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
     var _data: InlineArray[Scalar[T], size]
 
-    fn __init__(inout self):
+    fn __init__(mut self):
         self._data = InlineArray[Scalar[T], size](0.0)
 
-    fn __init__(inout self, owned data: InlineArray[Scalar[T], size]):
+    fn __init__(mut self, owned data: InlineArray[Scalar[T], size]):
         self._data = data
 
-    fn __init__(inout self, owned *args: Scalar[T]):
+    fn __init__(mut self, owned *args: Scalar[T]):
         """
         If you pass in a single argument, it will be broadcasted to all elements.
         Else, if you pass in multiple elements they will be copied up to the size of the vector.
@@ -34,10 +34,10 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
             self._data[i] = arg[]
             i += 1
 
-    fn __copyinit__(inout self, other: Self):
+    fn __copyinit__(mut self, other: Self):
         self._data = other._data
 
-    fn __moveinit__(inout self, owned other: Self):
+    fn __moveinit__(mut self, owned other: Self):
         self._data = other._data^
 
     fn clone(self) -> Self:
@@ -48,7 +48,7 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
     fn __getitem__(self, index: Int) -> Scalar[T]:
         return self._data[index]
 
-    fn __setitem__(inout self, index: Int, value: SIMD[T, 1]):
+    fn __setitem__(mut self, index: Int, value: SIMD[T, 1]):
         self._data[index] = value
 
     fn dot(self, rhs: Self) -> SIMD[T, 1]:
@@ -152,7 +152,7 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
         """Readable representation of the vector."""
         var result = String("")
         for i in range(size):
-            result += str(self._data[i])
+            result += String(self._data[i])
             if i < size - 1:
                 result += ", "
         return result
@@ -225,7 +225,7 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
             result._data[i] = self._data[i] + rhs._data[i]
         return result
 
-    fn __iadd__(inout self, rhs: Self):
+    fn __iadd__(mut self, rhs: Self):
         for i in range(size):
             self._data[i] += rhs._data[i]
 
@@ -241,7 +241,7 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
             result._data[i] = self._data[i] - rhs._data[i]
         return result
 
-    fn __isub__(inout self, rhs: Self):
+    fn __isub__(mut self, rhs: Self):
         for i in range(size):
             self._data[i] -= rhs._data[i]
 
@@ -260,7 +260,7 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
     fn __rmul__(self, lhs: SIMD[T, 1]) -> Self:
         return self * lhs
 
-    fn __imul__(inout self, rhs: SIMD[T, 1]):
+    fn __imul__(mut self, rhs: SIMD[T, 1]):
         for i in range(size):
             self._data[i] *= rhs
 
@@ -277,7 +277,7 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
         return result
 
 
-    fn __itruediv__(inout self, rhs: SIMD[T, 1]):
+    fn __itruediv__(mut self, rhs: SIMD[T, 1]):
         for i in range(size):
             self._data[i] /= rhs
 
@@ -297,6 +297,6 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
         """
         var vec = Vec[T,size]()
         for i in range(size):
-            vec._data[i] = float(py_obj[i]).cast[T]()
+            vec._data[i] = Float64(py_obj[i]).cast[T]()
         return vec
         

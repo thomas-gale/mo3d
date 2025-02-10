@@ -19,7 +19,7 @@ struct HitRecord[T: DType, dim: Int]:
     var front_face: Bool
     var hits: Int
 
-    fn __init__(inout self):
+    fn __init__(mut self):
         self.p = Point[T, dim]()
         self.normal = Vec[T, dim]()
         self.mat = Material[T, dim](Lambertian[T, dim](
@@ -29,7 +29,7 @@ struct HitRecord[T: DType, dim: Int]:
         self.front_face = False
         self.hits = 0
 
-    fn set_face_normal(inout self, r: Ray[T, dim], outward_normal: Vec[T, dim]):
+    fn set_face_normal(mut self, r: Ray[T, dim], outward_normal: Vec[T, dim]):
         """
         Sets the hit record normal vector.
         NOTE: the parameter `outward_normal` is assumed to have unit length.
@@ -41,12 +41,12 @@ struct HitRecord[T: DType, dim: Int]:
     fn __str__(self) -> String:
         return (
             "HitRecord(p: "
-            + str(self.p)
+            + String(self.p)
             + ", normal: "
-            + str(self.normal)
+            + String(self.normal)
             + ", t: "
-            + str(self.t)
+            + String(self.t)
             + ", front_face: "
-            + str(self.front_face)
+            + String(self.front_face)
             + ")"
         )

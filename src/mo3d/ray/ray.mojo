@@ -9,12 +9,12 @@ struct Ray[type: DType, dim: Int]:
     var dir: Point[type, dim]
     var tm: Scalar[type]
 
-    fn __init__(inout self):
+    fn __init__(mut self):
         self.orig = Point[type, dim]()
         self.dir = Vec[type, dim]()
         self.tm = 0.0
 
-    fn __init__(inout self, orig: Point[type, dim], dir: Vec[type, dim], tm: Scalar[type] = 0.0):
+    fn __init__(mut self, orig: Point[type, dim], dir: Vec[type, dim], tm: Scalar[type] = 0.0):
         self.orig = orig
         self.dir = dir
         self.tm = tm
@@ -29,4 +29,4 @@ struct Ray[type: DType, dim: Int]:
         return self.orig + self.dir * t
 
     fn __str__(self) -> String:
-        return "Ray(orig=" + str(self.orig) + ", dir=" + str(self.dir) + ")"
+        return "Ray(orig=" + String(self.orig) + ", dir=" + String(self.dir) + ")"

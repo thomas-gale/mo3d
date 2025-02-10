@@ -18,7 +18,7 @@ struct Solid[type: DType, dim: Int](CollectionElement):
     fn __str__(self) -> String:
         return (
             "Soild(colour: "
-            + str(self.colour)
+            + String(self.colour)
             + ")"
         )
 

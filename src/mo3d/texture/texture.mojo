@@ -35,9 +35,9 @@ struct Texture[type: DType, dim: Int]:
     fn __str__(self) -> String:
         # TODO perform the runtime variant match
         if self._tex.isa[Solid[type, dim]]():
-            return str(self._tex[Solid[type, dim]])
+            return String(self._tex[Solid[type, dim]])
         elif self._tex.isa[Checker[type, dim]]():
-            return str(self._tex[Checker[type, dim]])
+            return String(self._tex[Checker[type, dim]])
         else:
             return "Texture(Unknown)"
 
@@ -62,7 +62,7 @@ struct Texture[type: DType, dim: Int]:
         """
         Load from python object representing the item dumped out to json
         """
-        var type_s = str(py_obj["type"])
+        var type_s = String(py_obj["type"])
         if type_s == "solid":
             return Self(Solid[type, dim]._load_py_json(py_obj))
         elif type_s == "checker":

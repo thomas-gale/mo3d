@@ -20,7 +20,7 @@ struct Checker[type: DType, dim: Int](CollectionElement):
     ) raises -> Color4[type]:
         var sum : Int = 0
         for i in range(dim):
-            sum += int(point._data[i] // self.scale)
+            sum += Int(point._data[i] // self.scale)
         if sum % 2 == 0:
             return self.even_texture[].value(point)
         else:
@@ -29,11 +29,11 @@ struct Checker[type: DType, dim: Int](CollectionElement):
     fn __str__(self) -> String:
         return (
             "Checker(scale: "
-            + str(self.scale)
+            + String(self.scale)
             + ", even texture: "
-            + str(self.even_texture[])
+            + String(self.even_texture[])
             + ", odd texture: "
-            + str(self.odd_texture[])
+            + String(self.odd_texture[])
             + ")"
         )
 
@@ -55,4 +55,4 @@ struct Checker[type: DType, dim: Int](CollectionElement):
         return Checker[type,dim](
             Texture[type, dim]._load_py_json(py_obj["even_texture"]),
             Texture[type, dim]._load_py_json(py_obj["odd_texture"]),
-            float(py_obj["scale"]).cast[type]())
+            Float64(py_obj["scale"]).cast[type]())

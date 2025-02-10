@@ -17,14 +17,13 @@ built = { cmd = "bin/mo3d", depends-on = ["build"] }
 perf = { cmd = "perf record -F 99 --call-graph dwarf bin/mo3d", depends-on = ["build"]  }
 
 [dependencies]
-max = ">=24.6.0.dev2024121016,<25"
+max = ">=25.1.0.dev2025020805,<26"
 pillow = ">=10.4.0,<11"
 
 [target.linux-64.tasks]
-setup = { cmd="sudo apt update && sudo apt install -y llvm libsdl2-dev", inputs=["pixi.toml"] }
-build-setup = { cmd="sudo apt update && sudo apt install -y build-essential python3-pil", inputs=["pixi.toml"] }
+setup = { cmd="echo 'Please ensure you have llvm sdl2 installed'", inputs=["pixi.toml"] }
+build-setup = { cmd="echo 'Please ensure you have build-essential, python3 and pillow installed'", inputs=["pixi.toml"] }
 
 [target.osx-arm64.tasks]
-setup = { cmd="brew install llvm sdl2", inputs=["pixi.toml"] }
-build-setup = { cmd="echo 'Skipping build-setup on mac for now'", inputs=["pixi.toml"] }
-# build-setup = { cmd="brew update && brew install build-essential python3-pil", inputs=["pixi.toml"] }
+setup = { cmd="echo 'Please ensure you have llvm sdl2 installed'", inputs=["pixi.toml"] }
+build-setup = { cmd="echo 'Please ensure you have python@3 and pillow installed'", inputs=["pixi.toml"] }

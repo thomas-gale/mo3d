@@ -26,8 +26,8 @@ struct Material[T: DType, dim: Int]:
         mut rng : Rng,
         r_in: Ray[T, dim],
         rec: HitRecord[T, dim],
-        inout attenuation: Color4[T],
-        inout scattered: Ray[T, dim],
+        mut attenuation: Color4[T],
+        mut scattered: Ray[T, dim],
     ) raises -> Bool:
         # TODO perform the runtime variant match
         if self._mat.isa[Lambertian[T, dim]]():
@@ -70,11 +70,11 @@ struct Material[T: DType, dim: Int]:
 
     fn __str__(self) -> String:
         if self._mat.isa[Lambertian[T, dim]]():
-            return str(self._mat[Lambertian[T, dim]])
+            return String(self._mat[Lambertian[T, dim]])
         elif self._mat.isa[Metal[T, dim]]():
-            return str(self._mat[Metal[T, dim]])
+            return String(self._mat[Metal[T, dim]])
         elif self._mat.isa[Dielectric[T, dim]]():
-            return str(self._mat[Dielectric[T, dim]])
+            return String(self._mat[Dielectric[T, dim]])
         else:
             return "Material(Unknown)"
 
@@ -105,7 +105,7 @@ struct Material[T: DType, dim: Int]:
         """
         Load from python object representing the item dumped out to json
         """
-        var type = str(py_obj["type"])
+        var type = String(py_obj["type"])
         if type == "lambertian":
             return Self(Lambertian[T, dim]._load_py_json(py_obj))
         elif type == "metal":

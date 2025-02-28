@@ -14,6 +14,7 @@ from memory import UnsafePointer
 
 @value 
 struct CollisionRecord[T : DType]:
+    alias FloatType = T # Needed to get around some isues with trait param
     var a_ptr : UnsafePointer[Entity[T]]
     var b_ptr : UnsafePointer[Entity[T]]
     var pt_a_in_b : Vec[T, 3]  
@@ -36,9 +37,12 @@ struct Entity[T: DType]:
     fn move(inout self, step : Scalar[T]):
         if not self.mobile:
             return
-        self._vel += self._force / self._geom.mass() * step
+        self._vel += self._force / self.mass() * step
         self._pos += self._vel * step
         self._force += Vec[T, 3](0,0,0)
+
+    fn mass(self) -> Scalar[T]:
+        return self._geom.volume()
 
 fn collision[T : DType](entity_a : Entity[T], entity_b : Entity[T]) -> Optional[CollisionRecord[T]]:
     return Optional[CollisionRecord[T]]()

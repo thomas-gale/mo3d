@@ -3,14 +3,14 @@ from utils import Variant
 @value
 struct PhysPlane[T : DType]:
 
-    fn mass(self) -> Scalar[T]:
+    fn volume(self) -> Scalar[T]:
         return 0
 
 @value
 struct PhysSphere[T : DType]:
     var radius : Scalar[T]
 
-    fn mass(self) -> Scalar[T]:
+    fn volume(self) -> Scalar[T]:
         return self.radius * self.radius * self.radius
 
 
@@ -27,11 +27,11 @@ struct PhysGeom[T : DType]:
         else:
             raise Error("Geometry c'tor: Unsupported geometry type")
 
-    fn mass(self) -> Scalar[T]:
+    fn volume(self) -> Scalar[T]:
         if self._geom.isa[PhysSphere[T]]():
-            return self._geom[PhysSphere[T]].mass()
+            return self._geom[PhysSphere[T]].volume()
         elif self._geom.isa[PhysPlane[T]]():
-            return self._geom[PhysPlane[T]].mass()
+            return self._geom[PhysPlane[T]].volume()
         else:
             return 0
 

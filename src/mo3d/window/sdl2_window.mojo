@@ -16,6 +16,7 @@ from mo3d.window.sdl2 import (
     SDL_TEXTUREACCESS_STREAMING,
     SDL_WINDOWPOS_CENTERED,
     SDL_WINDOW_SHOWN,
+    SDL_KEYDOWN,
     SDL,
     SDL_Rect,
     SDL_Renderer,
@@ -114,9 +115,12 @@ struct SDL2Window(Window):
                 if self._event.type == SDL_MOUSEMOTION:
                     var motion = self._event.as_mousemotion()
                     camera.arcball(motion[].x, motion[].y)
+                if self._event.type == SDL_KEYDOWN:
+                    var button = self._event.as_keyboard()
+                    if button[].keysym.keycode == 112:
+                        camera._simulate_physics = True
             except Error:
                 print("Failed to cast event")
-
         return True
 
     fn redraw[

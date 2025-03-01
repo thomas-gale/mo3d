@@ -73,6 +73,8 @@ struct Camera[
     var _last_x: Int32  # Last x position of the mouse
     var _last_y: Int32  # Last y position of the mouse
 
+    var _simulate_physics : Bool # Should we run a physics sim - ideally shouldnt be recorded on camera
+
     fn __init__(
         inout self,
     ) raises:
@@ -136,6 +138,7 @@ struct Camera[
         self._dragging = False
         self._last_x = 0
         self._last_y = 0
+        self._simulate_physics = False
 
         # Do a final update of the view matrix: TODO: Remove the duplicate code above.
         self.update_view_matrix()
@@ -169,6 +172,12 @@ struct Camera[
             self._pixel_delta_u + self._pixel_delta_v
         )
 
+    fn reset_samples(mut self):
+        self._sensor_samples = 0  # Reset samples (so that sensor doesn't accumulate a blend of old/new positions)
+        for i in range(height * width * channels):
+            (self._sensor_accum + i)[] = 0.0
+            (self._sensor_state + i)[] = 1.0
+
     fn arcball(inout self, x: Int32, y: Int32) raises -> None:
         """
         Rotate the camera around the center of the scene.
@@ -177,9 +186,7 @@ struct Camera[
         if not self._dragging:
             return
 
-        self._sensor_samples = 0  # Reset samples (so that sensor doesn't accumulate a blend of old/new positions)
-        for i in range(height * width * channels):
-            (self._sensor_accum + i)[] = 0.0
+        self.reset_samples()
 
         # Get the homogenous position of the camera and pivot point
         var position = Vec[T, dim](

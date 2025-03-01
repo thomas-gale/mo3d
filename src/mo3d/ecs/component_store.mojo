@@ -15,7 +15,8 @@ from mo3d.ecs.component import (
     OrientationComponent,
     GeometryComponent,
     MaterialComponent,
-    BoundingBoxComponent
+    BoundingBoxComponent,
+    PhysicsComponent
 )
 
 from python import Python
@@ -38,7 +39,8 @@ struct ComponentStore[T: DType, dim: Int]:
         OrientationComponent[T, dim],
         GeometryComponent[T, dim],
         MaterialComponent[T, dim],
-        BoundingBoxComponent[T, dim]
+        BoundingBoxComponent[T, dim],
+        PhysicsComponent[T]
     ]
 
     var position_components: List[PositionComponent[T, dim]]
@@ -58,6 +60,9 @@ struct ComponentStore[T: DType, dim: Int]:
 
     var bounding_box_components: List[BoundingBoxComponent[T, dim]]
     var bounding_box_component_to_entities: Dict[ComponentID, EntityID]
+
+    var physics_components: List[PhysicsComponent[T]]
+    var physics_component_to_entities: Dict[ComponentID, EntityID]
 
     var entity_to_components: Dict[EntityID, Dict[ComponentTypeID, ComponentID]]
     var entity_to_component_type_mask: Dict[EntityID, ComponentTypeID]
@@ -80,6 +85,9 @@ struct ComponentStore[T: DType, dim: Int]:
 
         self.bounding_box_components = List[BoundingBoxComponent[T, dim]]()
         self.bounding_box_component_to_entities = Dict[ComponentID, EntityID]()
+
+        self.physics_components = List[PhysicsComponent[T]]()
+        self.physics_component_to_entities = Dict[ComponentID, EntityID]()
 
         self.entity_to_components = Dict[
             EntityID, Dict[ComponentTypeID, ComponentID]
@@ -207,6 +215,28 @@ struct ComponentStore[T: DType, dim: Int]:
 
         return component_id
 
+    fn _add_physics_component(
+        inout self, entity_id: EntityID, component: PhysicsComponent[T]
+    ) raises -> ComponentID:
+        if (
+            self.entity_to_component_type_mask[entity_id]
+            & ComponentType.PhysicsComponent
+        ):
+            raise Error("Entity already has a physics component")
+
+        self.physics_components.append(component)
+        var component_id = ComponentID(len(self.physics_components) - 1)
+        self.physics_component_to_entities[component_id] = entity_id
+
+        self.entity_to_components[entity_id][
+            ComponentType.PhysicsComponent
+        ] = component_id
+        self.entity_to_component_type_mask[
+            entity_id
+        ] |= ComponentType.PhysicsComponent
+
+        return component_id
+
     fn create_entity(inout self) -> EntityID:
         """
         This implementation is not thread safe.
@@ -251,6 +281,10 @@ struct ComponentStore[T: DType, dim: Int]:
         elif component.isa[OrientationComponent[T, dim]]():
             return self._add_orientation_component(
                 entity_id, component[OrientationComponent[T, dim]]
+            )
+        elif component.isa[PhysicsComponent[T]]():
+            return self._add_physics_component(
+                entity_id, component[PhysicsComponent[T]]
             )
         else:
             raise Error("Unknown component type")

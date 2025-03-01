@@ -4,6 +4,7 @@ from mo3d.math.point import Point
 from mo3d.material.material import Material
 from mo3d.geometry.geometry import Geometry
 from mo3d.geometry.aabb import AABB
+from mo3d.phys.data import PhysData
 
 from mo3d.ecs.entity import EntityID
 
@@ -20,6 +21,8 @@ alias MaterialComponent = Material
 
 alias BoundingBoxComponent = AABB
 
+alias PhysicsComponent = PhysData
+
 alias ComponentID = Int
 
 alias ComponentTypeID = Int
@@ -32,3 +35,4 @@ struct ComponentType:
     alias Geometry: ComponentTypeID = 1 << 3
     alias Material: ComponentTypeID = 1 << 4
     alias BoundingBox: ComponentTypeID = 1 << 5
+    alias PhysicsComponent : ComponentTypeID = 1 << 6

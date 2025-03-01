@@ -1,7 +1,7 @@
 from memory.arc import ArcPointer
 from collections import Optional
 
-from mo3d.ecs.component_store import ComponentStore
+from mo3d.ecs.component_store import ComponentStore, ComponentType
 from mo3d.math.vec import Vec
 from mo3d.math.mat import RotMat
 from mo3d.math.point import Point
@@ -17,6 +17,8 @@ from mo3d.material.diffuse_light import DiffuseLight
 from mo3d.texture.texture import Texture
 from mo3d.texture.solid import Solid
 from mo3d.texture.checker import Checker
+from mo3d.phys.geometry import PhysGeom, PhysSphere
+from mo3d.phys.data import PhysData
 
 from mo3d.random.rng import Rng
 
@@ -44,11 +46,13 @@ fn sample_scene_3d[T: DType](inout store: ComponentStore[T, 3], grid_size: Int =
     )
     var ground = Sphere[T, dim](1_000)
     var ground_entity_id = store.create_entity()
+    # Add physics for fixed ground plane
     _ = store.add_components(
         ground_entity_id,
         Point[T, dim](0, -1_000, 0),
         Geometry[T, dim](ground),
         mat_ground,
+        PhysData[T](PhysGeom[T](PhysSphere[T](ground._radius)), False)
     )
 
     var rng = Rng(12345)
@@ -127,3 +131,16 @@ fn sample_scene_3d[T: DType](inout store: ComponentStore[T, 3], grid_size: Int =
     var sphere3 = Sphere[T, dim](1.0)
     var sphere3_entity_id = store.create_entity()
     _ = store.add_components(sphere3_entity_id, Point[T, dim](4, 1, 0), Geometry[T, dim](sphere3), mat3)
+
+    # Add physics objects for all the mobile bits
+    for entity_id in store.get_entities_with_components(ComponentType.Geometry):
+        var geom = store.geometry_components[
+            store.entity_to_components[entity_id[]][ComponentType.Geometry]
+        ]
+        # Add to all spheres is we havent set up a special component
+        if geom._hittable.isa[Sphere[T, dim]]() and not store.entity_has_components(entity_id[], ComponentType.PhysicsComponent):
+            var rad = geom._hittable[Sphere[T, dim]]._radius
+            _ = store.add_component(
+                entity_id[], 
+                PhysData[T](PhysGeom[T](PhysSphere[T](rad)), True)
+            )

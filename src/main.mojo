@@ -25,6 +25,7 @@ from mo3d.geometry.geometry import Geometry
 from mo3d.geometry.sphere import Sphere
 from mo3d.camera.camera import Camera
 from mo3d.window.sdl2_window import SDL2Window
+from mo3d.phys.world import run_physics_store
 
 from mo3d.ecs.component_store import ComponentStore
 from mo3d.scene.construct_bvh import construct_bvh_store
@@ -89,6 +90,13 @@ fn main() raises:
     var window = SDL2Window.create("mo3d", width, height)
 
     while window.process_events(camera):
+        if camera._simulate_physics:
+            print("Running physics")
+            run_physics_store(store, 0.25)
+            bvh_root = construct_bvh_store(store)
+            camera.reset_samples()
+            camera._simulate_physics = False
+
         start_time = perf_counter()
         camera.render(
             bvh_root,

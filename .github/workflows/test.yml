@@ -29,11 +29,11 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Install magic
+      - name: Install pixi
         run: |
-          curl -ssL https://magic.modular.com | bash
+          curl -fsSL https://pixi.sh/install.sh | sh
 
       - name: Test package for target platform
         run: |
           source $HOME/.bash_profile
-          magic run test
+          pixi run test

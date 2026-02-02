@@ -1,4 +1,4 @@
-[project]
+[workspace]
 name = "mo3d"
 version = "0.1.0"
 description = "Prototype 3d library for Mojo Lang"
@@ -9,22 +9,18 @@ license = "Apache-2.0"
 platforms = ["linux-64", "osx-arm64"]
 
 [tasks]
-start = { cmd = "mojo run src/main.mojo", depends-on = ["setup"] }
-package = { cmd = "mkdir -p bin && magic run mojo package src/mo3d -o bin/mo3d.mojopkg && cp bin/mo3d.mojopkg test/mo3d/mo3d.mojopkg", depends-on = ["setup"], inputs=["src/**/*.mojo"], outputs = ["bin/mo3d.mojopkg", "test/mo3d/mo3d.mojopkg"] }
+start = { cmd = "mojo run src/main.mojo" }
+# package = { cmd = "mkdir -p bin && magic run mojo package src/mo3d -o bin/mo3d.mojopkg && cp bin/mo3d.mojopkg test/mo3d/mo3d.mojopkg", depends-on = ["setup"], inputs=["src/**/*.mojo"], outputs = ["bin/mo3d.mojopkg", "test/mo3d/mo3d.mojopkg"] }
 test = { cmd = "magic run mojo test ./test", depends-on = ["package"], inputs=["src/**/*.mojo", "test/**/*.mojo"] }
 build = { cmd = "mkdir -p bin && magic run mojo build src/main.mojo -o bin/mo3d", depends-on = ["setup", "build-setup"], inputs=["src/**/*.mojo"], outputs = ["bin/mo3d"] }
-built = { cmd = "bin/mo3d", depends-on = ["build"] }
-perf = { cmd = "perf record -F 99 --call-graph dwarf bin/mo3d", depends-on = ["build"]  }
+# built = { cmd = "bin/mo3d", depends-on = ["build"] }
+# perf = { cmd = "perf record -F 99 --call-graph dwarf bin/mo3d", depends-on = ["build"]  }
 
 [dependencies]
-max = ">=24.6.0.dev2024121016,<25"
-pillow = ">=10.4.0,<11"
-
-[target.linux-64.tasks]
-setup = { cmd="sudo apt update && sudo apt install -y llvm libsdl2-dev", inputs=["pixi.toml"] }
-build-setup = { cmd="sudo apt update && sudo apt install -y build-essential python3-pil", inputs=["pixi.toml"] }
-
-[target.osx-arm64.tasks]
-setup = { cmd="brew install llvm sdl2", inputs=["pixi.toml"] }
-build-setup = { cmd="echo 'Skipping build-setup on mac for now'", inputs=["pixi.toml"] }
-# build-setup = { cmd="brew update && brew install build-essential python3-pil", inputs=["pixi.toml"] }
+mojo = "<1.0.0" # includes `mojo-compiler`, lsp, debugger, formatter etc.
+max = "==26.1.0.dev2026011623"
+pillow = "*"
+sdl2 = "*"
+llvm = "*"
+cxx-compiler = "*"
+make = "*"

@@ -33,9 +33,9 @@ Key features aim to include an experimental ECS-based architecture for efficient
 ![Basic Architecture](./doc/mo3d-basic-architecture.svg)
 
 ## dev
-- install [`magic`](https://docs.modular.com/magic/#install-magic)
-- see available tasks with `magic run list`
-- main app `magic run start`
+- install [`pixi`](https://docs.modular.com/mojo/manual/install/#install) `curl -fsSL https://pixi.sh/install.sh | sh`
+- see available tasks with `pixi run`
+- main app `pixi run start`
 
 ## progress notes
 

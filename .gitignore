@@ -164,15 +164,7 @@ cython_debug/
 # pixi environments
 .pixi
 *.egg-info
-# magic environments
-.magic
 
 # Binary files
 bin/
 *.mojopkg
-
-# pixi environments
-.pixi
-*.egg-info
-# magic environments
-.magic

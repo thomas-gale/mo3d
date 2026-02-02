@@ -1,4 +1,5 @@
-from testing import assert_true, assert_false, assert_equal, assert_almost_equal
+from testing import assert_true, assert_false, assert_equal, assert_almost_equal, TestSuite
+from collections.string import String
 
 from mo3d.math.vec import Vec
 
@@ -90,7 +91,7 @@ fn test_unit() raises:
 
 fn test_str() raises:
     var v = Vec[DType.float32, 3](1.0, 2.0, 3.0)
-    assert_equal(str(v), "1.0, 2.0, 3.0")
+    assert_equal(String(v), "1.0, 2.0, 3.0")
 
 
 fn test_comparison() raises:
@@ -108,3 +109,6 @@ fn test_comparison() raises:
     assert_true(v3 > v2)
     assert_true(v4 > v3)
     assert_true(v4 >= v3)
+
+fn main() raises:
+    TestSuite.discover_tests[__functions_in_module()]().run()

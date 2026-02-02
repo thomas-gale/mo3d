@@ -24,7 +24,7 @@ struct HitRecord[T: DType, dim: Int](Copyable, Movable):
         self.mat = Material[Self.T, Self.dim](Lambertian[Self.T, Self.dim](
             Texture[Self.T, Self.dim](Solid[Self.T, Self.dim](Color4[Self.T](0.0)))
         ))
-        self.t = Scalar[Self.Self.T]()
+        self.t = Scalar[Self.T]()
         self.front_face = False
         self.hits = 0
 

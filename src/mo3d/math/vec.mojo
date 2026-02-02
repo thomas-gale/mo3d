@@ -8,22 +8,22 @@ from python import Python
 from python import PythonObject
 
 
-struct Vec[T: DType, size: Int](Stringable, Copyable, Movable, ImplicitlyCopyable):
+struct Vec[T: DType, size: Int](Stringable, Equatable, Copyable, Movable, ImplicitlyCopyable):
     var _data: InlineArray[Scalar[Self.T], Self.size]
 
     fn __init__(out self):
-        self._data = InlineArray[Scalar[Self.T], Self.size](0.0)
+        self._data = InlineArray[Scalar[Self.T], Self.size](fill=0.0)
 
-    fn __init__(out self, owned data: InlineArray[Scalar[Self.T], Self.size]):
+    fn __init__(out self, var data: InlineArray[Scalar[Self.T], Self.size]):
         self._data = data^
 
-    fn __init__(out self, owned *args: Scalar[Self.T]):
+    fn __init__(out self, var *args: Scalar[Self.T]):
         """
         If you pass in a single argument, it will be broadcasted to all elements.
         Else, if you pass in multiple elements they will be copied up to the Self.size of the vector.
         """
         # We don't know for sure that the user has passed in the right number of Scalars, so we'll just initialize the vector to 0 for safety.
-        self._data = InlineArray[Scalar[Self.T], Self.size](0.0)
+        self._data = InlineArray[Scalar[Self.T], Self.size](fill=0.0)
         if len(args) == 1:
             for i in range(Self.size):
                 self._data[i] = args[0]
@@ -34,10 +34,10 @@ struct Vec[T: DType, size: Int](Stringable, Copyable, Movable, ImplicitlyCopyabl
             self._data[i] = arg
             i += 1
 
-    fn __copyinit__(mut self, other: Self):
-        self._data = other._data
+    fn __copyinit__(out self, other: Self):
+        self._data = other._data.copy()
 
-    fn __moveinit__(mut self, owned other: Self):
+    fn __moveinit__(out self, deinit other: Self):
         self._data = other._data^
 
     fn clone(self) -> Self:
@@ -67,7 +67,7 @@ struct Vec[T: DType, size: Int](Stringable, Copyable, Movable, ImplicitlyCopyabl
         for i in range(Self.size):
             if abs(self._data[i]) > tol:
                 return False
-        return Self.True
+        return True
 
     @staticmethod
     fn cross_3(lhs: Self, rhs: Self) raises -> Self:
@@ -167,9 +167,9 @@ struct Vec[T: DType, size: Int](Stringable, Copyable, Movable, ImplicitlyCopyabl
         """Lexical comparison."""
 
         @parameter
-        for i in range(Self.Self.size):
+        for i in range(Self.size):
             if self._data[i] < rhs._data[i]:
-                return Self.True
+                return True
             elif self._data[i] > rhs._data[i]:
                 return False
         return False
@@ -178,9 +178,9 @@ struct Vec[T: DType, size: Int](Stringable, Copyable, Movable, ImplicitlyCopyabl
         """Lexical comparison."""
 
         @parameter
-        for i in range(Self.Self.size):
+        for i in range(Self.size):
             if self._data[i] <= rhs._data[i]:
-                return Self.True
+                return True
             elif self._data[i] > rhs._data[i]:
                 return False
         return False
@@ -189,21 +189,21 @@ struct Vec[T: DType, size: Int](Stringable, Copyable, Movable, ImplicitlyCopyabl
         for i in range(Self.size):
             if self._data[i] != rhs._data[i]:
                 return False
-        return Self.True
+        return True
 
     fn __ne__(self, rhs: Self) -> Bool:
         for i in range(Self.size):
             if self._data[i] != rhs._data[i]:
-                return Self.True
+                return True
         return False
 
     fn __gt__(self, rhs: Self) -> Bool:
         """Lexical comparison."""
 
         @parameter
-        for i in range(Self.Self.size):
+        for i in range(Self.size):
             if self._data[i] > rhs._data[i]:
-                return Self.True
+                return True
             elif self._data[i] < rhs._data[i]:
                 return False
         return False
@@ -212,9 +212,9 @@ struct Vec[T: DType, size: Int](Stringable, Copyable, Movable, ImplicitlyCopyabl
         """Lexical comparison."""
 
         @parameter
-        for i in range(Self.Self.size):
+        for i in range(Self.size):
             if self._data[i] >= rhs._data[i]:
-                return Self.True
+                return True
             elif self._data[i] < rhs._data[i]:
                 return False
         return False

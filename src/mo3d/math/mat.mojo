@@ -8,12 +8,12 @@ from python import Python
 from python import PythonObject
 
 
-struct Mat[T: DType, dim: Int](Copyable, Movable):
+struct Mat[T: DType, dim: Int](Stringable, Copyable, Movable):
     var _data: InlineArray[Scalar[Self.T], Self.dim * Self.dim]
 
     fn __init__(out self):
         self._data = InlineArray[Scalar[Self.T], Self.dim * Self.dim](
-            unsafe_uninitialized=Self.True
+            uninitialized=True
         )
         for i in range(Self.dim):
             for j in range(Self.dim):
@@ -21,11 +21,11 @@ struct Mat[T: DType, dim: Int](Copyable, Movable):
 
     fn __init__(out self, *args: Vec[Self.T, Self.dim]):
         # We don't know for sure that the user has passed in the right number of Vecs, so we'll just initialize the matrix to 0 for safety.
-        self._data = InlineArray[Scalar[Self.T], Self.dim * Self.dim](0.0)
+        self._data = InlineArray[Scalar[Self.T], Self.dim * Self.dim](fill=0.0)
         var i = 0
         for arg in args:
             for j in range(Self.dim):
-                self._data[i * Self.dim + j] = arg[][j]
+                self._data[i * Self.dim + j] = arg[j]
             i += 1
 
     @staticmethod
@@ -37,7 +37,7 @@ struct Mat[T: DType, dim: Int](Copyable, Movable):
                     result[i][j] = Scalar[Self.T](1)
                 else:
                     result[i][j] = Scalar[Self.T](0)
-        return result
+        return result.copy() # TODO - Check me, performance
 
     fn __getitem__(self, index: Int) -> Vec[Self.T, Self.dim]:
         var result = Vec[Self.T, Self.dim]()
@@ -52,7 +52,7 @@ struct Mat[T: DType, dim: Int](Copyable, Movable):
     fn __str__(self) -> String:
         var result = String("")
         for i in range(Self.dim):
-            result += str(self[i]) + "\n"
+            result += String(self[i]) + "\n"
         return result
 
     @staticmethod
@@ -60,57 +60,87 @@ struct Mat[T: DType, dim: Int](Copyable, Movable):
         matrix: Self, angle_rads: Scalar[Self.T], axis: Vec[Self.T, Self.dim]
     ) raises -> Self:
         """
-        Self.This just computes a 3D rotation.
+        This just computes a 3D rotation.
         """
         if Self.dim != 3:
             raise Error("Rotation is only defined for 3D matrices.")
 
-        c = cos(angle_rads)
-        s = sin(angle_rads)
-        var axis_norm = axis.unit()
-        var ux = axis_norm[0]
-        var uy = axis_norm[1]
-        var uz = axis_norm[2]
-
-        # Calculate rotation matrix components
-        var r11 = c + ux * ux * (1 - c)
-        var r12 = ux * uy * (1 - c) - uz * s
-        var r13 = ux * uz * (1 - c) + uy * s
-
-        var r21 = uy * ux * (1 - c) + uz * s
-        var r22 = c + uy * uy * (1 - c)
-        var r23 = uy * uz * (1 - c) - ux * s
-
-        var r31 = uz * ux * (1 - c) - uy * s
-        var r32 = uz * uy * (1 - c) + ux * s
-        var r33 = c + uz * uz * (1 - c)
-
-        var rotation_matrix = Mat[Self.T, Self.dim](
-            Vec[Self.T, Self.dim](r11, r12, r13),
-            Vec[Self.T, Self.dim](r21, r22, r23),
-            Vec[Self.T, Self.dim](r31, r32, r33),
-        )
-
-        return Mat[Self.T, Self.dim](
-            rotation_matrix * matrix[0],
-            rotation_matrix * matrix[1],
-            rotation_matrix * matrix[2],
-        )
-
-    fn __mul__(self, rhs: Vec[T, dim]) -> Vec[T, dim]:
-        var result = Vec[T, dim]()
         @parameter
-        for i in range(dim):
+        if Self.T == DType.float32:
+            # Use concrete Float32 type so compiler knows it's floating point
+            var angle_f32 = angle_rads.cast[DType.float32]()
+            var c = cos(angle_f32).cast[Self.T]()
+            var s = sin(angle_f32).cast[Self.T]()
+            var axis_norm = axis.unit()
+            var ux = axis_norm[0]
+            var uy = axis_norm[1]
+            var uz = axis_norm[2]
+            var r11 = c + ux * ux * (1 - c)
+            var r12 = ux * uy * (1 - c) - uz * s
+            var r13 = ux * uz * (1 - c) + uy * s
+            var r21 = uy * ux * (1 - c) + uz * s
+            var r22 = c + uy * uy * (1 - c)
+            var r23 = uy * uz * (1 - c) - ux * s
+            var r31 = uz * ux * (1 - c) - uy * s
+            var r32 = uz * uy * (1 - c) + ux * s
+            var r33 = c + uz * uz * (1 - c)
+            var rotation_matrix = Mat[Self.T, Self.dim](
+                Vec[Self.T, Self.dim](r11, r12, r13),
+                Vec[Self.T, Self.dim](r21, r22, r23),
+                Vec[Self.T, Self.dim](r31, r32, r33),
+            )
+            return Mat[Self.T, Self.dim](
+                rotation_matrix * matrix[0],
+                rotation_matrix * matrix[1],
+                rotation_matrix * matrix[2],
+            )
+        elif Self.T == DType.float64:
+            # Use concrete Float64 type so compiler knows it's floating point
+            var angle_f64 = angle_rads.cast[DType.float64]()
+            var c = cos(angle_f64).cast[Self.T]()
+            var s = sin(angle_f64).cast[Self.T]()
+            var axis_norm = axis.unit()
+            var ux = axis_norm[0]
+            var uy = axis_norm[1]
+            var uz = axis_norm[2]
+            var r11 = c + ux * ux * (1 - c)
+            var r12 = ux * uy * (1 - c) - uz * s
+            var r13 = ux * uz * (1 - c) + uy * s
+            var r21 = uy * ux * (1 - c) + uz * s
+            var r22 = c + uy * uy * (1 - c)
+            var r23 = uy * uz * (1 - c) - ux * s
+            var r31 = uz * ux * (1 - c) - uy * s
+            var r32 = uz * uy * (1 - c) + ux * s
+            var r33 = c + uz * uz * (1 - c)
+            var rotation_matrix = Mat[Self.T, Self.dim](
+                Vec[Self.T, Self.dim](r11, r12, r13),
+                Vec[Self.T, Self.dim](r21, r22, r23),
+                Vec[Self.T, Self.dim](r31, r32, r33),
+            )
+            return Mat[Self.T, Self.dim](
+                rotation_matrix * matrix[0],
+                rotation_matrix * matrix[1],
+                rotation_matrix * matrix[2],
+            )
+        else:
+            # This will fail at compile time for non-float types
+            constrained[False, "rotate_3 only supports float32 and float64"]()
+            return Self()  # unreachable
+
+    fn __mul__(self, rhs: Vec[Self.T, Self.dim]) -> Vec[Self.T, Self.dim]:
+        var result = Vec[Self.T, Self.dim]()
+        @parameter
+        for i in range(Self.dim):
             result[i] = self[i].dot(rhs)
         return result
 
-    fn mul_transpose(self, rhs: Vec[T, dim]) -> Vec[T, dim]:
-        var result = Vec[T, dim]()
+    fn mul_transpose(self, rhs: Vec[Self.T, Self.dim]) -> Vec[Self.T, Self.dim]:
+        var result = Vec[Self.T, Self.dim]()
         @parameter
-        for i in range(dim):
+        for i in range(Self.dim):
             @parameter
-            for j in range(dim):
-                result[i] += self._data[dim * j + i] * rhs[j]
+            for j in range(Self.dim):
+                result[i] += self._data[Self.dim * j + i] * rhs[j]
         return result
     
     fn _dump_py_json(self) raises -> PythonObject:
@@ -118,10 +148,10 @@ struct Mat[T: DType, dim: Int](Copyable, Movable):
         Python object representing the item to dump out to json
         """
         var py_rows = Python.list()
-        for i in range(dim):
+        for i in range(Self.dim):
             var py_row = Python.list()
-            for j in range(dim):
-                py_row.append(self._data[i * dim + j])
+            for j in range(Self.dim):
+                py_row.append(self._data[i * Self.dim + j])
             py_rows.append(py_row)
         return py_rows
 
@@ -130,11 +160,11 @@ struct Mat[T: DType, dim: Int](Copyable, Movable):
         """
         Load from python object representing the item dumped out to json
         """
-        var mat = Mat[T,dim]()
-        for i in range(dim):
+        var mat = Mat[Self.T, Self.dim]()
+        for i in range(Self.dim):
             var row = mat[i]
-            for j in range(dim):
-                mat._data[i * dim + j] = float(row[j]).cast[T]()
+            for j in range(Self.dim):
+                mat._data[i * Self.dim + j] = float(row[j]).cast[Self.T]()
         return mat
 
 

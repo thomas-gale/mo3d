@@ -88,7 +88,7 @@ struct Vec[T: DType, size: Int](Stringable, Equatable, Copyable, Movable, Implic
 
     @staticmethod
     fn random_in_unit_disk(mut rng : Rng) -> Self:
-        while Self.True:
+        while True:
             var p = Self.random(rng, -1, 1)
             p[2] = 0
             if p.length_squared() < 1:
@@ -96,7 +96,7 @@ struct Vec[T: DType, size: Int](Stringable, Equatable, Copyable, Movable, Implic
 
     @staticmethod
     fn random_in_unit_sphere(mut rng : Rng) -> Self:
-        while Self.True:
+        while True:
             var p = Self.random(rng, -1, 1)
             if p.length_squared() < 1:
                 return p
@@ -127,7 +127,7 @@ struct Vec[T: DType, size: Int](Stringable, Equatable, Copyable, Movable, Implic
 
     @staticmethod
     fn random(mut rng : Rng) -> Self:
-        var data = InlineArray[Scalar[Self.T], Self.size](unsafe_uninitialized=Self.True)
+        var data = InlineArray[Scalar[Self.T], Self.size](unsafe_uninitialized=True)
         for i in range(Self.size):
             @parameter
             if Self.T == Self.T.float64:
@@ -139,7 +139,7 @@ struct Vec[T: DType, size: Int](Stringable, Equatable, Copyable, Movable, Implic
     @staticmethod
     fn random(mut rng : Rng, min: Scalar[Self.T], max: Scalar[Self.T]) -> Self:
         var delta = max - min
-        var data = InlineArray[Scalar[Self.T], Self.size](unsafe_uninitialized=Self.True)
+        var data = InlineArray[Scalar[Self.T], Self.size](unsafe_uninitialized=True)
         for i in range(Self.size):
             @parameter
             if Self.T == Self.T.float64:

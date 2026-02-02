@@ -1,4 +1,6 @@
-from testing import assert_true, assert_false, assert_equal, assert_almost_equal
+from collections.string import String
+from testing import assert_true, assert_false, assert_equal, assert_almost_equal, TestSuite
+
 
 from mo3d.math.vec import Vec
 from mo3d.math.mat import Mat
@@ -26,7 +28,7 @@ fn test_create_eye_mat_size_3_float32() raises:
 fn test_str_eye_mat_size_3_float32() raises:
     var m = Mat[DType.float32, 3].eye()
 
-    assert_equal(str(m), "1.0, 0.0, 0.0\n0.0, 1.0, 0.0\n0.0, 0.0, 1.0\n")
+    assert_equal(String(m), "1.0, 0.0, 0.0\n0.0, 1.0, 0.0\n0.0, 0.0, 1.0\n")
 
 
 fn test_set_vec_mat_size_3_float32() raises:
@@ -59,3 +61,6 @@ fn test_rotate_mat_size_3_float32() raises:
     assert_almost_equal(rotated[2][0], Float32(0.0), atol=1e-4)
     assert_almost_equal(rotated[2][1], Float32(0.0), atol=1e-4)
     assert_almost_equal(rotated[2][2], Float32(1.0), atol=1e-4)
+
+fn main() raises:
+    TestSuite.discover_tests[__functions_in_module()]().run()

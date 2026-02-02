@@ -7,7 +7,7 @@ from mo3d.geometry.sphere import Sphere
 from mo3d.ecs.component_store import ComponentStore
 from mo3d.ecs.component import ComponentID, ComponentTypeID, ComponentType
 
-alias f32 = DType.float32
+comptime f32 = DType.float32
 
 
 fn test_create_empty_component_store() raises:

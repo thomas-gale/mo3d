@@ -14,9 +14,8 @@ from mo3d.random.rng import Rng
 from python import Python
 from python import PythonObject
 
-@value
-struct Material[T: DType, dim: Int]:
-    alias Variant = Variant[
+struct Material[T: DType, dim: Int](Copyable, Movable):
+    comptime Variant = Variant[
         Lambertian[T, dim], Metal[T, dim], Dielectric[T, dim], DiffuseLight[T, dim]
     ]
     var _mat: Self.Variant
@@ -26,8 +25,8 @@ struct Material[T: DType, dim: Int]:
         mut rng : Rng,
         r_in: Ray[T, dim],
         rec: HitRecord[T, dim],
-        inout attenuation: Color4[T],
-        inout scattered: Ray[T, dim],
+        mut attenuation: Color4[T],
+        mut scattered: Ray[T, dim],
     ) raises -> Bool:
         # TODO perform the runtime variant match
         if self._mat.isa[Lambertian[T, dim]]():

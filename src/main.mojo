@@ -1,13 +1,9 @@
-from algorithm import parallelize, vectorize
 from complex import ComplexSIMD, ComplexFloat64
 from math import iota, inf
 from memory import UnsafePointer, bitcast
 from pathlib import Path
-from sys import simdwidthof
 from testing import assert_equal
 from time import sleep, perf_counter
-
-from max.tensor import Tensor
 
 from mo3d.math.interval import Interval
 from mo3d.math.vec import Vec
@@ -36,18 +32,18 @@ fn main() raises:
     print("-- Hello, mo3d! --")
 
     # Settings
-    alias float_type = DType.float32
+    comptime float_type = DType.float32
 
-    alias max_fps = 60
-    alias fov = 20
-    alias aperature = 0.6
-    alias width = 800
-    alias height = 450
-    alias channels = 4
-    alias max_depth = 8
-    alias max_samples = 1024 * 1024
-    alias background_light = Color4[float_type](0.5, 0.7, 1.0, 1.0)
-    alias background_dark = Color4[float_type](0.03, 0.06, 0.08, 1.0)
+    comptime max_fps = 60
+    comptime fov = 20
+    comptime aperature = 0.6
+    comptime width = 800
+    comptime height = 450
+    comptime channels = 4
+    comptime max_depth = 8
+    comptime max_samples = 1024 * 1024
+    comptime background_light = Color4[float_type](0.5, 0.7, 1.0, 1.0)
+    comptime background_dark = Color4[float_type](0.03, 0.06, 0.08, 1.0)
 
     # ECS
     var store = ComponentStore[float_type, 3]()
@@ -109,12 +105,12 @@ fn main() raises:
     # Print stats
     print(
         "Last compute time: ",
-        str(last_compute_time * 10**3),
+        String(last_compute_time * 10**3),
         " ms",
     )
     print(
         "Last redraw time: ",
-        str(last_redraw_time * 10**3),
+        String(last_redraw_time * 10**3),
         " ms",
     )
     print("-- Goodbye, mo3d! --")

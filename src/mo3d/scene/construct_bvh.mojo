@@ -18,8 +18,8 @@ from mo3d.math.point import Point
 from mo3d.math.mat import RotMat
 from mo3d.math.interval import Interval
 
-@value 
-struct HittableEntity[T : DType, dim : Int](Hittable):
+@fieldwise_init
+struct HittableEntity[T : DType, dim : Int](Hittable, Copyable, Movable):
     """
     The needed data from hittable entities to trace them.
     """
@@ -48,10 +48,10 @@ struct HittableEntity[T : DType, dim : Int](Hittable):
             rec.hits += 1
         return hit
 
-@value
-struct BVHSplit[T: DType, dim: Int, H : Hittable](Hittable):
-    var left : ArcPointer[BVHNode[T, dim, H]]
-    var right : ArcPointer[BVHNode[T, dim, H]]
+@fieldwise_init
+struct BVHSplit[T: DType, dim: Int, H : Hittable](Hittable, Copyable, Movable):
+    var left : ArcPointer[BVHNode[Self.T, Self.dim, Self.H]]
+    var right : ArcPointer[BVHNode[Self.T, Self.dim, Self.H]]
 
     fn aabb[T : DType, dim : Int](self) -> AABB[T, dim]:
         var box = self.left[].aabb[Self.T, Self.dim]()
@@ -72,23 +72,23 @@ struct BVHSplit[T: DType, dim: Int, H : Hittable](Hittable):
         )
         return hit_left or hit_right
 
-@value
-struct BVHNode[T: DType, dim: Int, H : Hittable](Hittable):
-    alias Variant = Variant[
+@fieldwise_init
+struct BVHNode[T: DType, dim: Int, H : Hittable](Hittable, Copyable, Movable):
+    comptime Variant = Variant[
         BVHSplit[T, dim, H], 
         H]
     var _wrapped: Self.Variant
     var box : AABB[T, dim]
 
     fn count_hittables(self) -> Int:
-        if self._wrapped.isa[BVHSplit[T, dim, H]]():
-            return self._wrapped[BVHSplit[T, dim, H]].left[].count_hittables() + self._wrapped[BVHSplit[T, dim, H]].right[].count_hittables()
+        if self._wrapped.isa[BVHSplit[Self.T, Self.dim, Self.H]]():
+            return self._wrapped[BVHSplit[Self.T, Self.dim, Self.H]].left[].count_hittables() + self._wrapped[BVHSplit[Self.T, Self.dim, Self.H]].right[].count_hittables()
         else:
             return 1
 
     fn count_nodes(self) -> Int:
-        if self._wrapped.isa[BVHSplit[T, dim, H]]():
-            return 1 + self._wrapped[BVHSplit[T, dim, H]].left[].count_hittables() +  self._wrapped[BVHSplit[T, dim, H]].right[].count_hittables()
+        if self._wrapped.isa[BVHSplit[Self.T, Self.dim, Self.H]]():
+            return 1 + self._wrapped[BVHSplit[Self.T, Self.dim, Self.H]].left[].count_hittables() +  self._wrapped[BVHSplit[Self.T, Self.dim, Self.H]].right[].count_hittables()
         else:
             return 0
 
@@ -105,10 +105,10 @@ struct BVHNode[T: DType, dim: Int, H : Hittable](Hittable):
         var ray_t_int = rebind[Interval[Self.T]](ray_t)
         if not self.box.any_hit(r_int, ray_t_int):
             return False
-        if self._wrapped.isa[BVHSplit[T, dim, H]]():
-            return self._wrapped[BVHSplit[T, dim, H]].hit(r, ray_t, rec)
+        if self._wrapped.isa[BVHSplit[Self.T, Self.dim, Self.H]]():
+            return self._wrapped[BVHSplit[Self.T, Self.dim, Self.H]].hit(r, ray_t, rec)
         else:
-            return self._wrapped[H].hit(r, ray_t, rec)
+            return self._wrapped[Self.H].hit(r, ray_t, rec)
 
 
 
@@ -168,7 +168,7 @@ fn construct_bvh_list[
     """
     Construct a BVH from the given list of hittable entities.
     """
-    var indices = List[Int](len(hittables))
+    var indices = List[Int](capacity=len(hittables))
     var box_cache = List[AABB[T, dim]]()
     for i in range(len(hittables)):
         indices.append(i)

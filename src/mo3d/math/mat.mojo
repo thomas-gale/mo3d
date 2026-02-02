@@ -8,62 +8,61 @@ from python import Python
 from python import PythonObject
 
 
-@value
-struct Mat[T: DType, dim: Int]:
-    var _data: InlineArray[Scalar[T], dim * dim]
+struct Mat[T: DType, dim: Int](Copyable, Movable):
+    var _data: InlineArray[Scalar[Self.T], Self.dim * Self.dim]
 
-    fn __init__(inout self):
-        self._data = InlineArray[Scalar[T], dim * dim](
-            unsafe_uninitialized=True
+    fn __init__(out self):
+        self._data = InlineArray[Scalar[Self.T], Self.dim * Self.dim](
+            unsafe_uninitialized=Self.True
         )
-        for i in range(dim):
-            for j in range(dim):
-                self._data[i * dim + j] = Scalar[T](0)
+        for i in range(Self.dim):
+            for j in range(Self.dim):
+                self._data[i * Self.dim + j] = Scalar[Self.T](0)
 
-    fn __init__(inout self, *args: Vec[T, dim]):
+    fn __init__(out self, *args: Vec[Self.T, Self.dim]):
         # We don't know for sure that the user has passed in the right number of Vecs, so we'll just initialize the matrix to 0 for safety.
-        self._data = InlineArray[Scalar[T], dim * dim](0.0)
+        self._data = InlineArray[Scalar[Self.T], Self.dim * Self.dim](0.0)
         var i = 0
         for arg in args:
-            for j in range(dim):
-                self._data[i * dim + j] = arg[][j]
+            for j in range(Self.dim):
+                self._data[i * Self.dim + j] = arg[][j]
             i += 1
 
     @staticmethod
     fn eye() -> Self:
         var result = Self()
-        for i in range(dim):
-            for j in range(dim):
+        for i in range(Self.dim):
+            for j in range(Self.dim):
                 if i == j:
-                    result[i][j] = Scalar[T](1)
+                    result[i][j] = Scalar[Self.T](1)
                 else:
-                    result[i][j] = Scalar[T](0)
+                    result[i][j] = Scalar[Self.T](0)
         return result
 
-    fn __getitem__(self, index: Int) -> Vec[T, dim]:
-        var result = Vec[T, dim]()
-        for i in range(dim):
-            result[i] = self._data[dim * index + i]
+    fn __getitem__(self, index: Int) -> Vec[Self.T, Self.dim]:
+        var result = Vec[Self.T, Self.dim]()
+        for i in range(Self.dim):
+            result[i] = self._data[Self.dim * index + i]
         return result
 
-    fn __setitem__(inout self, index: Int, value: Vec[T, dim]):
-        for i in range(dim):
-            self._data[dim * index + i] = value[i]
+    fn __setitem__(mut self, index: Int, value: Vec[Self.T, Self.dim]):
+        for i in range(Self.dim):
+            self._data[Self.dim * index + i] = value[i]
 
     fn __str__(self) -> String:
         var result = String("")
-        for i in range(dim):
+        for i in range(Self.dim):
             result += str(self[i]) + "\n"
         return result
 
     @staticmethod
     fn rotate_3(
-        matrix: Self, angle_rads: Scalar[T], axis: Vec[T, dim]
+        matrix: Self, angle_rads: Scalar[Self.T], axis: Vec[Self.T, Self.dim]
     ) raises -> Self:
         """
-        This just computes a 3D rotation.
+        Self.This just computes a 3D rotation.
         """
-        if dim != 3:
+        if Self.dim != 3:
             raise Error("Rotation is only defined for 3D matrices.")
 
         c = cos(angle_rads)
@@ -86,13 +85,13 @@ struct Mat[T: DType, dim: Int]:
         var r32 = uz * uy * (1 - c) + ux * s
         var r33 = c + uz * uz * (1 - c)
 
-        var rotation_matrix = Mat[T, dim](
-            Vec[T, dim](r11, r12, r13),
-            Vec[T, dim](r21, r22, r23),
-            Vec[T, dim](r31, r32, r33),
+        var rotation_matrix = Mat[Self.T, Self.dim](
+            Vec[Self.T, Self.dim](r11, r12, r13),
+            Vec[Self.T, Self.dim](r21, r22, r23),
+            Vec[Self.T, Self.dim](r31, r32, r33),
         )
 
-        return Mat[T, dim](
+        return Mat[Self.T, Self.dim](
             rotation_matrix * matrix[0],
             rotation_matrix * matrix[1],
             rotation_matrix * matrix[2],
@@ -141,4 +140,4 @@ struct Mat[T: DType, dim: Int]:
 
 # A matrix that we are asserting is a rotation matrix 
 # (special orthogonal)
-alias RotMat = Mat
+comptime RotMat = Mat

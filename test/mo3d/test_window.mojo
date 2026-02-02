@@ -19,7 +19,7 @@ fn test_redraw_sdl2_window() raises:
         return
 
     var window = SDL2Window.create("test_redraw_window", 128, 128)
-    var t = UnsafePointer[Scalar[DType.float32]].alloc(128*128*4)
+    var t = UnsafePointer[mut=True, Scalar[DType.float32]].alloc(128*128*4)
     window.redraw(t, 4)
     assert_equal(window._height, 128)
     assert_equal(window._width, 128)

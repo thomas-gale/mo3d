@@ -1,29 +1,22 @@
 # Attribution: https://github.com/msteele/mojo-sdl/tree/main
-# WIP: Upgrading for mojo nightly 2024.8.1517 (ee6ccd9a)
 
-from memory import UnsafePointer
+from memory import UnsafePointer, alloc
+from sys.ffi import OwnedDLHandle, DLHandle
 from sys import ffi, info, simdwidthof
 
-
-fn get_sdl_lib_path() -> StringLiteral:
-    if info.os_is_linux():
-        var lib_path = "/usr/lib/x86_64-linux-gnu/libSDL2.so"
-        try:
-            with open("/etc/os-release", "r") as f:
-                var release = f.read()
-                if release.find("Ubuntu") < 0:
-                    lib_path = "/usr/lib64/libSDL2.so"
-        except:
-            print("Can't detect Linux version")
-        return lib_path
-    if info.os_is_macos():
-        return "/opt/homebrew/lib/libSDL2.dylib"
-    return ""
+comptime CPtr[T: AnyType] = UnsafePointer[T, origin=MutExternalOrigin]
+comptime CPtrRO[T: AnyType] = UnsafePointer[T, origin=ImmutAnyOrigin]
 
 
-alias SDL_PIXELTYPE_PACKED32 = 6
-alias SDL_PACKEDORDER_RGBA = 4
-alias SDL_PACKEDLAYOUT_8888 = 6
+from os import getenv
+from python import Python
+
+fn get_sdl_lib_path() -> String:
+    return getenv("CONDA_PREFIX") + "/lib/libSDL2.so"
+
+comptime SDL_PIXELTYPE_PACKED32 = 6
+comptime SDL_PACKEDORDER_RGBA = 4
+comptime SDL_PACKEDLAYOUT_8888 = 6
 
 
 fn SDL_DEFINE_PIXELFORMAT(
@@ -39,22 +32,21 @@ fn SDL_DEFINE_PIXELFORMAT(
     )
 
 
-alias SDL_PIXELFORMAT_RGBA8888 = SDL_DEFINE_PIXELFORMAT(
+comptime SDL_PIXELFORMAT_RGBA8888 = SDL_DEFINE_PIXELFORMAT(
     SDL_PIXELTYPE_PACKED32, SDL_PACKEDORDER_RGBA, SDL_PACKEDLAYOUT_8888, 32, 4
 )
 
-alias SDL_TEXTUREACCESS_STREAMING = 1
-alias SDL_TEXTUREACCESS_TARGET = 2
+comptime SDL_TEXTUREACCESS_STREAMING = 1
+comptime SDL_TEXTUREACCESS_TARGET = 2
 
-alias SDL_INIT_VIDEO = 0x00000020
+comptime SDL_INIT_VIDEO = 0x00000020
 
 
-@register_passable("trivial")
 struct SDL_Window:
     pass
 
 
-@register_passable("trivial")
+
 struct SDL_Rect:
     var x: Int32
     var y: Int32
@@ -62,64 +54,63 @@ struct SDL_Rect:
     var h: Int32
 
 
-@register_passable("trivial")
+
 struct SDL_PixelFormat:
     pass
 
 
-@register_passable("trivial")
+
 struct SDL_Renderer:
     pass
 
 
-@register_passable("trivial")
+
 struct SDL_Texture:
     pass
 
 
-@register_passable("trivial")
+
 struct SDL_Surface:
     var flags: UInt32
-    var format: UnsafePointer[SDL_PixelFormat]
+    var format: CPtr[SDL_PixelFormat]
     var w: Int32
     var h: Int32
     var pitch: Int32
-    var pixels: UnsafePointer[UInt32]
-    var userdata: UnsafePointer[Int8]
+    var pixels: CPtr[UInt32]
+    var userdata: CPtr[Int8]
     var locked: Int32
-    var list_blitmap: UnsafePointer[Int8]
+    var list_blitmap: CPtr[Int8]
     var clip_rect: SDL_Rect
-    var map: UnsafePointer[Int8]
+    var map: CPtr[Int8]
     var refcount: Int32
 
 
-alias SDL_QUIT = 0x100
+comptime SDL_QUIT = 0x100
 
-alias SDL_KEYDOWN = 0x300
-alias SDL_KEYUP = 0x301
+comptime SDL_KEYDOWN = 0x300
+comptime SDL_KEYUP = 0x301
 
-alias SDL_MOUSEMOTION = 0x400
-alias SDL_MOUSEBUTTONDOWN = 0x401
-alias SDL_MOUSEBUTTONUP = 0x402
-alias SDL_MOUSEWHEEL = 0x403
+comptime SDL_MOUSEMOTION = 0x400
+comptime SDL_MOUSEBUTTONDOWN = 0x401
+comptime SDL_MOUSEBUTTONUP = 0x402
+comptime SDL_MOUSEWHEEL = 0x403
 
 
-@register_passable("trivial")
+
 struct Keysym:
     var scancode: Int32
     var keycode: Int32
     var mod: UInt16
     var unused: UInt32
 
-    fn __init__(inout self):
+    fn __init__(mut self):
         self.scancode = 0
         self.keycode = 0
         self.mod = 0
         self.unused = 0
 
 
-@value
-@register_passable("trivial")
+
 struct MouseMotionEvent:
     var type: UInt32
     var timestamp: UInt32
@@ -132,7 +123,7 @@ struct MouseMotionEvent:
     var yrel: Int32
 
 
-@register_passable("trivial")
+
 struct MouseButtonEvent:
     var type: UInt32
     var timestamp: UInt32
@@ -146,7 +137,7 @@ struct MouseButtonEvent:
     var y: Int32
 
 
-@register_passable("trivial")
+
 struct MouseWheelEvent:
     var type: UInt32
     var timestamp: UInt32
@@ -161,7 +152,7 @@ struct MouseWheelEvent:
     var mouseY: Int32
 
 
-@register_passable("trivial")
+
 struct Keyevent:
     var type: UInt32
     var timestamp: UInt32
@@ -172,7 +163,7 @@ struct Keyevent:
     var padding3: UInt8
     var keysym: Keysym
 
-    def __init__(inout self):
+    def __init__(mut self):
         self.type = 0
         self.timestamp = 0
         self.windowID = 0
@@ -183,127 +174,130 @@ struct Keyevent:
         self.keysym = Keysym()
 
 
-@register_passable("trivial")
+
 struct Event:
     var type: UInt32
     var _padding: SIMD[DType.uint8, 16]
     var _padding2: Int64
     var _padding3: Int64
 
-    fn __init__(inout self):
+    fn __init__(mut self):
         self.type = 0
         self._padding = 0
         self._padding2 = 0
         self._padding3 = 0
 
-    def as_keyboard(inout self) -> UnsafePointer[Keyevent]:
+    def as_keyboard(mut self) -> CPtr[Keyevent]:
         return UnsafePointer.address_of(self).bitcast[Keyevent]()
 
-    def as_mousemotion(inout self) -> UnsafePointer[MouseMotionEvent]:
+    def as_mousemotion(mut self) -> CPtr[MouseMotionEvent]:
         return UnsafePointer.address_of(self).bitcast[MouseMotionEvent]()
 
-    def as_mousebutton(inout self) -> UnsafePointer[MouseButtonEvent]:
+    def as_mousebutton(mut self) -> CPtr[MouseButtonEvent]:
         return UnsafePointer.address_of(self).bitcast[MouseButtonEvent]()
 
-    def as_mousewheel(inout self) -> UnsafePointer[MouseWheelEvent]:
+    def as_mousewheel(mut self) -> CPtr[MouseWheelEvent]:
         return UnsafePointer.address_of(self).bitcast[MouseWheelEvent]()
 
 
 # SDL.h
-alias c_SDL_Init = fn (w: Int32) -> Int32
-alias c_SDL_Quit = fn () -> None
+comptime c_SDL_Init = fn (w: Int32) -> Int32
+comptime c_SDL_Quit = fn () -> None
 
+# SDL_stdinc.h
+# SDL_error.h
 # SDL_video.h
-alias c_SDL_CreateWindow = fn (
-    UnsafePointer[UInt8], Int32, Int32, Int32, Int32, Int32
-) -> UnsafePointer[SDL_Window]
-alias c_SDL_DestroyWindow = fn (UnsafePointer[SDL_Window]) -> None
-alias c_SDL_GetWindowSurface = fn (s: UnsafePointer[Int8]) -> UnsafePointer[
+comptime c_SDL_CreateWindow = fn (
+    CPtrRO[UInt8], Int32, Int32, Int32, Int32, Int32
+) -> CPtr[SDL_Window]
+comptime c_SDL_DestroyWindow = fn (CPtr[SDL_Window]) -> None
+comptime c_SDL_GetWindowSurface = fn (s: CPtr[SDL_Window]) -> CPtr[
     SDL_Surface
 ]
-alias c_SDL_UpdateWindowSurface = fn (s: UnsafePointer[Int8]) -> Int32
+comptime c_SDL_UpdateWindowSurface = fn (s: CPtr[SDL_Window]) -> Int32
 
 # SDL_pixels.h
-alias c_SDL_MapRGB = fn (Int32, Int32, Int32, Int32) -> UInt32
+comptime c_SDL_MapRGB = fn (Int32, Int32, Int32, Int32) -> UInt32
 
 # SDL_timer.h
-alias c_SDL_Delay = fn (Int32) -> UInt32
+comptime c_SDL_Delay = fn (Int32) -> UInt32
 
 # SDL_event.h
-alias c_SDL_PollEvent = fn (UnsafePointer[Event]) -> Int32
+comptime c_SDL_PollEvent = fn (CPtr[Event]) -> Int32
 
 # SDL_render.h
-alias c_SDL_CreateRenderer = fn (
-    UnsafePointer[SDL_Window], Int32, UInt32
-) -> UnsafePointer[SDL_Renderer]
-alias c_SDL_DestroyRenderer = fn (UnsafePointer[SDL_Renderer]) -> None
+comptime c_SDL_CreateRenderer = fn (
+    CPtr[SDL_Window], Int32, UInt32
+) -> CPtr[SDL_Renderer]
+comptime c_SDL_DestroyRenderer = fn (CPtr[SDL_Renderer]) -> None
 
-alias c_SDL_CreateWindowAndRenderer = fn (
+comptime c_SDL_CreateWindowAndRenderer = fn (
     Int32,
     Int32,
     UInt32,
-    UnsafePointer[UnsafePointer[Int8]],
-    UnsafePointer[UnsafePointer[SDL_Renderer]],
+    CPtr[CPtr[Int8]],
+    CPtr[CPtr[SDL_Renderer]],
 ) -> Int32
-alias c_SDL_RenderDrawPoint = fn (
-    UnsafePointer[SDL_Renderer], Int32, Int32
+comptime c_SDL_RenderDrawPoint = fn (
+    CPtr[SDL_Renderer], Int32, Int32
 ) -> Int32
-alias c_SDL_RenderDrawRect = fn (
-    r: UnsafePointer[SDL_Renderer], rect: UnsafePointer[SDL_Rect]
+comptime c_SDL_RenderDrawRect = fn (
+    r: CPtr[SDL_Renderer], rect: CPtr[SDL_Rect]
 ) -> Int32
-alias c_SDL_RenderPresent = fn (s: UnsafePointer[SDL_Renderer]) -> Int32
-alias c_SDL_RenderClear = fn (s: UnsafePointer[SDL_Renderer]) -> Int32
-alias c_SDL_SetRenderDrawColor = fn (
-    UnsafePointer[SDL_Renderer], UInt8, UInt8, UInt8, UInt8
+comptime c_SDL_RenderPresent = fn (s: CPtr[SDL_Renderer]) -> Int32
+comptime c_SDL_RenderClear = fn (s: CPtr[SDL_Renderer]) -> Int32
+comptime c_SDL_SetRenderDrawColor = fn (
+    CPtr[SDL_Renderer], UInt8, UInt8, UInt8, UInt8
 ) -> Int32
-alias SDL_BlendMode = Int
-alias c_SDL_SetRenderDrawBlendMode = fn (
-    UnsafePointer[SDL_Renderer], SDL_BlendMode
+comptime SDL_BlendMode = Int
+comptime c_SDL_SetRenderDrawBlendMode = fn (
+    CPtr[SDL_Renderer], SDL_BlendMode
 ) -> Int32
-alias c_SDL_SetRenderTarget = fn (
-    r: UnsafePointer[SDL_Renderer],
-    # t: UnsafePointer[SDL_Texture]) -> Int32
+comptime c_SDL_SetRenderTarget = fn (
+    r: CPtr[SDL_Renderer],
+    # t: CPtr[SDL_Texture]) -> Int32
     t: Int64,
 ) -> Int32
 
-alias c_SDL_RenderCopy = fn (
-    r: UnsafePointer[SDL_Renderer],
-    t: UnsafePointer[SDL_Texture],
+comptime c_SDL_RenderCopy = fn (
+    r: CPtr[SDL_Renderer],
+    t: CPtr[SDL_Texture],
     s: Int64,
     d: Int64,
 ) -> Int32
 
 # SDL_surface.h
-alias c_SDL_FillRect = fn (UnsafePointer[SDL_Surface], Int64, UInt32) -> Int32
+comptime c_SDL_FillRect = fn (CPtr[SDL_Surface], Int64, UInt32) -> Int32
 
 
 # texture
-alias c_SDL_CreateTexture = fn (
-    UnsafePointer[SDL_Renderer], UInt32, Int32, Int32, Int32
-) -> UnsafePointer[SDL_Texture]
-alias c_SDL_DestroyTexture = fn (UnsafePointer[SDL_Texture]) -> None
-alias c_SDL_LockTexture = fn (
-    UnsafePointer[SDL_Texture],
-    UnsafePointer[SDL_Rect],
-    inout UnsafePointer[
+comptime c_SDL_CreateTexture = fn (
+    CPtr[SDL_Renderer], UInt32, Int32, Int32, Int32
+) -> CPtr[SDL_Texture]
+comptime c_SDL_DestroyTexture = fn (CPtr[SDL_Texture]) -> None
+comptime c_SDL_LockTexture = fn (
+    CPtr[SDL_Texture],
+    CPtr[SDL_Rect],
+    mut CPtr[
         SIMD[DType.uint8, 1]
-    ],  # Pixel data: We can't increase this from 1 as we don't know if SDL will guarantee that the bytes are aligned
-    inout UnsafePointer[
+    ],  # Pixel data
+    mut CPtr[
         Int32
-    ],  # Pitch (this value doesn't seem to be working - returning ptr to 0x400 which is not valid)
+    ],  # Pitch
 ) -> Int32
-alias c_SDL_UnlockTexture = fn (UnsafePointer[SDL_Texture]) -> None
+comptime c_SDL_UnlockTexture = fn (CPtr[SDL_Texture]) -> None
 
 
-alias SDL_WINDOWPOS_UNDEFINED = 0x1FFF0000
-alias SDL_WINDOWPOS_CENTERED = 0x2FFF0000
-alias SDL_WINDOW_SHOWN = 0x00000004
+comptime SDL_WINDOWPOS_UNDEFINED = 0x1FFF0000
+comptime SDL_WINDOWPOS_CENTERED = 0x2FFF0000
+comptime SDL_WINDOW_SHOWN = 0x00000004
 
 # SDL_error.h
-alias c_SDL_GetError = fn () -> UnsafePointer[UInt8]
+comptime c_SDL_GetError = fn () -> CPtr[UInt8]
 
 
 struct SDL:
+    var _handle: OwnedDLHandle
     var Init: c_SDL_Init
     var Quit: c_SDL_Quit
 
@@ -336,78 +330,78 @@ struct SDL:
 
     var GetError: c_SDL_GetError
 
-    fn __init__(inout self):
+    fn __init__(out self) raises:
         var lib_path = get_sdl_lib_path()
-        var SDL = ffi.DLHandle(lib_path)
+        self._handle = OwnedDLHandle(lib_path)
 
-        self.Init = SDL.get_function[c_SDL_Init]("SDL_Init")
-        self.Quit = SDL.get_function[c_SDL_Quit]("SDL_Quit")
+        self.Init = self._handle.get_function[c_SDL_Init]("SDL_Init")
+        self.Quit = self._handle.get_function[c_SDL_Quit]("SDL_Quit")
 
-        self.CreateWindow = SDL.get_function[c_SDL_CreateWindow](
+        self.CreateWindow = self._handle.get_function[c_SDL_CreateWindow](
             "SDL_CreateWindow"
         )
-        self.DestroyWindow = SDL.get_function[c_SDL_DestroyWindow](
+        self.DestroyWindow = self._handle.get_function[c_SDL_DestroyWindow](
             "SDL_DestroyWindow"
         )
 
-        self.GetWindowSurface = SDL.get_function[c_SDL_GetWindowSurface](
+        self.GetWindowSurface = self._handle.get_function[c_SDL_GetWindowSurface](
             "SDL_GetWindowSurface"
         )
-        self.UpdateWindowSurface = SDL.get_function[c_SDL_UpdateWindowSurface](
+        self.UpdateWindowSurface = self._handle.get_function[c_SDL_UpdateWindowSurface](
             "SDL_UpdateWindowSurface"
         )
 
-        self.CreateRenderer = SDL.get_function[c_SDL_CreateRenderer](
+        self.CreateRenderer = self._handle.get_function[c_SDL_CreateRenderer](
             "SDL_CreateRenderer"
         )
-        self.DestroyRenderer = SDL.get_function[c_SDL_DestroyRenderer](
+        self.DestroyRenderer = self._handle.get_function[c_SDL_DestroyRenderer](
             "SDL_DestroyRenderer"
         )
-        self.CreateWindowAndRenderer = SDL.get_function[
+        self.CreateWindowAndRenderer = self._handle.get_function[
             c_SDL_CreateWindowAndRenderer
         ]("SDL_CreateWindowAndRenderer")
-        self.RenderDrawPoint = SDL.get_function[c_SDL_RenderDrawPoint](
+        self.RenderDrawPoint = self._handle.get_function[c_SDL_RenderDrawPoint](
             "SDL_RenderDrawPoint"
         )
-        self.RenderDrawRect = SDL.get_function[c_SDL_RenderDrawRect](
+        self.RenderDrawRect = self._handle.get_function[c_SDL_RenderDrawRect](
             "SDL_RenderDrawRect"
         )
-        self.SetRenderDrawColor = SDL.get_function[c_SDL_SetRenderDrawColor](
+        self.SetRenderDrawColor = self._handle.get_function[c_SDL_SetRenderDrawColor](
             "SDL_SetRenderDrawColor"
         )
-        self.RenderPresent = SDL.get_function[c_SDL_RenderPresent](
+        self.RenderPresent = self._handle.get_function[c_SDL_RenderPresent](
             "SDL_RenderPresent"
         )
-        self.RenderClear = SDL.get_function[c_SDL_RenderClear](
+        self.RenderClear = self._handle.get_function[c_SDL_RenderClear](
             "SDL_RenderClear"
         )
-        self.SetRenderDrawBlendMode = SDL.get_function[
+        self.SetRenderDrawBlendMode = self._handle.get_function[
             c_SDL_SetRenderDrawBlendMode
         ]("SDL_SetRenderDrawBlendMode")
-        self.SetRenderTarget = SDL.get_function[c_SDL_SetRenderTarget](
+        self.SetRenderTarget = self._handle.get_function[c_SDL_SetRenderTarget](
             "SDL_SetRenderTarget"
         )
-        self.RenderCopy = SDL.get_function[c_SDL_RenderCopy]("SDL_RenderCopy")
+        self.RenderCopy = self._handle.get_function[c_SDL_RenderCopy]("SDL_RenderCopy")
 
-        self.CreateTexture = SDL.get_function[c_SDL_CreateTexture](
+        self.CreateTexture = self._handle.get_function[c_SDL_CreateTexture](
             "SDL_CreateTexture"
         )
-        self.DestroyTexture = SDL.get_function[c_SDL_DestroyTexture](
+        self.DestroyTexture = self._handle.get_function[c_SDL_DestroyTexture](
             "SDL_DestroyTexture"
         )
-        self.LockTexture = SDL.get_function[c_SDL_LockTexture](
+        self.LockTexture = self._handle.get_function[c_SDL_LockTexture](
             "SDL_LockTexture"
         )
-        self.UnlockTexture = SDL.get_function[c_SDL_UnlockTexture](
+        self.UnlockTexture = self._handle.get_function[c_SDL_UnlockTexture](
             "SDL_UnlockTexture"
         )
 
-        self.MapRGB = SDL.get_function[c_SDL_MapRGB]("SDL_MapRGB")
-        self.FillRect = SDL.get_function[c_SDL_FillRect]("SDL_FillRect")
-        self.Delay = SDL.get_function[c_SDL_Delay]("SDL_Delay")
-        self.PollEvent = SDL.get_function[c_SDL_PollEvent]("SDL_PollEvent")
+        self.MapRGB = self._handle.get_function[c_SDL_MapRGB]("SDL_MapRGB")
+        self.FillRect = self._handle.get_function[c_SDL_FillRect]("SDL_FillRect")
+        self.Delay = self._handle.get_function[c_SDL_Delay]("SDL_Delay")
+        self.PollEvent = self._handle.get_function[c_SDL_PollEvent]("SDL_PollEvent")
 
-        self.GetError = SDL.get_function[c_SDL_GetError]("SDL_GetError")
+        self.GetError = self._handle.get_function[c_SDL_GetError]("SDL_GetError")
 
     fn get_sdl_error_as_string(self) -> String:
         var error_ptr = self.GetError()  # Call the function to get the error pointer

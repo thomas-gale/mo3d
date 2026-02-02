@@ -8,27 +8,27 @@ from mo3d.geometry.aabb import AABB
 from mo3d.ecs.entity import EntityID
 
 
-alias PositionComponent = Point
+comptime PositionComponent = Point
 
-alias VelocityComponent = Vec
+comptime VelocityComponent = Vec
 
-alias OrientationComponent = RotMat
+comptime OrientationComponent = RotMat
 
-alias GeometryComponent = Geometry
+comptime GeometryComponent = Geometry
 
-alias MaterialComponent = Material
+comptime MaterialComponent = Material
 
-alias BoundingBoxComponent = AABB
+comptime BoundingBoxComponent = AABB
 
-alias ComponentID = Int
+comptime ComponentID = Int
 
-alias ComponentTypeID = Int
+comptime ComponentTypeID = Int
 
 
 struct ComponentType:
-    alias Position: ComponentTypeID = 1 << 0
-    alias Velocity: ComponentTypeID = 1 << 1
-    alias Orientation: ComponentTypeID = 1 << 2
-    alias Geometry: ComponentTypeID = 1 << 3
-    alias Material: ComponentTypeID = 1 << 4
-    alias BoundingBox: ComponentTypeID = 1 << 5
+    comptime Position: ComponentTypeID = 1 << 0
+    comptime Velocity: ComponentTypeID = 1 << 1
+    comptime Orientation: ComponentTypeID = 1 << 2
+    comptime Geometry: ComponentTypeID = 1 << 3
+    comptime Material: ComponentTypeID = 1 << 4
+    comptime BoundingBox: ComponentTypeID = 1 << 5

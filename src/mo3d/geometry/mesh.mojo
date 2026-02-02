@@ -42,7 +42,7 @@ struct Mesh[T : DType](Hittable):
         # Header
         _ = file.seek(80)
         var size = InlineArray[UInt32, 1](0)
-        _ = file.read(size.unsafe_ptr(), 1)
+        _ = file.read(size.unsafe_ptr().bitcast[UInt8](), 1 * sizeof[UInt32]())
 
         var tris = List[Triangle[T]]()
 
@@ -52,9 +52,9 @@ struct Mesh[T : DType](Hittable):
             var vert_a = InlineArray[Float32, 3](0)
             var vert_b = InlineArray[Float32, 3](0)
             var vert_c = InlineArray[Float32, 3](0)
-            _ = file.read(vert_a.unsafe_ptr(), 3)
-            _ = file.read(vert_b.unsafe_ptr(), 3)
-            _ = file.read(vert_c.unsafe_ptr(), 3)
+            _ = file.read(vert_a.unsafe_ptr().bitcast[UInt8](), 3 * sizeof[Float32]())
+            _ = file.read(vert_b.unsafe_ptr().bitcast[UInt8](), 3 * sizeof[Float32]())
+            _ = file.read(vert_c.unsafe_ptr().bitcast[UInt8](), 3 * sizeof[Float32]())
             var a = Vec[T, 3](vert_a[0].cast[T](), vert_a[1].cast[T](), vert_a[2].cast[T]())
             var b = Vec[T, 3](vert_b[0].cast[T](), vert_b[1].cast[T](), vert_b[2].cast[T]())
             var c = Vec[T, 3](vert_c[0].cast[T](), vert_c[1].cast[T](), vert_c[2].cast[T]())
@@ -66,7 +66,7 @@ struct Mesh[T : DType](Hittable):
                 pass
             # Skip tag 
             _ = file.seek(2, os.SEEK_CUR)
-        return Mesh[T](tris)
+        return Mesh[Self.T](tris)
 
 
     fn aabb[T : DType, dim : Int](self) -> AABB[T, dim]:

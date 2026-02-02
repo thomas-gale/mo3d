@@ -5,14 +5,12 @@ from mo3d.math.point import Point
 from python import Python
 from python import PythonObject
 
-@value
-struct Solid[type: DType, dim: Int](CollectionElement):
-    var colour : Color4[type]
+struct Solid[T: DType, dim: Int](Copyable, Movable):
+    var colour : Color4[T]
 
     fn value(
-        self,
-        _point : Point[type, dim]
-    ) -> Color4[type]:
+        self, u: Scalar[Self.T], v: Scalar[Self.T], p: Point[Self.T, Self.dim]
+    ) -> Color4[Self.T]:
         return self.colour
 
     fn __str__(self) -> String:
@@ -35,5 +33,5 @@ struct Solid[type: DType, dim: Int](CollectionElement):
         """
         Load from python object representing the item dumped out to json
         """
-        return Solid[type,dim](
-            Color4[type]._load_py_json(py_obj["colour"]))
+        return Solid[T,dim](
+            Color4[T]._load_py_json(py_obj["colour"]))

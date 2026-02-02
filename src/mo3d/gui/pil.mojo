@@ -6,7 +6,7 @@ struct PIL:
     var pil_imagefont: PythonObject
     var pil_imagedraw: PythonObject
 
-    def __init__(inout self):
+    def __init__(mut self):
         self.pil = Python.import_module("PIL")
         self.pil_imagefont = Python.import_module("PIL.ImageFont")
         self.pil_imagedraw = Python.import_module("PIL.ImageDraw")
@@ -28,7 +28,7 @@ struct PIL:
             result.append(atof(str(pixel_data[i])).cast[DType.uint8]())
         return result
 
-    def render_to_texture[T: DType](self, inout texture: UnsafePointer[Scalar[T]], texture_width: Int, text_x: Int, text_y: Int, text: String):
+    def render_to_texture[T: DType](self, mut texture: UnsafePointer[Scalar[T]], texture_width: Int, text_x: Int, text_y: Int, text: String):
         txt_img = self._text_to_image(text)
         pixels = self._image_to_pixels(txt_img)
         text_width = txt_img.width

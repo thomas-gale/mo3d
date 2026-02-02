@@ -7,7 +7,7 @@ from mo3d.math.point import Point
 from mo3d.ray.ray import Ray
 from mo3d.geometry.aabb import AABB
 
-alias ft = DType.float32
+comptime ft = DType.float32
 
 
 fn test_create_2d_aabb_from_bounds() raises:

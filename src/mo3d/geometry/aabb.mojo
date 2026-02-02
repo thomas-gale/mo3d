@@ -21,7 +21,7 @@ fn sign[T: DType](num : Scalar[T]) -> Scalar[T]:
         return 1
 
 @value
-struct AABB[T: DType, dim: Int](Hittable):
+struct AABB[T: DType, dim: Int](Hittable, Copyable, Movable):
     var _bounds: InlineArray[Interval[T, 1], dim]
 
     fn __init__(inout self):

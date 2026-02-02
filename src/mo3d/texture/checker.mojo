@@ -4,25 +4,24 @@ from mo3d.ray.color4 import Color4
 from mo3d.math.point import Point
 
 from mo3d.texture.texture import Texture
+from mo3d.texture.solid import Solid
 
 from python import Python
 from python import PythonObject
 
-@value
-struct Checker[type: DType, dim: Int](CollectionElement):
-    var even_texture : ArcPointer[Texture[type, dim]]
-    var odd_texture : ArcPointer[Texture[type, dim]]
-    var scale : Scalar[type]
+struct Checker[T: DType, dim: Int](Copyable, Movable, Texture[T, dim]):
+    var even_texture : ArcPointer[Texture[T, dim]]
+    var odd_texture : ArcPointer[Texture[T, dim]]
+    var scale : Scalar[T]
 
     fn value(
-        self,
-        point : Point[type, dim]
-    ) raises -> Color4[type]:
+        self, u: Scalar[Self.T], v: Scalar[Self.T], p: Point[Self.T, Self.dim]
+    ) -> Color4[Self.T]:
         var sum : Int = 0
-        for i in range(dim):
-            sum += int(point._data[i] // self.scale)
+        for i in range(Self.dim):
+            sum += int(p._data[i] // self.scale)
         if sum % 2 == 0:
-            return self.even_texture[].value(point)
+            return self.even_texture[].value(u, v, p)
         else:
             return self.odd_texture[].value(point)
 
@@ -52,7 +51,7 @@ struct Checker[type: DType, dim: Int](CollectionElement):
         """
         Load from python object representing the item dumped out to json
         """
-        return Checker[type,dim](
-            Texture[type, dim]._load_py_json(py_obj["even_texture"]),
-            Texture[type, dim]._load_py_json(py_obj["odd_texture"]),
-            float(py_obj["scale"]).cast[type]())
+        return Checker[T,dim](
+            Texture[T, dim]._load_py_json(py_obj["even_texture"]),
+            Texture[T, dim]._load_py_json(py_obj["odd_texture"]),
+            float(py_obj["scale"]).cast[T]())

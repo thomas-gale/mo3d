@@ -20,7 +20,7 @@ from python import PythonObject
 # Unfortunatly traits currently cant have parameters thus
 # we have to have fully generic trait methods and rebind in the
 # implementing classes
-trait Hittable(CollectionElement):
+trait Hittable(Copyable, Movable):
     """
     The trait to be implemented by all entities that are to be tracable
     (so hit by rays).
@@ -62,7 +62,7 @@ struct Geometry[T: DType, dim: Int](Hittable):
     will want to support and make a manual dispatch chain.
     """
 
-    alias Variant = Variant[Sphere[T, dim], AABB[T, dim], Triangle[T], Mesh[T]]
+    comptime Variant = Variant[Sphere[T, dim], AABB[T, dim], Triangle[T], Mesh[T]]
     var _hittable: Self.Variant
 
     fn __init__(inout self, hittable: Self.Variant) raises:

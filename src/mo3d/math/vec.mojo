@@ -8,36 +8,36 @@ from python import Python
 from python import PythonObject
 
 
-struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
-    var _data: InlineArray[Scalar[T], size]
+struct Vec[T: DType, size: Int](Stringable, Copyable, Movable, ImplicitlyCopyable):
+    var _data: InlineArray[Scalar[Self.T], Self.size]
 
-    fn __init__(inout self):
-        self._data = InlineArray[Scalar[T], size](0.0)
+    fn __init__(out self):
+        self._data = InlineArray[Scalar[Self.T], Self.size](0.0)
 
-    fn __init__(inout self, owned data: InlineArray[Scalar[T], size]):
-        self._data = data
+    fn __init__(out self, owned data: InlineArray[Scalar[Self.T], Self.size]):
+        self._data = data^
 
-    fn __init__(inout self, owned *args: Scalar[T]):
+    fn __init__(out self, owned *args: Scalar[Self.T]):
         """
         If you pass in a single argument, it will be broadcasted to all elements.
-        Else, if you pass in multiple elements they will be copied up to the size of the vector.
+        Else, if you pass in multiple elements they will be copied up to the Self.size of the vector.
         """
         # We don't know for sure that the user has passed in the right number of Scalars, so we'll just initialize the vector to 0 for safety.
-        self._data = InlineArray[Scalar[T], size](0.0)
+        self._data = InlineArray[Scalar[Self.T], Self.size](0.0)
         if len(args) == 1:
-            for i in range(size):
+            for i in range(Self.size):
                 self._data[i] = args[0]
         var i = 0
         for arg in args:
-            if i >= size:
+            if i >= Self.size:
                 break
-            self._data[i] = arg[]
+            self._data[i] = arg
             i += 1
 
-    fn __copyinit__(inout self, other: Self):
+    fn __copyinit__(mut self, other: Self):
         self._data = other._data
 
-    fn __moveinit__(inout self, owned other: Self):
+    fn __moveinit__(mut self, owned other: Self):
         self._data = other._data^
 
     fn clone(self) -> Self:
@@ -45,29 +45,29 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
         result._data = self._data
         return result
 
-    fn __getitem__(self, index: Int) -> Scalar[T]:
+    fn __getitem__(self, index: Int) -> Scalar[Self.T]:
         return self._data[index]
 
-    fn __setitem__(inout self, index: Int, value: SIMD[T, 1]):
+    fn __setitem__(mut self, index: Int, value: SIMD[Self.T, 1]):
         self._data[index] = value
 
-    fn dot(self, rhs: Self) -> SIMD[T, 1]:
-        var sum: Scalar[T] = 0
-        for i in range(size):
+    fn dot(self, rhs: Self) -> SIMD[Self.T, 1]:
+        var sum: Scalar[Self.T] = 0
+        for i in range(Self.size):
             sum += self._data[i] * rhs._data[i]
         return sum
 
-    fn length_squared(self) -> Scalar[T]:
+    fn length_squared(self) -> Scalar[Self.T]:
         return self.dot(self)
 
-    fn length(self) -> SIMD[T, 1]:
+    fn length(self) -> SIMD[Self.T, 1]:
         return sqrt(self.length_squared())
 
-    fn near_zero[tol: Scalar[T] = 1e-8](self) -> Bool:
-        for i in range(size):
+    fn near_zero[tol: Scalar[Self.T] = 1e-8](self) -> Bool:
+        for i in range(Self.size):
             if abs(self._data[i]) > tol:
                 return False
-        return True
+        return Self.True
 
     @staticmethod
     fn cross_3(lhs: Self, rhs: Self) raises -> Self:
@@ -75,7 +75,7 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
         Cross product of two 3D vectors.
         It will raise an error if the vectors are not 3D.
         """
-        if size != 3:
+        if Self.size != 3:
             raise Error("Cross product is only defined for 3D vectors.")
         return Self(
             lhs._data[1] * rhs._data[2] - lhs._data[2] * rhs._data[1],
@@ -88,7 +88,7 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
 
     @staticmethod
     fn random_in_unit_disk(mut rng : Rng) -> Self:
-        while True:
+        while Self.True:
             var p = Self.random(rng, -1, 1)
             p[2] = 0
             if p.length_squared() < 1:
@@ -96,7 +96,7 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
 
     @staticmethod
     fn random_in_unit_sphere(mut rng : Rng) -> Self:
-        while True:
+        while Self.True:
             var p = Self.random(rng, -1, 1)
             if p.length_squared() < 1:
                 return p
@@ -119,7 +119,7 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
         return v - 2 * v.dot(n) * n
 
     @staticmethod
-    fn refract(uv: Self, n: Self, etai_over_etat: Scalar[T]) -> Self:
+    fn refract(uv: Self, n: Self, etai_over_etat: Scalar[Self.T]) -> Self:
         var cos_theta = min(-uv.dot(n), 1.0)
         var r_out_perp = etai_over_etat * (uv + cos_theta * n)
         var r_out_parallel = -sqrt(abs(1.0 - r_out_perp.length_squared())) * n
@@ -127,39 +127,39 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
 
     @staticmethod
     fn random(mut rng : Rng) -> Self:
-        var data = InlineArray[Scalar[T], size](unsafe_uninitialized=True)
-        for i in range(size):
+        var data = InlineArray[Scalar[Self.T], Self.size](unsafe_uninitialized=Self.True)
+        for i in range(Self.size):
             @parameter
-            if T == T.float64:
-                data[i] = rng.float64().cast[T]()
+            if Self.T == Self.T.float64:
+                data[i] = rng.float64().cast[Self.T]()
             else:
-                data[i] = rng.float32().cast[T]()
+                data[i] = rng.float32().cast[Self.T]()
         return Self(data)
 
     @staticmethod
-    fn random(mut rng : Rng, min: Scalar[T], max: Scalar[T]) -> Self:
+    fn random(mut rng : Rng, min: Scalar[Self.T], max: Scalar[Self.T]) -> Self:
         var delta = max - min
-        var data = InlineArray[Scalar[T], size](unsafe_uninitialized=True)
-        for i in range(size):
+        var data = InlineArray[Scalar[Self.T], Self.size](unsafe_uninitialized=Self.True)
+        for i in range(Self.size):
             @parameter
-            if T == T.float64:
-                data[i] = min + (rng.float64().cast[T]() * delta)
+            if Self.T == Self.T.float64:
+                data[i] = min + (rng.float64().cast[Self.T]() * delta)
             else:
-                data[i] = min + (rng.float32().cast[T]() * delta)
+                data[i] = min + (rng.float32().cast[Self.T]() * delta)
         return Self(data)
 
     fn __str__(self) -> String:
         """Readable representation of the vector."""
         var result = String("")
-        for i in range(size):
-            result += str(self._data[i])
-            if i < size - 1:
+        for i in range(Self.size):
+            result += String(self._data[i])
+            if i < Self.size - 1:
                 result += ", "
         return result
 
     fn __abs__(self) -> Self:
         var result = Self()
-        for i in range(size):
+        for i in range(Self.size):
             result._data[i] = abs(self._data[i])
         return result
 
@@ -167,9 +167,9 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
         """Lexical comparison."""
 
         @parameter
-        for i in range(Self.size):
+        for i in range(Self.Self.size):
             if self._data[i] < rhs._data[i]:
-                return True
+                return Self.True
             elif self._data[i] > rhs._data[i]:
                 return False
         return False
@@ -178,32 +178,32 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
         """Lexical comparison."""
 
         @parameter
-        for i in range(Self.size):
+        for i in range(Self.Self.size):
             if self._data[i] <= rhs._data[i]:
-                return True
+                return Self.True
             elif self._data[i] > rhs._data[i]:
                 return False
         return False
 
     fn __eq__(self, rhs: Self) -> Bool:
-        for i in range(size):
+        for i in range(Self.size):
             if self._data[i] != rhs._data[i]:
                 return False
-        return True
+        return Self.True
 
     fn __ne__(self, rhs: Self) -> Bool:
-        for i in range(size):
+        for i in range(Self.size):
             if self._data[i] != rhs._data[i]:
-                return True
+                return Self.True
         return False
 
     fn __gt__(self, rhs: Self) -> Bool:
         """Lexical comparison."""
 
         @parameter
-        for i in range(Self.size):
+        for i in range(Self.Self.size):
             if self._data[i] > rhs._data[i]:
-                return True
+                return Self.True
             elif self._data[i] < rhs._data[i]:
                 return False
         return False
@@ -212,73 +212,73 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
         """Lexical comparison."""
 
         @parameter
-        for i in range(Self.size):
+        for i in range(Self.Self.size):
             if self._data[i] >= rhs._data[i]:
-                return True
+                return Self.True
             elif self._data[i] < rhs._data[i]:
                 return False
         return False
 
     fn __add__(self, rhs: Self) -> Self:
         var result = Self()
-        for i in range(size):
+        for i in range(Self.size):
             result._data[i] = self._data[i] + rhs._data[i]
         return result
 
-    fn __iadd__(inout self, rhs: Self):
-        for i in range(size):
+    fn __iadd__(mut self, rhs: Self):
+        for i in range(Self.size):
             self._data[i] += rhs._data[i]
 
     fn __neg__(self) -> Self:
         var result = Self()
-        for i in range(size):
+        for i in range(Self.size):
             result._data[i] = -self._data[i]
         return result
 
     fn __sub__(self, rhs: Self) -> Self:
         var result = Self()
-        for i in range(size):
+        for i in range(Self.size):
             result._data[i] = self._data[i] - rhs._data[i]
         return result
 
-    fn __isub__(inout self, rhs: Self):
-        for i in range(size):
+    fn __isub__(mut self, rhs: Self):
+        for i in range(Self.size):
             self._data[i] -= rhs._data[i]
 
     fn __mul__(self, rhs: Self) -> Self:
         var result = Self()
-        for i in range(size):
+        for i in range(Self.size):
             result._data[i] = self._data[i] * rhs._data[i]
         return result
 
-    fn __mul__(self, rhs: SIMD[T, 1]) -> Self:
+    fn __mul__(self, rhs: SIMD[Self.T, 1]) -> Self:
         var result = Self()
-        for i in range(size):
+        for i in range(Self.size):
             result._data[i] = self._data[i] * rhs
         return result
 
-    fn __rmul__(self, lhs: SIMD[T, 1]) -> Self:
+    fn __rmul__(self, lhs: SIMD[Self.T, 1]) -> Self:
         return self * lhs
 
-    fn __imul__(inout self, rhs: SIMD[T, 1]):
-        for i in range(size):
+    fn __imul__(mut self, rhs: SIMD[Self.T, 1]):
+        for i in range(Self.size):
             self._data[i] *= rhs
 
-    fn __truediv__(self, rhs: SIMD[T, 1]) -> Self:
+    fn __truediv__(self, rhs: SIMD[Self.T, 1]) -> Self:
         var result = Self()
-        for i in range(size):
+        for i in range(Self.size):
             result._data[i] = self._data[i] / rhs
         return result
 
-    fn __rtruediv__(self, lhs: SIMD[T, 1]) -> Self:
+    fn __rtruediv__(self, lhs: SIMD[Self.T, 1]) -> Self:
         var result = Self()
-        for i in range(size):
+        for i in range(Self.size):
             result._data[i] = lhs / self._data[i] 
         return result
 
 
-    fn __itruediv__(inout self, rhs: SIMD[T, 1]):
-        for i in range(size):
+    fn __itruediv__(mut self, rhs: SIMD[Self.T, 1]):
+        for i in range(Self.size):
             self._data[i] /= rhs
 
     fn _dump_py_json(self) raises -> PythonObject:
@@ -286,7 +286,7 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
         Python object representing the item to dump out to json
         """
         var py_vec = Python.list()
-        for i in range(size):
+        for i in range(Self.size):
             py_vec.append(self._data[i])
         return py_vec
 
@@ -295,8 +295,8 @@ struct Vec[T: DType, size: Int](EqualityComparable, Stringable):
         """
         Load from python object representing the item dumped out to json
         """
-        var vec = Vec[T,size]()
-        for i in range(size):
-            vec._data[i] = float(py_obj[i]).cast[T]()
+        var vec = Vec[Self.T,Self.size]()
+        for i in range(Self.size):
+            vec._data[i] = float(py_obj[i]).cast[Self.T]()
         return vec
         

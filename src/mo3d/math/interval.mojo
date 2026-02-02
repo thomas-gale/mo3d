@@ -1,27 +1,28 @@
+from collections import CollectionElement
 from math import inf
 
 
 @value
-struct Interval[T: DType, simd_size: Int = 1](CollectionElementNew):
-    alias S = SIMD[T, simd_size]
+struct Interval[T: DType, simd_size: Int = 1](CollectionElement):
+    comptime S = SIMD[T, simd_size]
     var min: Self.S
     var max: Self.S
 
-    fn __init__(inout self):
+    fn __init__(out self):
         """
         Default constructor (empty interval).
         """
         self.min = Self.S(inf[T]())
         self.max = Self.S(-inf[T]())
 
-    fn __init__(inout self, other: Self):
+    fn __init__(out self, other: Self):
         """
         Copy constructor.
         """
         self.min = other.min
         self.max = other.max
 
-    fn __init__(inout self, a: Self, b: Self):
+    fn __init__(out self, a: Self, b: Self):
         """
         Construct interval tightly bounding two intervals.
         """
@@ -51,13 +52,13 @@ struct Interval[T: DType, simd_size: Int = 1](CollectionElementNew):
     fn mid(self) -> Self.S:
         return 0.5 * (self.max + self.min)
 
-    fn merge_in(inout self, x : Self.S):
+    fn merge_in(mut self, x : Self.S):
         if x > self.max:
             self.max = x
         if x < self.min:
             self.min = x
 
-    fn merge_in(inout self, x : Self):
+    fn merge_in(mut self, x : Self):
         if x.max > self.max:
             self.max = x.max
         if x.min < self.min:

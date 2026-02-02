@@ -11,7 +11,7 @@ trait Window:
         """
         ...
 
-    fn process_events(inout self, inout camera: Camera) -> Bool:
+    fn process_events(mut self, mut camera: Camera) -> Bool:
         """
         Apply events to the camera.
         Returns True if the window should remain open.
@@ -20,7 +20,7 @@ trait Window:
 
     fn redraw[
         float_type: DType
-    ](self, t: UnsafePointer[Scalar[float_type]], channels: Int) raises -> None:
+    ](self, t: UnsafePointer[mut=True, Scalar[float_type]], channels: Int) raises -> None:
         """
         Redraw the window with the given texture data buffer (height * width * channels).
         """

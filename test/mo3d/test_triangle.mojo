@@ -7,8 +7,8 @@ from mo3d.math.interval import Interval
 from mo3d.ray.ray import Ray
 from mo3d.ray.hit_record import HitRecord
 
-alias f32 = DType.float32
-alias Vec3 = Vec[f32, 3]
+comptime f32 = DType.float32
+comptime Vec3 = Vec[f32, 3]
 
 fn test_hit_triangle() raises:
     # Basic ray triangle hit in the plane

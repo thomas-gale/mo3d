@@ -20,11 +20,11 @@ from mo3d.texture.checker import Checker
 
 from mo3d.random.rng import Rng
 
-fn sample_scene_3d[T: DType](inout store: ComponentStore[T, 3], grid_size: Int = 14) raises:
+fn sample_scene_3d[T: DType](mut store: ComponentStore[T, 3], grid_size: Int = 14) raises:
     """
     The classic end scene from the Ray Tracing in One Weekend by Peter Shirley.
     """
-    alias dim = 3
+    comptime dim = 3
 
     fn random_float(mut rng : Rng, min: Scalar[T] = 0, max: Scalar[T] = 1.0) -> Scalar[T]:
         return min + (rng.float64().cast[T]() * (max - min))

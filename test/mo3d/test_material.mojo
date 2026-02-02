@@ -12,7 +12,7 @@ from mo3d.texture.solid import Solid
 
 from mo3d.random.rng import Rng
 
-alias f32 = DType.float32
+comptime f32 = DType.float32
 
 fn test_create_lambertian_material() raises:
     var c = Color4[f32](0.5, 0.5, 0.5, 1.0)

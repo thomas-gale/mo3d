@@ -17,8 +17,8 @@ struct DiffuseLight[T: DType, dim: Int](CollectionElement):
         mut rng : Rng,
         r_in: Ray[T, dim],
         rec: HitRecord[T, dim],
-        inout attenuation: Color4[T],
-        inout scattered: Ray[T, dim],
+        mut attenuation: Color4[T],
+        mut scattered: Ray[T, dim],
     ) -> Bool:
         return False
 

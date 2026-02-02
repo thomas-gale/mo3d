@@ -11,6 +11,8 @@ from mo3d.random.rng import Rng
 from python import Python
 from python import PythonObject
 
+from collections import CollectionElement
+
 @value
 struct Lambertian[T: DType, dim: Int](CollectionElement):
     var albedo: Texture[T, dim]
@@ -20,8 +22,8 @@ struct Lambertian[T: DType, dim: Int](CollectionElement):
         mut rng : Rng,
         r_in: Ray[T, dim],
         rec: HitRecord[T, dim],
-        inout attenuation: Color4[T],
-        inout scattered: Ray[T, dim],
+        mut attenuation: Color4[T],
+        mut scattered: Ray[T, dim],
     ) raises -> Bool:
         var scatter_direction = rec.normal + Vec[T, dim].random_unit_vector(rng)
         # Catch degenerate scatter direction

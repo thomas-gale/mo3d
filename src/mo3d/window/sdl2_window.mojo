@@ -31,14 +31,14 @@ struct SDL2Window(Window):
     var _width: Int
 
     var _sdl: SDL
-    var _window: UnsafePointer[SDL_Window]
-    var _renderer: UnsafePointer[SDL_Renderer]
-    var _display_texture: UnsafePointer[SDL_Texture]
+    var _window: UnsafePointer[mut=True, SDL_Window]
+    var _renderer: UnsafePointer[mut=True, SDL_Renderer]
+    var _display_texture: UnsafePointer[mut=True, SDL_Texture]
 
     var _event: Event
 
     fn __init__(
-        inout self, name: String, width: Int, height: Int
+        out self, name: String, width: Int, height: Int
     ) raises:
         self._name = name
         self._width = width
@@ -61,7 +61,7 @@ struct SDL2Window(Window):
         )
         print("SDL2 window created")
 
-        if self._window == UnsafePointer[SDL_Window]():
+        if not self._window:
             raise Error("Failed to create SDL window")
 
         self._renderer = self._sdl.CreateRenderer(self._window, -1, 0)
@@ -80,13 +80,16 @@ struct SDL2Window(Window):
         print("Renderer", self._renderer)
         print("Display texture", self._display_texture)
 
-    fn __del__(owned self) -> None:
-        self._sdl.DestroyTexture(self._display_texture)
-        print("Texture destroyed")
-        self._sdl.DestroyRenderer(self._renderer)
-        print("Renderer destroyed")
-        self._sdl.DestroyWindow(self._window)
-        print("Window destroyed")
+    fn deinit(mut self):
+        if self._display_texture:
+            self._sdl.DestroyTexture(self._display_texture)
+            print("Texture destroyed")
+        if self._renderer:
+            self._sdl.DestroyRenderer(self._renderer)
+            print("Renderer destroyed")
+        if self._window:
+            self._sdl.DestroyWindow(self._window)
+            print("Window destroyed")
         self._sdl.Quit()
         print("SDL2 quit")
 
@@ -94,12 +97,12 @@ struct SDL2Window(Window):
     fn create(name: String, height: Int, width: Int) raises -> Self:
         return SDL2Window(name, height, width)
 
-    fn process_events(inout self, inout camera: Camera) -> Bool:
+    fn process_events(mut self, mut camera: Camera) -> Bool:
         """
         Process all SDL2 events, setting state on the camera (TODO: should this be decoupled?) and return True if the window should remain open.
         """
         while (
-            self._sdl.PollEvent(UnsafePointer[Event].address_of(self._event))
+            self._sdl.PollEvent(UnsafePointer.address_of(self._event))
             != 0
         ):
             if self._event.type == SDL_QUIT:
@@ -122,18 +125,18 @@ struct SDL2Window(Window):
     fn redraw[
         float_type: DType
     ](
-        self, t: UnsafePointer[Scalar[float_type]], channels: Int = 4
+        self, t: UnsafePointer[mut=True, Scalar[float_type]], channels: Int = 4
     ) raises -> None:
         _ = self._sdl.RenderClear(self._renderer)
 
         # These pixels are in GPU memory - we cant use SIMD as we don't know if SDL2 has aligned them
-        var pixels = UnsafePointer[SIMD[DType.uint8, 1]]()
-        # This value doesn't seem to be at a sensible address - 0x400 (Is this SDL2's null pointer?)
-        var pitch = UnsafePointer[Int32]()
+        var pixels = UnsafePointer[mut=True, SIMD[DType.uint8, 1]]()
+        # Only 1 Int32, but we need a pointer to it
+        var pitch = UnsafePointer[mut=True, Int32]()
         # Manually set the pitch to the width * 4 (4 channels)
         var manual_pitch = self._width * channels
         var lock_code = self._sdl.LockTexture(
-            self._display_texture, UnsafePointer[SDL_Rect](), pixels, pitch
+            self._display_texture, UnsafePointer[mut=True, SDL_Rect](), pixels, pitch
         )
 
         if lock_code != 0:

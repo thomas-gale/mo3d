@@ -1,1 +1,1 @@
-alias EntityID = Int
+comptime EntityID = Int

@@ -9,24 +9,23 @@ from mo3d.texture.checker import Checker
 from python import Python
 from python import PythonObject
 
-@value
-struct Texture[type: DType, dim: Int]:
-    alias Variant = Variant[
-        Solid[type, dim], Checker[type, dim]
+struct Texture[T: DType, dim: Int](Copyable, Movable):
+    comptime Variant = Variant[
+        Solid[T, dim], Checker[T, dim]
     ]
     var _tex: Self.Variant
 
     fn value(
         self,
-        point : Point[type, dim]
-    ) raises -> Color4[type]:
+        point : Point[T, dim]
+    ) raises -> Color4[T]:
         # TODO perform the runtime variant match
-        if self._tex.isa[Solid[type, dim]]():
-            return self._tex[Solid[type, dim]].value(
+        if self._tex.isa[Solid[T, dim]]():
+            return self._tex[Solid[T, dim]].value(
                 point
             )
-        elif self._tex.isa[Checker[type, dim]]():
-            return self._tex[Checker[type, dim]].value(
+        elif self._tex.isa[Checker[T, dim]]():
+            return self._tex[Checker[T, dim]].value(
                 point
             )
         else:
@@ -34,10 +33,10 @@ struct Texture[type: DType, dim: Int]:
 
     fn __str__(self) -> String:
         # TODO perform the runtime variant match
-        if self._tex.isa[Solid[type, dim]]():
-            return str(self._tex[Solid[type, dim]])
-        elif self._tex.isa[Checker[type, dim]]():
-            return str(self._tex[Checker[type, dim]])
+        if self._tex.isa[Solid[T, dim]]():
+            return str(self._tex[Solid[T, dim]])
+        elif self._tex.isa[Checker[T, dim]]():
+            return str(self._tex[Checker[T, dim]])
         else:
             return "Texture(Unknown)"
 
@@ -46,11 +45,11 @@ struct Texture[type: DType, dim: Int]:
         Python object representing the item to dump out to json
         """
         var data : PythonObject
-        if self._tex.isa[Solid[type, dim]]():
-            data = self._tex[Solid[type, dim]]._dump_py_json()
+        if self._tex.isa[Solid[T, dim]]():
+            data = self._tex[Solid[T, dim]]._dump_py_json()
             data["type"] = "solid"
-        elif self._tex.isa[Checker[type, dim]]():
-            data = self._tex[Checker[type, dim]]._dump_py_json()
+        elif self._tex.isa[Checker[T, dim]]():
+            data = self._tex[Checker[T, dim]]._dump_py_json()
             data["type"] = "checker"
         else:
             data = Python.dict()
@@ -64,8 +63,8 @@ struct Texture[type: DType, dim: Int]:
         """
         var type_s = str(py_obj["type"])
         if type_s == "solid":
-            return Self(Solid[type, dim]._load_py_json(py_obj))
+            return Self(Solid[T, dim]._load_py_json(py_obj))
         elif type_s == "checker":
-            return Self(Checker[type, dim]._load_py_json(py_obj))
+            return Self(Checker[T, dim]._load_py_json(py_obj))
         else:
             raise Error("Unknown geometry")

@@ -9,18 +9,16 @@ license = "Apache-2.0"
 platforms = ["linux-64", "osx-arm64"]
 
 [tasks]
+format = { cmd = "mojo format ./src && mojo format ./test" }
 start = { cmd = "mojo run src/main.mojo" }
 package = { cmd = "mkdir -p bin && mojo package src/mo3d -o bin/mo3d.mojopkg && cp bin/mo3d.mojopkg test/mo3d/mo3d.mojopkg", inputs=["src/**/*.mojo"], outputs = ["bin/mo3d.mojopkg", "test/mo3d/mo3d.mojopkg"] }
 test = { cmd = "mojo test ./test", depends-on = ["package"], inputs=["src/**/*.mojo", "test/**/*.mojo"] }
-build = { cmd = "mkdir -p bin && mojo build src/main.mojo -o bin/mo3d", inputs=["src/**/*.mojo"], outputs = ["bin/mo3d"] }
+build = { cmd = "mkdir -p bin && mojo build src/main.mojo -o bin/mo3d -Xlinker -ldl", inputs=["src/**/*.mojo"], outputs = ["bin/mo3d"] }
 built = { cmd = "bin/mo3d", depends-on = ["build"] }
 perf = { cmd = "perf record -F 99 --call-graph dwarf bin/mo3d", depends-on = ["build"]  }
 
 [dependencies]
 mojo = "<1.0.0" # includes `mojo-compiler`, lsp, debugger, formatter etc.
-max = "==26.1.0.dev2026011623"
+max = "*"
 pillow = "*"
 sdl2 = "*"
-llvm = "*"
-cxx-compiler = "*"
-make = "*"

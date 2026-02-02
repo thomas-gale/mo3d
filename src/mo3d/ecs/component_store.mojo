@@ -32,53 +32,53 @@ struct ComponentStore[T: DType, dim: Int]:
     Having both will allow for faster access to components given an entity and vice versa however presents a challenge in keeping the two in sync and a larger memory footprint.
     """
 
-    alias ComponentVariants = Variant[
-        PositionComponent[T, dim],
-        VelocityComponent[T, dim],
-        OrientationComponent[T, dim],
-        GeometryComponent[T, dim],
-        MaterialComponent[T, dim],
-        BoundingBoxComponent[T, dim]
+    comptime ComponentVariants = Variant[
+        PositionComponent[T, Self.dim],
+        VelocityComponent[T, Self.dim],
+        OrientationComponent[T, Self.dim],
+        GeometryComponent[T, Self.dim],
+        MaterialComponent[T, Self.dim],
+        BoundingBoxComponent[T, Self.dim]
     ]
 
-    var position_components: List[PositionComponent[T, dim]]
+    var position_components: List[PositionComponent[Self.T, Self.dim]]
     var position_component_to_entities: Dict[ComponentID, EntityID]
 
-    var velocity_components: List[VelocityComponent[T, dim]]
+    var velocity_components: List[VelocityComponent[Self.T, Self.dim]]
     var velocity_component_to_entities: Dict[ComponentID, EntityID]
 
-    var orientation_components: List[OrientationComponent[T, dim]]
+    var orientation_components: List[OrientationComponent[Self.T, Self.dim]]
     var orientation_component_to_entities: Dict[ComponentID, EntityID]
 
-    var geometry_components: List[GeometryComponent[T, dim]]
+    var geometry_components: List[GeometryComponent[Self.T, Self.dim]]
     var geometry_component_to_entities: Dict[ComponentID, EntityID]
 
-    var material_components: List[MaterialComponent[T, dim]]
+    var material_components: List[MaterialComponent[Self.T, Self.dim]]
     var material_component_to_entities: Dict[ComponentID, EntityID]
 
-    var bounding_box_components: List[BoundingBoxComponent[T, dim]]
+    var bounding_box_components: List[BoundingBoxComponent[Self.T, Self.dim]]
     var bounding_box_component_to_entities: Dict[ComponentID, EntityID]
 
     var entity_to_components: Dict[EntityID, Dict[ComponentTypeID, ComponentID]]
     var entity_to_component_type_mask: Dict[EntityID, ComponentTypeID]
 
-    fn __init__(inout self):
-        self.position_components = List[PositionComponent[T, dim]]()
+    fn __init__(out self):
+        self.position_components = List[PositionComponent[Self.T, Self.dim]]()
         self.position_component_to_entities = Dict[ComponentID, EntityID]()
 
-        self.velocity_components = List[VelocityComponent[T, dim]]()
+        self.velocity_components = List[VelocityComponent[Self.T, Self.dim]]()
         self.velocity_component_to_entities = Dict[ComponentID, EntityID]()
 
-        self.orientation_components = List[OrientationComponent[T, dim]]()
+        self.orientation_components = List[OrientationComponent[Self.T, Self.dim]]()
         self.orientation_component_to_entities = Dict[ComponentID, EntityID]()
 
-        self.geometry_components = List[GeometryComponent[T, dim]]()
+        self.geometry_components = List[GeometryComponent[Self.T, Self.dim]]()
         self.geometry_component_to_entities = Dict[ComponentID, EntityID]()
 
-        self.material_components = List[MaterialComponent[T, dim]]()
+        self.material_components = List[MaterialComponent[Self.T, Self.dim]]()
         self.material_component_to_entities = Dict[ComponentID, EntityID]()
 
-        self.bounding_box_components = List[BoundingBoxComponent[T, dim]]()
+        self.bounding_box_components = List[BoundingBoxComponent[Self.T, Self.dim]]()
         self.bounding_box_component_to_entities = Dict[ComponentID, EntityID]()
 
         self.entity_to_components = Dict[
@@ -87,7 +87,7 @@ struct ComponentStore[T: DType, dim: Int]:
         self.entity_to_component_type_mask = Dict[EntityID, ComponentTypeID]()
 
     fn _add_position_component(
-        inout self, entity_id: EntityID, component: PositionComponent[T, dim]
+        mut self, entity_id: EntityID, component: PositionComponent[Self.T, Self.dim]
     ) raises -> ComponentID:
         if (
             self.entity_to_component_type_mask[entity_id]
@@ -106,7 +106,7 @@ struct ComponentStore[T: DType, dim: Int]:
         return component_id
 
     fn _add_velocity_component(
-        inout self, entity_id: EntityID, component: VelocityComponent[T, dim]
+        inout self, entity_id: EntityID, component: VelocityComponent[Self.T, Self.dim]
     ) raises -> ComponentID:
         if (
             self.entity_to_component_type_mask[entity_id]
@@ -126,7 +126,7 @@ struct ComponentStore[T: DType, dim: Int]:
         return component_id
 
     fn _add_orientation_component(
-        inout self, entity_id: EntityID, component: OrientationComponent[T, dim]
+        inout self, entity_id: EntityID, component: OrientationComponent[Self.T, Self.dim]
     ) raises -> ComponentID:
         if (
             self.entity_to_component_type_mask[entity_id]
@@ -146,7 +146,7 @@ struct ComponentStore[T: DType, dim: Int]:
         return component_id
 
     fn _add_geometry_component(
-        inout self, entity_id: EntityID, component: GeometryComponent[T, dim]
+        inout self, entity_id: EntityID, component: GeometryComponent[Self.T, Self.dim]
     ) raises -> ComponentID:
         if (
             self.entity_to_component_type_mask[entity_id]
@@ -166,7 +166,7 @@ struct ComponentStore[T: DType, dim: Int]:
         return component_id
 
     fn _add_material_component(
-        inout self, entity_id: EntityID, component: MaterialComponent[T, dim]
+        inout self, entity_id: EntityID, component: MaterialComponent[Self.T, Self.dim]
     ) raises -> ComponentID:
         if (
             self.entity_to_component_type_mask[entity_id]
@@ -186,7 +186,7 @@ struct ComponentStore[T: DType, dim: Int]:
         return component_id
 
     fn _add_bounding_box_component(
-        inout self, entity_id: EntityID, component: BoundingBoxComponent[T, dim]
+        inout self, entity_id: EntityID, component: BoundingBoxComponent[Self.T, Self.dim]
     ) raises -> ComponentID:
         if (
             self.entity_to_component_type_mask[entity_id]
@@ -228,29 +228,29 @@ struct ComponentStore[T: DType, dim: Int]:
         if entity_id not in self.entity_to_components:
             raise Error("Entity does not exist")
 
-        if component.isa[PositionComponent[T, dim]]():
+        if component.isa[PositionComponent[Self.T, Self.dim]]():
             return self._add_position_component(
-                entity_id, component[Point[T, dim]]
+                entity_id, component[Point[Self.T, Self.dim]]
             )
-        elif component.isa[VelocityComponent[T, dim]]():
+        elif component.isa[VelocityComponent[Self.T, Self.dim]]():
             return self._add_velocity_component(
-                entity_id, component[Vec[T, dim]]
+                entity_id, component[Vec[Self.T, Self.dim]]
             )
-        elif component.isa[GeometryComponent[T, dim]]():
+        elif component.isa[GeometryComponent[Self.T, Self.dim]]():
             return self._add_geometry_component(
-                entity_id, component[GeometryComponent[T, dim]]
+                entity_id, component[GeometryComponent[Self.T, Self.dim]]
             )
-        elif component.isa[MaterialComponent[T, dim]]():
+        elif component.isa[MaterialComponent[Self.T, Self.dim]]():
             return self._add_material_component(
-                entity_id, component[MaterialComponent[T, dim]]
+                entity_id, component[MaterialComponent[Self.T, Self.dim]]
             )
-        elif component.isa[BoundingBoxComponent[T, dim]]():
+        elif component.isa[BoundingBoxComponent[Self.T, Self.dim]]():
             return self._add_bounding_box_component(
-                entity_id, component[BoundingBoxComponent[T, dim]]
+                entity_id, component[BoundingBoxComponent[Self.T, Self.dim]]
             )
-        elif component.isa[OrientationComponent[T, dim]]():
+        elif component.isa[OrientationComponent[Self.T, Self.dim]]():
             return self._add_orientation_component(
-                entity_id, component[OrientationComponent[T, dim]]
+                entity_id, component[OrientationComponent[Self.T, Self.dim]]
             )
         else:
             raise Error("Unknown component type")
@@ -337,7 +337,7 @@ struct ComponentStore[T: DType, dim: Int]:
         Load from python object representing the item dumped out to json
         """
         var max_id : EntityID = 0
-        var store = ComponentStore[T, dim]();
+        var store = ComponentStore[Self.T, Self.dim]();
         for py_id in py_obj:
             max_id = max(max_id, int(str(py_id)))
         for entity_id in range(max_id + 1):
@@ -349,25 +349,25 @@ struct ComponentStore[T: DType, dim: Int]:
                 if "Position" in py_entity:
                     _ = store._add_position_component(
                         entity_id, 
-                        Point[T, dim]._load_py_json(py_entity["Position"]))
+                        Point[Self.T, Self.dim]._load_py_json(py_entity["Position"]))
                 if "Velocity" in py_entity:
                     _ = store._add_velocity_component(
                         entity_id, 
-                        Vec[T, dim]._load_py_json(py_entity["Velocity"]))
+                        Vec[Self.T, Self.dim]._load_py_json(py_entity["Velocity"]))
                 if "Orientation" in py_entity:
                     _ = store._add_orientation_component(
                         entity_id, 
-                        Mat[T, dim]._load_py_json(py_entity["Orientation"]))
+                        Mat[Self.T, Self.dim]._load_py_json(py_entity["Orientation"]))
                 if "Geometry" in py_entity:
                     var geom_id = store._add_geometry_component(
                         entity_id, 
-                        GeometryComponent[T, dim]._load_py_json(py_entity["Geometry"]))
+                        GeometryComponent[Self.T, Self.dim]._load_py_json(py_entity["Geometry"]))
                     _ = store._add_bounding_box_component(entity_id, 
-                        store.geometry_components[geom_id].aabb[T, dim]())
+                        store.geometry_components[geom_id].aabb[Self.T, Self.dim]())
                 if "Material" in py_entity:
                     _ = store._add_material_component(
                         entity_id, 
-                        MaterialComponent[T, dim]._load_py_json(py_entity["Material"]))
+                        MaterialComponent[Self.T, Self.dim]._load_py_json(py_entity["Material"]))
         return store
 
     fn dump(self, file : String) raises:

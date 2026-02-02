@@ -33,8 +33,11 @@ fn test_sdl2_init() raises:
     
     print("About to clean up")
     # Clean up
+    print("About to DestroyWindow")
     sdl.DestroyWindow(window)
+    print("About to Quit")
     sdl.Quit()
+    print("Clean up finished")
 
 fn main() raises:
     test_sdl2_init()

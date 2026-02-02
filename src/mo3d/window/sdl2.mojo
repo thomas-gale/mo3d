@@ -296,6 +296,8 @@ comptime SDL_WINDOW_SHOWN = 0x00000004
 comptime c_SDL_GetError = fn () -> CPtr[UInt8]
 
 
+from sys.ffi import RTLD
+
 struct SDL:
     var _handle: OwnedDLHandle
     var Init: c_SDL_Init
@@ -332,7 +334,7 @@ struct SDL:
 
     fn __init__(out self) raises:
         var lib_path = get_sdl_lib_path()
-        self._handle = OwnedDLHandle(lib_path)
+        self._handle = OwnedDLHandle(lib_path, RTLD.GLOBAL | RTLD.NOW | RTLD.NODELETE)
 
         self.Init = self._handle.get_function[c_SDL_Init]("SDL_Init")
         self.Quit = self._handle.get_function[c_SDL_Quit]("SDL_Quit")

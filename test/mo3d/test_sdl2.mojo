@@ -1,4 +1,4 @@
-from testing import assert_true, assert_equal
+from testing import assert_true, assert_equal, TestSuite
 from memory import UnsafePointer
 from os import getenv
 
@@ -31,4 +31,4 @@ fn test_sdl2_init() raises:
     sdl.Quit()
 
 fn main() raises:
-    test_sdl2_init()
+    TestSuite.discover_tests[__functions_in_module()]().run()

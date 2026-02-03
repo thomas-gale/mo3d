@@ -3,7 +3,7 @@ from mo3d.math.mat import RotMat
 from mo3d.math.point import Point
 
 
-struct Ray[T: DType, dim: Int](Copyable, Movable):
+struct Ray[T: DType, dim: Int](Copyable, ImplicitlyCopyable, Movable):
     var orig: Point[Self.T, Self.dim]
     var dir: Point[Self.T, Self.dim]
     var tm: Scalar[Self.T]

@@ -134,7 +134,7 @@ struct Vec[T: DType, size: Int](Stringable, Equatable, Copyable, Movable, Implic
                 data[i] = rng.float64().cast[Self.T]()
             else:
                 data[i] = rng.float32().cast[Self.T]()
-        return Self(data.copy())
+        return Self(data^)
 
     @staticmethod
     fn random(mut rng : Rng, min: Scalar[Self.T], max: Scalar[Self.T]) -> Self:
@@ -146,7 +146,7 @@ struct Vec[T: DType, size: Int](Stringable, Equatable, Copyable, Movable, Implic
                 data[i] = min + (rng.float64().cast[Self.T]() * delta)
             else:
                 data[i] = min + (rng.float32().cast[Self.T]() * delta)
-        return Self(data.copy())
+        return Self(data^)
 
     fn __str__(self) -> String:
         """Readable representation of the vector."""

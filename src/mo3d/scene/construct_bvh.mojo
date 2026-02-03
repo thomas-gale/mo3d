@@ -19,10 +19,13 @@ from mo3d.math.mat import RotMat
 from mo3d.math.interval import Interval
 
 @fieldwise_init
-struct HittableEntity[T : DType, dim : Int](Hittable, Copyable, Movable):
+struct HittableEntity[_T: DType, _dim: Int](Hittable, Copyable, Movable):
     """
     The needed data from hittable entities to trace them.
     """
+    comptime T = Self._T
+    comptime dim = Self._dim
+
     var geometry : Geometry[Self.T, Self.dim]
     var material : Material[Self.T, Self.dim]
     var position : Point[Self.T, Self.dim]
@@ -49,7 +52,10 @@ struct HittableEntity[T : DType, dim : Int](Hittable, Copyable, Movable):
         return hit
 
 @fieldwise_init
-struct BVHSplit[T: DType, dim: Int, H: Hittable](Hittable, Copyable, Movable):
+struct BVHSplit[_T: DType, _dim: Int, H: Hittable](Hittable, Copyable, Movable):
+    comptime T = Self._T
+    comptime dim = Self._dim
+
     var left : ArcPointer[BVHNode[Self.T, Self.dim, Self.H]]
     var right : ArcPointer[BVHNode[Self.T, Self.dim, Self.H]]
 
@@ -61,7 +67,7 @@ struct BVHSplit[T: DType, dim: Int, H: Hittable](Hittable, Copyable, Movable):
     fn hit(
         self,
         r: Ray[Self.T, Self.dim],
-        owned ray_t: Interval[Self.T],
+        var ray_t: Interval[Self.T],
         mut rec: HitRecord[Self.T, Self.dim]
     ) -> Bool:
         var hit_left = self.left[].hit(r, ray_t, rec)
@@ -73,10 +79,14 @@ struct BVHSplit[T: DType, dim: Int, H: Hittable](Hittable, Copyable, Movable):
         return hit_left or hit_right
 
 @fieldwise_init
-struct BVHNode[T: DType, dim: Int, H: Hittable](Copyable, Hittable, ImplicitlyCopyable, Movable):
+struct BVHNode[_T: DType, _dim: Int, H: Hittable](Copyable, Hittable, ImplicitlyCopyable, Movable):
+    comptime T = Self._T
+    comptime dim = Self._dim
+
     comptime Variant = Variant[
         BVHSplit[Self.T, Self.dim, Self.H], 
         Self.H]
+
     var _wrapped: Self.Variant
     var box : AABB[Self.T, Self.dim]
 

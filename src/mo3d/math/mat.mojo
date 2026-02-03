@@ -37,7 +37,7 @@ struct Mat[T: DType, dim: Int](Copyable, ImplicitlyCopyable, Movable, Stringable
                     result[i][j] = Scalar[Self.T](1)
                 else:
                     result[i][j] = Scalar[Self.T](0)
-        return result.copy() # TODO - Check me, performance
+        return result^
 
     fn __getitem__(self, index: Int) -> Vec[Self.T, Self.dim]:
         var result = Vec[Self.T, Self.dim]()

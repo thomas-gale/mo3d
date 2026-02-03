@@ -20,15 +20,18 @@ fn sign[T: DType](num : Scalar[T]) -> Scalar[T]:
     else:
         return 1
 
-struct AABB[T: DType, dim: Int](Hittable, Copyable, Movable):
+struct AABB[_T: DType, _dim: Int](Hittable):
+    comptime T = Self._T
+    comptime dim = Self._dim
+
     var _bounds: InlineArray[Interval[Self.T, 1], Self.dim]
 
     fn __init__(out self):
-        self._bounds = InlineArray[Interval[Self.T, 1], Self.dim](Interval[Self.T, 1]())
+        self._bounds = InlineArray[Interval[Self.T, 1], Self.dim](fill=Interval[Self.T, 1]())
 
     fn __init__(out self, a: Point[Self.T, Self.dim], b: Point[Self.T, Self.dim]):
         self._bounds = InlineArray[Interval[Self.T, 1], Self.dim](
-            unsafe_uninitialized=True
+            uninitialized=True
         )
         @parameter
         for i in range(Self.dim):
@@ -39,20 +42,20 @@ struct AABB[T: DType, dim: Int](Hittable, Copyable, Movable):
 
     fn __init__(out self, var box_a: Self, var box_b: Self):
         self._bounds = InlineArray[Interval[Self.T, 1], Self.dim](
-            unsafe_uninitialized=True
+            uninitialized=True
         )
         @parameter
-        for i in range(dim):
-            self._bounds[i] = Interval[T, 1](box_a._bounds[i], box_b._bounds[i])
-
-    fn __add__(self, vec: Vec[T, dim]) -> Self:
+        for i in range(Self.dim):
+            self._bounds[i] = Interval[Self.T, 1](box_a._bounds[i], box_b._bounds[i])
+ 
+    fn __add__(self, vec: Vec[Self.T, Self.dim]) -> Self:
         var new_box = Self()
         @parameter
         for i in range(dim):
             new_box._bounds[i] = self._bounds[i] + vec[i]
         return new_box
 
-    fn center(self) -> Vec[T, dim]:
+    fn center(self) -> Vec[Self.T, Self.dim]:
         var res = Vec[T, dim](0)
         @parameter
         for i in range(dim):
@@ -66,32 +69,32 @@ struct AABB[T: DType, dim: Int](Hittable, Copyable, Movable):
             new_box._bounds[i] = self._bounds[i]
         return new_box
 
-    fn merge_in(inout self, vec : Vec[T, dim]):
+    fn merge_in(inout self, vec : Vec[Self.T, Self.dim]):
         @parameter
         for i in range(dim):
             self._bounds[i].merge_in(vec[i])
 
-    fn merge_in(inout self, aabb : AABB[T, dim]):
+    fn merge_in(inout self, aabb : AABB[Self.T, Self.dim]):
         @parameter
         for i in range(dim):
             self._bounds[i].merge_in(aabb._bounds[i])
 
-    fn pad_to(inout self, min : Scalar[T]):
+    fn pad_to(inout self, min : Scalar[Self.T]):
         @parameter
         for i in range(dim):
             if (self._bounds[i].size() < min):
                 self._bounds[i] = self._bounds[i].expand(min / 2)
 
 
-    fn axis_interval(self, n: Int) -> Interval[T, 1]:
+    fn axis_interval(self, n: Int) -> Interval[Self.T, 1]:
         if n < 0 or n >= dim:
             print("Invalid axis index")
-            return Interval[T, 1]()
+            return Interval[Self.T, 1]()
         return self._bounds[n]
 
     fn longest_axis(self) -> Int:
         # Returns the index of the longest axis of the bounding box.
-        var longest_size: Scalar[T] = 0
+        var longest_size: Scalar[Self.T] = 0
         var longest_axis = 0
         @parameter
         for i in range(dim):
@@ -108,12 +111,12 @@ struct AABB[T: DType, dim: Int](Hittable, Copyable, Movable):
         return self._bounds[axis].min < other._bounds[axis].min
 
     # Ideally use some form of parameterisation to make the recording optional
-    fn any_hit(self, r: Ray[T, dim], owned ray_t: Interval[T, 1]) -> Bool:
+    fn any_hit(self, r: Ray[Self.T, Self.dim], var ray_t: Interval[Self.T, 1]) -> Bool:
         """
         Check if the ray intersects the bounding box.
         """
         @parameter
-        for axis in range(dim):
+        for axis in range(Self.dim):
             var ax = self.axis_interval(axis)
             var adinv = 1.0 / r.dir[axis]
 
@@ -135,10 +138,10 @@ struct AABB[T: DType, dim: Int](Hittable, Copyable, Movable):
                 return False
         return True
 
-    fn aabb[T: DType, dim: Int](self) -> AABB[T,dim]:
-        return rebind[AABB[T, dim]](self)
+    fn aabb(self) -> AABB[Self.T, Self.dim]:
+        return rebind[AABB[Self.T, Self.dim]](self)
 
-    fn hit[T: DType, dim: Int](self, r: Ray[T, dim], owned ray_t: Interval[T, 1], inout rec: HitRecord[T, dim]) -> Bool:
+    fn hit(self, r: Ray[Self.T, Self.dim], var ray_t: Interval[Self.T, 1], mut rec: HitRecord[Self.T, Self.dim]) -> Bool:
         """
         Check if the ray intersects the bounding box.
         """

@@ -263,7 +263,7 @@ struct ComponentStore[T: DType, dim: Int](Copyable, Movable):
         var component_ids = List[ComponentID]()
         for component in components:
             component_ids.append(self.add_component(entity_id, component))
-        return component_ids
+        return component_ids^
 
     fn add_components(
         mut self,
@@ -272,8 +272,8 @@ struct ComponentStore[T: DType, dim: Int](Copyable, Movable):
     ) raises -> List[ComponentID]:
         var component_ids = List[ComponentID]()
         for component in components:
-            component_ids.append(self.add_component(entity_id, component[]))
-        return component_ids
+            component_ids.append(self.add_component(entity_id, component))
+        return component_ids^
 
     fn entity_has_components(
         self, entity_id: EntityID, component_type_mask: ComponentTypeID
@@ -301,9 +301,9 @@ struct ComponentStore[T: DType, dim: Int](Copyable, Movable):
         var entities = List[EntityID]()
         for entity_id in self.entity_to_component_type_mask:
             # Queried component type mask is a subset of the entity's component type mask.
-            if self.entity_has_components(entity_id[], component_type_mask):
-                entities.append(entity_id[])
-        return entities
+            if self.entity_has_components(entity_id, component_type_mask):
+                entities.append(entity_id)
+        return entities^
 
     fn _dump_py_json(self) raises -> PythonObject:
         """

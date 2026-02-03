@@ -17,16 +17,17 @@ from python import Python
 from python import PythonObject
 
 
-# Unfortunatly traits currently cant have parameters thus
-# we have to have fully generic trait methods and rebind in the
-# implementing classes
 trait Hittable(Copyable, Movable):
     """
     The trait to be implemented by all entities that are to be tracable
     (so hit by rays).
     """
 
-    fn aabb[T: DType, dim: Int](self) -> AABB[T, dim]:
+    # Work around due to traits not supported generic parameterisation
+    comptime T: DType
+    comptime dim: Int
+
+    fn aabb(self) -> AABB[Self.T, Self.dim]:
         """
         Produce a AABB that bounds the hittable.
 
@@ -37,13 +38,11 @@ trait Hittable(Copyable, Movable):
         """
         ...
 
-    fn hit[
-        T: DType, dim: Int
-    ](
+    fn hit(
         self,
-        r: Ray[T, dim],
-        owned ray_t: Interval[T],
-        mut rec: HitRecord[T, dim],
+        r: Ray[Self.T, Self.dim],
+        var ray_t: Interval[Self.T],
+        mut rec: HitRecord[Self.T, Self.dim],
     ) -> Bool:
         """
         Detect if a given ray (r) hits the geometry in the parameter range (ray_t).
@@ -54,12 +53,15 @@ trait Hittable(Copyable, Movable):
         ...
 
 
-struct Geometry[T: DType, dim: Int](Copyable, ImplicitlyCopyable, Movable, Hittable):
+struct Geometry[_T: DType, _dim: Int](Copyable, ImplicitlyCopyable, Movable, Hittable):
     """
     If is not possible to dispatch dynamically on a trait yet in mojo
     for now we make a varient type for the instances of hittable that we
     will want to support and make a manual dispatch chain.
     """
+
+    comptime T = Self._T
+    comptime dim = Self._dim  
 
     comptime Variant = Variant[Sphere[Self.T, Self.dim], AABB[Self.T, Self.dim], Triangle[Self.T], Mesh[Self.T]]
     var _hittable: Self.Variant
@@ -89,35 +91,33 @@ struct Geometry[T: DType, dim: Int](Copyable, ImplicitlyCopyable, Movable, Hitta
             print("Geometry aabb: Unsupported geometry type")
             return AABB[T, dim]()
 
-    fn hit[
-        T: DType, dim: Int
-    ](
+    fn hit(
         self,
-        r: Ray[T, dim],
-        owned ray_t: Interval[T],
-        inout rec: HitRecord[T, dim],
+        r: Ray[Self.T, Self.dim],
+        var ray_t: Interval[Self.T],
+        mut rec: HitRecord[Self.T, Self.dim],
     ) -> Bool:
-        if self._hittable.isa[Sphere[T, dim]]():
-            return self._hittable[Sphere[T, dim]].hit(r, ray_t, rec)
-        elif self._hittable.isa[AABB[T, dim]]():
-            return self._hittable[AABB[T, dim]].hit(r, ray_t, rec)
-        elif self._hittable.isa[Triangle[T]]():
-            return self._hittable[Triangle[T]].hit(r, ray_t, rec)
-        elif self._hittable.isa[Mesh[T]]():
-            return self._hittable[Mesh[T]].hit(r, ray_t, rec)
+        if self._hittable.isa[Sphere[Self.T, Self.dim]]():
+            return self._hittable[Sphere[Self.T, Self.dim]].hit(r, ray_t, rec)
+        elif self._hittable.isa[AABB[Self.T, Self.dim]]():
+            return self._hittable[AABB[Self.T, Self.dim]].hit(r, ray_t, rec)
+        elif self._hittable.isa[Triangle[Self.T]]():
+            return self._hittable[Triangle[Self.T]].hit(r, ray_t, rec)
+        elif self._hittable.isa[Mesh[Self.T]]():
+            return self._hittable[Mesh[Self.T]].hit(r, ray_t, rec)
         else:
             print("Hittable hit: Unsupported hittable type")
             return False
 
     fn __str__(self) -> String:
-        if self._hittable.isa[Sphere[T, dim]]():
-            return str(self._hittable[Sphere[T, dim]])
-        elif self._hittable.isa[AABB[T, dim]]():
-            return str(self._hittable[AABB[T, dim]])
-        elif self._hittable.isa[Triangle[T]]():
-            return str(self._hittable[Triangle[T]])
-        elif self._hittable.isa[Mesh[T]]():
-            return str(self._hittable[Mesh[T]])
+        if self._hittable.isa[Sphere[Self.T, Self.dim]]():
+            return str(self._hittable[Sphere[Self.T, Self.dim]])
+        elif self._hittable.isa[AABB[Self.T, Self.dim]]():
+            return str(self._hittable[AABB[Self.T, Self.dim]])
+        elif self._hittable.isa[Triangle[Self.T]]():
+            return str(self._hittable[Triangle[Self.T]])
+        elif self._hittable.isa[Mesh[Self.T]]():
+            return str(self._hittable[Mesh[Self.T]])
         else:
             return "Geometry(Unknown)"
 
@@ -127,11 +127,11 @@ struct Geometry[T: DType, dim: Int](Copyable, ImplicitlyCopyable, Movable, Hitta
         Python object representing the item to dump out to json
         """
         var data : PythonObject
-        if self._hittable.isa[Sphere[T, dim]]():
-            data = self._hittable[Sphere[T, dim]]._dump_py_json()
+        if self._hittable.isa[Sphere[Self.T, Self.dim]]():
+            data = self._hittable[Sphere[Self.T, Self.dim]]._dump_py_json()
             data["type"] = "sphere"
-        elif self._hittable.isa[AABB[T, dim]]():
-            data = self._hittable[AABB[T, dim]]._dump_py_json()
+        elif self._hittable.isa[AABB[Self.T, Self.dim]]():
+            data = self._hittable[AABB[Self.T, Self.dim]]._dump_py_json()
             data["type"] = "aabb"
         else:
             data = Python.dict()
@@ -145,8 +145,8 @@ struct Geometry[T: DType, dim: Int](Copyable, ImplicitlyCopyable, Movable, Hitta
         """
         var type = str(py_obj["type"])
         if type == "sphere":
-            return Self(Sphere[T, dim]._load_py_json(py_obj))
+            return Self(Sphere[Self.T, Self.dim]._load_py_json(py_obj))
         elif type == "aabb":
-            return Self(AABB[T, dim]._load_py_json(py_obj))
+            return Self(AABB[Self.T, Self.dim]._load_py_json(py_obj))
         else:
             raise Error("Unknown geometry")

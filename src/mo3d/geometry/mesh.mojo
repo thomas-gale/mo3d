@@ -69,10 +69,10 @@ struct Mesh[T : DType](Hittable):
         return Mesh[Self.T](tris)
 
 
-    fn aabb[T : DType, dim : Int](self) -> AABB[T, dim]:
-        return self._triangles.aabb[T, dim]()
+    fn aabb[Self.T : DType, Self.dim : Int](self) -> AABB[Self.T, Self.dim]:
+        return self._triangles.aabb[Self.T, Self.dim]()
 
-    fn hit[T : DType, dim : Int](
+    fn hit[Self.T: DType, Self.dim: Int](
         self,
         r: Ray[T, dim],
         owned ray_t: Interval[T],

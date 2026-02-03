@@ -30,14 +30,14 @@ fn sample_scene_3d[T: DType](mut store: ComponentStore[T, 3], grid_size: Int = 1
         return min + (rng.float64().cast[T]() * (max - min))
 
     # Ground
-    var tex_ground_light = Texture[T, dim](
+    var tex_ground_light_ptr = ArcPointer(Texture[T, dim](
         Solid[T, dim](Color4[T](0.8, 0.8, 0.8))
-    )
-    var tex_ground_dark = Texture[T, dim](
+    ))
+    var tex_ground_dark_ptr = ArcPointer(Texture[T, dim](
         Solid[T, dim](Color4[T](0.15, 0.7, 0.15))
-    )
+    ))
     var tex_ground = Texture[T, dim](
-        Checker(tex_ground_light, tex_ground_dark, 0.4)
+        Checker(tex_ground_light_ptr, tex_ground_dark_ptr, 0.4)
     )
     var mat_ground = Material[T, dim](
         Lambertian[T, dim](tex_ground)

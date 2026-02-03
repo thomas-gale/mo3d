@@ -22,8 +22,8 @@ from python import Python
 from python.python_object import PythonObject
 
 
-@value
-struct ComponentStore[T: DType, dim: Int]:
+@fieldwise_init
+struct ComponentStore[T: DType, dim: Int](Copyable, Movable):
     """
     It will be nice to move the component store data to some variadic comptime SoA design.
     While experimenting with Proof of Concept, I will keep it simple and have hardcoded component lists for each component type.
@@ -33,12 +33,12 @@ struct ComponentStore[T: DType, dim: Int]:
     """
 
     comptime ComponentVariants = Variant[
-        PositionComponent[T, Self.dim],
-        VelocityComponent[T, Self.dim],
-        OrientationComponent[T, Self.dim],
-        GeometryComponent[T, Self.dim],
-        MaterialComponent[T, Self.dim],
-        BoundingBoxComponent[T, Self.dim]
+        PositionComponent[Self.T, Self.dim],
+        VelocityComponent[Self.T, Self.dim],
+        OrientationComponent[Self.T, Self.dim],
+        GeometryComponent[Self.T, Self.dim],
+        MaterialComponent[Self.T, Self.dim],
+        BoundingBoxComponent[Self.T, Self.dim]
     ]
 
     var position_components: List[PositionComponent[Self.T, Self.dim]]
@@ -207,7 +207,7 @@ struct ComponentStore[T: DType, dim: Int]:
 
         return component_id
 
-    fn create_entity(inout self) -> EntityID:
+    fn create_entity(mut self) -> EntityID:
         """
         This implementation is not thread safe.
         """
@@ -219,7 +219,7 @@ struct ComponentStore[T: DType, dim: Int]:
         return entity_id
 
     fn add_component(
-        inout self, entity_id: EntityID, component: Self.ComponentVariants
+        mut self, entity_id: EntityID, component: Self.ComponentVariants
     ) raises -> ComponentID:
         """
         This implementation is probably not thread safe.
@@ -256,7 +256,7 @@ struct ComponentStore[T: DType, dim: Int]:
             raise Error("Unknown component type")
 
     fn add_components(
-        inout self,
+        mut self,
         entity_id: EntityID,
         components: List[Self.ComponentVariants],
     ) raises -> List[ComponentID]:
@@ -266,7 +266,7 @@ struct ComponentStore[T: DType, dim: Int]:
         return component_ids
 
     fn add_components(
-        inout self,
+        mut self,
         entity_id: EntityID,
         *components: Self.ComponentVariants,
     ) raises -> List[ComponentID]:

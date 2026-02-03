@@ -20,26 +20,25 @@ fn sign[T: DType](num : Scalar[T]) -> Scalar[T]:
     else:
         return 1
 
-@value
 struct AABB[T: DType, dim: Int](Hittable, Copyable, Movable):
-    var _bounds: InlineArray[Interval[T, 1], dim]
+    var _bounds: InlineArray[Interval[Self.T, 1], Self.dim]
 
-    fn __init__(inout self):
-        self._bounds = InlineArray[Interval[T, 1], dim](Interval[T, 1]())
+    fn __init__(out self):
+        self._bounds = InlineArray[Interval[Self.T, 1], Self.dim](Interval[Self.T, 1]())
 
-    fn __init__(inout self, a: Point[T, dim], b: Point[T, dim]):
-        self._bounds = InlineArray[Interval[T, 1], dim](
+    fn __init__(out self, a: Point[Self.T, Self.dim], b: Point[Self.T, Self.dim]):
+        self._bounds = InlineArray[Interval[Self.T, 1], Self.dim](
             unsafe_uninitialized=True
         )
         @parameter
-        for i in range(dim):
+        for i in range(Self.dim):
             if a[i] < b[i]:
-                self._bounds[i] = Interval[T, 1](a[i], b[i])
+                self._bounds[i] = Interval[Self.T, 1](a[i], b[i])
             else:
-                self._bounds[i] = Interval[T, 1](b[i], a[i])
+                self._bounds[i] = Interval[Self.T, 1](b[i], a[i])
 
-    fn __init__(inout self, owned box_a: Self, owned box_b: Self):
-        self._bounds = InlineArray[Interval[T, 1], dim](
+    fn __init__(out self, var box_a: Self, var box_b: Self):
+        self._bounds = InlineArray[Interval[Self.T, 1], Self.dim](
             unsafe_uninitialized=True
         )
         @parameter

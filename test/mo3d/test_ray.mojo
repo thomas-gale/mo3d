@@ -1,5 +1,5 @@
 from math import inf, log2
-from testing import assert_equal, assert_true
+from testing import assert_equal, assert_true, TestSuite
 
 from mo3d.math.interval import Interval
 from mo3d.math.vec import Vec
@@ -88,3 +88,6 @@ fn test_hit_entity_50_range_sphere_scene() raises:
     var hit = bvh.hit( r, ray_t, rec)
     assert_equal(hit, True)
     assert_true(Scalar[f32](rec.hits) < 5*log2(Scalar[f32](size)))
+
+fn main() raises:
+    TestSuite.discover_tests[__functions_in_module()]().run()

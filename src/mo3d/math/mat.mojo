@@ -8,7 +8,7 @@ from python import Python
 from python import PythonObject
 
 
-struct Mat[T: DType, dim: Int](Stringable, Copyable, Movable):
+struct Mat[T: DType, dim: Int](Copyable, ImplicitlyCopyable, Movable, Stringable):
     var _data: InlineArray[Scalar[Self.T], Self.dim * Self.dim]
 
     fn __init__(out self):

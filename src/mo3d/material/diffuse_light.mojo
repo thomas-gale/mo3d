@@ -8,21 +8,21 @@ from mo3d.random.rng import Rng
 from python import Python
 from python import PythonObject
 
-@value
-struct DiffuseLight[T: DType, dim: Int](CollectionElement):
-    var emit: Color4[T]
+@fieldwise_init
+struct DiffuseLight[T: DType, dim: Int](Copyable, Movable):
+    var emit: Color4[Self.T]
 
     fn scatter(
         self,
         mut rng : Rng,
-        r_in: Ray[T, dim],
-        rec: HitRecord[T, dim],
-        mut attenuation: Color4[T],
-        mut scattered: Ray[T, dim],
+        r_in: Ray[Self.T, Self.dim],
+        rec: HitRecord[Self.T, Self.dim],
+        mut attenuation: Color4[Self.T],
+        mut scattered: Ray[Self.T, Self.dim],
     ) -> Bool:
         return False
 
-    fn emission(self, rec : HitRecord[T,dim]) -> Color4[T]:
+    fn emission(self, rec : HitRecord[Self.T, Self.dim]) -> Color4[Self.T]:
         return self.emit
 
     fn __str__(self) -> String:
@@ -41,5 +41,5 @@ struct DiffuseLight[T: DType, dim: Int](CollectionElement):
         """
         Load from python object representing the item dumped out to json
         """
-        return DiffuseLight[T,dim](
-            Color4[T]._load_py_json(py_obj["emit"]))
+        return DiffuseLight[Self.T, Self.dim](
+            Color4[Self.T]._load_py_json(py_obj["emit"]))

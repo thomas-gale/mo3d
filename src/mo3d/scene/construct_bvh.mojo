@@ -23,46 +23,46 @@ struct HittableEntity[T : DType, dim : Int](Hittable, Copyable, Movable):
     """
     The needed data from hittable entities to trace them.
     """
-    var geometry : Geometry[T, dim]
-    var material : Material[T, dim]
-    var position : Point[T, dim]
-    var orientation : Optional[RotMat[T, dim]]
+    var geometry : Geometry[Self.T, Self.dim]
+    var material : Material[Self.T, Self.dim]
+    var position : Point[Self.T, Self.dim]
+    var orientation : Optional[RotMat[Self.T, Self.dim]]
 
-    fn aabb[T : DType, dim : Int](self) -> AABB[T, dim]:
-        return rebind[AABB[T, dim]](
+    fn aabb(self) -> AABB[Self.T, Self.dim]:
+        return rebind[AABB[Self.T, Self.dim]](
             self.geometry.aabb[Self.T, Self.dim]() + self.position
         )
 
-    fn hit[T : DType, dim : Int](
+    fn hit(
         self,
-        r: Ray[T, dim],
-        owned ray_t: Interval[T],
-        mut rec: HitRecord[T, dim]
+        r: Ray[Self.T, Self.dim],
+        owned ray_t: Interval[Self.T],
+        mut rec: HitRecord[Self.T, Self.dim]
     ) -> Bool:
-        var p = rebind[Point[T, dim]](self.position)
+        var p = rebind[Point[Self.T, Self.dim]](self.position)
         var local_ray = r.offset(-p)
         var hit = self.geometry.hit(local_ray, ray_t, rec)
         if hit:
             rec.p += p
-            rec.mat = rebind[Material[T, dim]](self.material)
+            rec.mat = rebind[Material[Self.T, Self.dim]](self.material)
             rec.hits += 1
         return hit
 
 @fieldwise_init
-struct BVHSplit[T: DType, dim: Int, H : Hittable](Hittable, Copyable, Movable):
+struct BVHSplit[T: DType, dim: Int, H: Hittable](Hittable, Copyable, Movable):
     var left : ArcPointer[BVHNode[Self.T, Self.dim, Self.H]]
     var right : ArcPointer[BVHNode[Self.T, Self.dim, Self.H]]
 
-    fn aabb[T : DType, dim : Int](self) -> AABB[T, dim]:
+    fn aabb(self) -> AABB[T, dim]:
         var box = self.left[].aabb[Self.T, Self.dim]()
         box.merge_in(self.right[].aabb[Self.T, Self.dim]())
-        return rebind[AABB[T, dim]](box)
+        return rebind[AABB[Self.T, Self.dim]](box)
 
-    fn hit[T : DType, dim : Int](
+    fn hit(
         self,
-        r: Ray[T, dim],
-        owned ray_t: Interval[T],
-        mut rec: HitRecord[T, dim]
+        r: Ray[Self.T, Self.dim],
+        owned ray_t: Interval[Self.T],
+        mut rec: HitRecord[Self.T, Self.dim]
     ) -> Bool:
         var hit_left = self.left[].hit(r, ray_t, rec)
         var hit_right = self.right[].hit(
@@ -73,12 +73,12 @@ struct BVHSplit[T: DType, dim: Int, H : Hittable](Hittable, Copyable, Movable):
         return hit_left or hit_right
 
 @fieldwise_init
-struct BVHNode[T: DType, dim: Int, H : Hittable](Hittable, Copyable, Movable):
+struct BVHNode[T: DType, dim: Int, H: Hittable](Copyable, Hittable, ImplicitlyCopyable, Movable):
     comptime Variant = Variant[
-        BVHSplit[T, dim, H], 
-        H]
+        BVHSplit[Self.T, Self.dim, Self.H], 
+        Self.H]
     var _wrapped: Self.Variant
-    var box : AABB[T, dim]
+    var box : AABB[Self.T, Self.dim]
 
     fn count_hittables(self) -> Int:
         if self._wrapped.isa[BVHSplit[Self.T, Self.dim, Self.H]]():
@@ -92,14 +92,14 @@ struct BVHNode[T: DType, dim: Int, H : Hittable](Hittable, Copyable, Movable):
         else:
             return 0
 
-    fn aabb[T : DType, dim : Int](self) -> AABB[T, dim]:
+    fn aabb(self) -> AABB[Self.T, Self.dim]:
         return rebind[AABB[T, dim]](self.box)
 
-    fn hit[T : DType, dim : Int](
+    fn hit(
         self,
-        r: Ray[T, dim],
-        owned ray_t: Interval[T],
-        mut rec: HitRecord[T, dim]
+        r: Ray[Self.T, Self.dim],
+        var ray_t: Interval[Self.T],
+        mut rec: HitRecord[Self.T, Self.dim]
     ) -> Bool:
         var r_int = rebind[Ray[Self.T, Self.dim]](r)
         var ray_t_int = rebind[Interval[Self.T]](ray_t)
@@ -197,18 +197,18 @@ fn construct_bvh_store[
     var hittables = List[HittableEntity[T, dim]]()
     for entity_id in entity_ids:
         var geometry = store.geometry_components[
-            store.entity_to_components[entity_id[]][ComponentType.Geometry]
+            store.entity_to_components[entity_id][ComponentType.Geometry]
         ]
         var material = store.material_components[
-            store.entity_to_components[entity_id[]][ComponentType.Material]
+            store.entity_to_components[entity_id][ComponentType.Material]
         ]
         var position = store.position_components[
-            store.entity_to_components[entity_id[]][ComponentType.Position]
+            store.entity_to_components[entity_id][ComponentType.Position]
         ]
         var orientation = Optional[RotMat[T, dim]]();
-        if (store.entity_has_components(entity_id[], ComponentType.Orientation)):
+        if (store.entity_has_components(entity_id, ComponentType.Orientation)):
             orientation = store.orientation_components[
-                store.entity_to_components[entity_id[]][ComponentType.Orientation]
+                store.entity_to_components[entity_id][ComponentType.Orientation]
             ]
         hittables.append(HittableEntity(geometry, material, position, orientation))
 

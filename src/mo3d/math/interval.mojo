@@ -1,10 +1,8 @@
-from collections import CollectionElement
 from math import inf
 
-
-@value
-struct Interval[T: DType, simd_size: Int = 1](CollectionElement):
-    comptime S = SIMD[T, simd_size]
+@fieldwise_init
+struct Interval[T: DType, simd_size: Int = 1](Copyable, ImplicitlyCopyable, Movable):
+    comptime S = SIMD[Self.T, Self.simd_size]
     var min: Self.S
     var max: Self.S
 
@@ -12,8 +10,8 @@ struct Interval[T: DType, simd_size: Int = 1](CollectionElement):
         """
         Default constructor (empty interval).
         """
-        self.min = Self.S(inf[T]())
-        self.max = Self.S(-inf[T]())
+        self.min = Self.S(inf[Self.T]())
+        self.max = Self.S(-inf[Self.T]())
 
     fn __init__(out self, other: Self):
         """

@@ -54,38 +54,37 @@ trait Hittable(Copyable, Movable):
         ...
 
 
-@value
-struct Geometry[T: DType, dim: Int](Hittable):
+struct Geometry[T: DType, dim: Int](Copyable, ImplicitlyCopyable, Movable, Hittable):
     """
     If is not possible to dispatch dynamically on a trait yet in mojo
     for now we make a varient type for the instances of hittable that we
     will want to support and make a manual dispatch chain.
     """
 
-    comptime Variant = Variant[Sphere[T, dim], AABB[T, dim], Triangle[T], Mesh[T]]
+    comptime Variant = Variant[Sphere[Self.T, Self.dim], AABB[Self.T, Self.dim], Triangle[Self.T], Mesh[Self.T]]
     var _hittable: Self.Variant
 
-    fn __init__(inout self, hittable: Self.Variant) raises:
-        if hittable.isa[Sphere[T, dim]]():
+    fn __init__(out self, hittable: Self.Variant) raises:
+        if hittable.isa[Sphere[Self.T, Self.dim]]():
             self._hittable = hittable
-        elif hittable.isa[AABB[T, dim]]():
+        elif hittable.isa[AABB[Self.T, Self.dim]]():
             self._hittable = hittable
-        elif hittable.isa[Triangle[T]]():
+        elif hittable.isa[Triangle[Self.T]]():
             self._hittable = hittable
-        elif hittable.isa[Mesh[T]]():
+        elif hittable.isa[Mesh[Self.T]]():
             self._hittable = hittable
         else:
             raise Error("Geometry c'tor: Unsupported geometry type")
 
-    fn aabb[T: DType, dim: Int](self) -> AABB[T, dim]:
-        if self._hittable.isa[Sphere[T, dim]]():
-            return self._hittable[Sphere[T, dim]].aabb[T, dim]()
-        elif self._hittable.isa[AABB[T, dim]]():
-            return self._hittable[AABB[T, dim]].aabb[T, dim]()
-        elif self._hittable.isa[Triangle[T]]():
-            return self._hittable[Triangle[T]].aabb[T, dim]()
-        elif self._hittable.isa[Mesh[T]]():
-            return self._hittable[Mesh[T]].aabb[T, dim]()
+    fn aabb(self) -> AABB[Self.T, Self.dim]:
+        if self._hittable.isa[Sphere[Self.T, Self.dim]]():
+            return self._hittable[Sphere[Self.T, Self.dim]].aabb[Self.T, Self.dim]()
+        elif self._hittable.isa[AABB[Self.T, Self.dim]]():
+            return self._hittable[AABB[Self.T, Self.dim]].aabb[Self.T, Self.dim]()
+        elif self._hittable.isa[Triangle[Self.T]]():
+            return self._hittable[Triangle[Self.T]].aabb[Self.T, Self.dim]()
+        elif self._hittable.isa[Mesh[Self.T]]():
+            return self._hittable[Mesh[Self.T]].aabb[Self.T, Self.dim]()
         else:
             print("Geometry aabb: Unsupported geometry type")
             return AABB[T, dim]()

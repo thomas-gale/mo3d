@@ -10,19 +10,19 @@ from mo3d.random.rng import Rng
 from python import Python
 from python import PythonObject
 
-@value
+@fieldwise_init
 struct Dielectric[T: DType, dim: Int](Copyable, Movable):
-    var refraction_index: Scalar[T]
+    var refraction_index: Scalar[Self.T]
 
     fn scatter(
         self,
         mut rng : Rng,
-        r_in: Ray[T, dim],
-        rec: HitRecord[T, dim],
-        mut attenuation: Color4[T],
-        mut scattered: Ray[T, dim],
+        r_in: Ray[Self.T, Self.dim],
+        rec: HitRecord[Self.T, Self.dim],
+        mut attenuation: Color4[Self.T],
+        mut scattered: Ray[Self.T, Self.dim],
     ) -> Bool:
-        attenuation = Color4[T](1.0)
+        attenuation = Color4[Self.T](1.0)
         var ri = (
             1.0 / self.refraction_index
         ) if rec.front_face else self.refraction_index
@@ -33,21 +33,21 @@ struct Dielectric[T: DType, dim: Int](Copyable, Movable):
         var sin_theta = sqrt(1.0 - cos_theta * cos_theta)
 
         var cannot_refract = ri * sin_theta > 1.0
-        var direction = Vec[T, dim]()
+        var direction = Vec[Self.T, Self.dim]()
 
         if (
             cannot_refract
-            or Self.reflectance(cos_theta, ri) > rng.float64().cast[T]()
+            or Self.reflectance(cos_theta, ri) > rng.float64().cast[Self.T]()
         ):
-            direction = Vec[T, dim].reflect(unit_direction, rec.normal)
+            direction = Vec[Self.T, Self.dim].reflect(unit_direction, rec.normal)
         else:
-            direction = Vec[T, dim].refract(unit_direction, rec.normal, ri)
+            direction = Vec[Self.T, Self.dim].refract(unit_direction, rec.normal, ri)
 
-        scattered = Ray[T, dim](rec.p, direction, r_in.tm)
+        scattered = Ray[Self.T, Self.dim](rec.p, direction, r_in.tm)
         return True
 
     @staticmethod
-    fn reflectance(cosine: Scalar[T], refraction_index: Scalar[T]) -> Scalar[T]:
+    fn reflectance(cosine: Scalar[Self.T], refraction_index: Scalar[Self.T]) -> Scalar[Self.T]:
         """
         Use Schlick's approximation for reflectance.
         """
@@ -55,8 +55,8 @@ struct Dielectric[T: DType, dim: Int](Copyable, Movable):
         r0 = r0 * r0
         return r0 + (1 - r0) * pow((1 - cosine), 5)
 
-    fn emission(self, rec : HitRecord[T,dim]) raises -> Color4[T]:
-        return Color4[T](0, 0, 0)
+    fn emission(self, rec : HitRecord[Self.T, Self.dim]) raises -> Color4[Self.T]:
+        return Color4[Self.T](0, 0, 0)
 
     fn __str__(self) -> String:
         return (
@@ -76,5 +76,5 @@ struct Dielectric[T: DType, dim: Int](Copyable, Movable):
         """
         Load from python object representing the item dumped out to json
         """
-        return Dielectric[T,dim](
-            float(py_obj["refration_index"]).cast[T]())
+        return Dielectric[Self.T, Self.dim](
+            float(py_obj["refration_index"]).cast[Self.T]())

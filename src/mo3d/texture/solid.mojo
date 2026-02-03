@@ -5,8 +5,9 @@ from mo3d.math.point import Point
 from python import Python
 from python import PythonObject
 
+@fieldwise_init
 struct Solid[T: DType, dim: Int](Copyable, Movable):
-    var colour : Color4[T]
+    var colour : Color4[Self.T]
 
     fn value(
         self, u: Scalar[Self.T], v: Scalar[Self.T], p: Point[Self.T, Self.dim]

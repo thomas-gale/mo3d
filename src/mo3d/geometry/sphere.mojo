@@ -16,38 +16,37 @@ from mo3d.material.lambertian import Lambertian
 from python import Python
 from python import PythonObject
 
-@value
-struct Sphere[T: DType, dim: Int](Hittable):
+struct Sphere[T: DType, dim: Int](Copyable, Hittable, ImplicitlyCopyable, Movable):
     """
     A n-dimensional sphere.
     """
 
-    var _radius: Scalar[T]
+    var _radius: Scalar[Self.T]
 
     fn __init__(
-        inout self,
-        radius: Scalar[T],
+        out self,
+        radius: Scalar[Self.T],
     ):
         """
         Sphere defined by center position and radius.
         """
         self._radius = radius
 
-    fn aabb[T : DType, dim : Int](self) -> AABB[T, dim]:
+    fn aabb(self) -> AABB[Self.T, Self.dim]:
         """
         Generate an axis-aligned bounding box for the sphere.
         """
-        var rvec = Vec[T, dim](rebind[Scalar[T]](self._radius))
-        return AABB[T, dim](
+        var rvec = Vec[Self.T, Self.dim](rebind[Scalar[Self.T]](self._radius))
+        return AABB[Self.T, Self.dim](
             -rvec,
             rvec,
         )
 
-    fn hit[T : DType, dim : Int](
+    fn hit(
         self,
-        r: Ray[T, dim],
-        owned ray_t: Interval[T],
-        inout rec: HitRecord[T, dim]
+        r: Ray[Self.T, Self.dim],
+        var ray_t: Interval[Self.T],
+        inout rec: HitRecord[Self.T, Self.dim]
     ) -> Bool:
         var ray_in = rebind[Ray[Self.T, Self.dim]](r)
         var ray_t_in = rebind[Interval[Self.T]](ray_t)
@@ -68,9 +67,9 @@ struct Sphere[T: DType, dim: Int](Hittable):
             if not ray_t_in.surrounds(root):
                 return False
 
-        rec.t = rebind[Scalar[T]](root)
+        rec.t = rebind[Scalar[Self.T]](root)
         rec.p = r.at(rec.t)
-        var outward_normal = rec.p / rebind[Scalar[T]](self._radius)
+        var outward_normal = rec.p / rebind[Scalar[Self.T]](self._radius)
         rec.set_face_normal(r, outward_normal)
 
         return True
@@ -91,5 +90,5 @@ struct Sphere[T: DType, dim: Int](Hittable):
         """
         Load from python object representing the item dumped out to json
         """
-        return Sphere[T,dim](
-            float(py_obj["radius"]).cast[T]())
+        return Sphere[Self.T, Self.dim](
+            float(py_obj["radius"]).cast[Self.T]())

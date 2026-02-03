@@ -3,16 +3,17 @@ from memory.arc import ArcPointer
 from mo3d.ray.color4 import Color4
 from mo3d.math.point import Point
 
-from mo3d.texture.texture import Texture
+from mo3d.texture.texture import Texture, Texturable
 from mo3d.texture.solid import Solid
 
 from python import Python
 from python import PythonObject
 
-struct Checker[T: DType, dim: Int](Copyable, Movable, Texture[T, dim]):
-    var even_texture : ArcPointer[Texture[T, dim]]
-    var odd_texture : ArcPointer[Texture[T, dim]]
-    var scale : Scalar[T]
+@fieldwise_init
+struct Checker[T: DType, dim: Int](Copyable, Movable, Texturable):
+    var even_texture : ArcPointer[Texture[Self.T, Self.dim]]
+    var odd_texture : ArcPointer[Texture[Self.T, Self.dim]]
+    var scale : Scalar[Self.T]
 
     fn value(
         self, u: Scalar[Self.T], v: Scalar[Self.T], p: Point[Self.T, Self.dim]

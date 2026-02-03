@@ -14,9 +14,10 @@ from mo3d.random.rng import Rng
 from python import Python
 from python import PythonObject
 
-struct Material[T: DType, dim: Int](Copyable, Movable):
+@fieldwise_init
+struct Material[T: DType, dim: Int](Copyable, ImplicitlyCopyable, Movable):
     comptime Variant = Variant[
-        Lambertian[T, dim], Metal[T, dim], Dielectric[T, dim], DiffuseLight[T, dim]
+        Lambertian[Self.T, Self.dim], Metal[Self.T, Self.dim], Dielectric[Self.T, Self.dim], DiffuseLight[Self.T, Self.dim]
     ]
     var _mat: Self.Variant
 

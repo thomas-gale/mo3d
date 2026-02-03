@@ -5,27 +5,29 @@ from mo3d.math.point import Point
 
 from mo3d.texture.solid import Solid
 from mo3d.texture.checker import Checker
+from mo3d.texture.texturable import Texturable
 
 from python import Python
 from python import PythonObject
 
-struct Texture[T: DType, dim: Int](Copyable, Movable):
+@fieldwise_init
+struct Texture[T: DType, dim: Int](Copyable, ImplicitlyCopyable, Movable, Texturable):
     comptime Variant = Variant[
-        Solid[T, dim], Checker[T, dim]
+        Solid[Self.T, Self.dim], Checker[Self.T, Self.dim]
     ]
     var _tex: Self.Variant
 
     fn value(
         self,
-        point : Point[T, dim]
-    ) raises -> Color4[T]:
+        point : Point[Self.T, Self.dim]
+    ) raises -> Color4[Self.T]:
         # TODO perform the runtime variant match
-        if self._tex.isa[Solid[T, dim]]():
-            return self._tex[Solid[T, dim]].value(
+        if self._tex.isa[Solid[Self.T, Self.dim]]():
+            return self._tex[Solid[Self.T, Self.dim]].value(
                 point
             )
-        elif self._tex.isa[Checker[T, dim]]():
-            return self._tex[Checker[T, dim]].value(
+        elif self._tex.isa[Checker[Self.T, Self.dim]]():
+            return self._tex[Checker[Self.T, Self.dim]].value(
                 point
             )
         else:
@@ -33,10 +35,10 @@ struct Texture[T: DType, dim: Int](Copyable, Movable):
 
     fn __str__(self) -> String:
         # TODO perform the runtime variant match
-        if self._tex.isa[Solid[T, dim]]():
-            return str(self._tex[Solid[T, dim]])
-        elif self._tex.isa[Checker[T, dim]]():
-            return str(self._tex[Checker[T, dim]])
+        if self._tex.isa[Solid[Self.T, Self.dim]]():
+            return str(self._tex[Solid[Self.T, Self.dim]])
+        elif self._tex.isa[Checker[Self.T, Self.dim]]():
+            return str(self._tex[Checker[Self.T, Self.dim]])
         else:
             return "Texture(Unknown)"
 
@@ -45,11 +47,11 @@ struct Texture[T: DType, dim: Int](Copyable, Movable):
         Python object representing the item to dump out to json
         """
         var data : PythonObject
-        if self._tex.isa[Solid[T, dim]]():
-            data = self._tex[Solid[T, dim]]._dump_py_json()
+        if self._tex.isa[Solid[Self.T, Self.dim]]():
+            data = self._tex[Solid[Self.T, Self.dim]]._dump_py_json()
             data["type"] = "solid"
-        elif self._tex.isa[Checker[T, dim]]():
-            data = self._tex[Checker[T, dim]]._dump_py_json()
+        elif self._tex.isa[Checker[Self.T, Self.dim]]():
+            data = self._tex[Checker[Self.T, Self.dim]]._dump_py_json()
             data["type"] = "checker"
         else:
             data = Python.dict()

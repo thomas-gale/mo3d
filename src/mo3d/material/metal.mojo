@@ -8,29 +8,29 @@ from mo3d.random.rng import Rng
 from python import Python
 from python import PythonObject
 
-@value
-struct Metal[T: DType, dim: Int](CollectionElement):
-    var albedo: Color4[T]
-    var fuzz: Scalar[T]
+@fieldwise_init
+struct Metal[T: DType, dim: Int](Copyable, Movable):
+    var albedo: Color4[Self.T]
+    var fuzz: Scalar[Self.T]
 
     fn scatter(
         self,
         mut rng : Rng,
-        r_in: Ray[T, dim],
-        rec: HitRecord[T, dim],
-        mut attenuation: Color4[T],
-        mut scattered: Ray[T, dim],
+        r_in: Ray[Self.T, Self.dim],
+        rec: HitRecord[Self.T, Self.dim],
+        mut attenuation: Color4[Self.T],
+        mut scattered: Ray[Self.T, Self.dim],
     ) -> Bool:
-        var reflected = Vec[T, dim].reflect(r_in.dir, rec.normal)
+        var reflected = Vec[Self.T, Self.dim].reflect(r_in.dir, rec.normal)
         reflected = reflected.unit() + (
-            self.fuzz * Vec[T, dim].random_unit_vector(rng)
+            self.fuzz * Vec[Self.T, Self.dim].random_unit_vector(rng)
         )
-        scattered = Ray[T, dim](rec.p, reflected, r_in.tm)
+        scattered = Ray[Self.T, Self.dim](rec.p, reflected, r_in.tm)
         attenuation = self.albedo
         return scattered.dir.dot(rec.normal) > 0.0
 
-    fn emission(self, rec : HitRecord[T,dim]) -> Color4[T]:
-        return Color4[T](0, 0, 0)
+    fn emission(self, rec : HitRecord[Self.T, Self.dim]) -> Color4[Self.T]:
+        return Color4[Self.T](0, 0, 0)
 
     fn __str__(self) -> String:
         return (
@@ -55,6 +55,6 @@ struct Metal[T: DType, dim: Int](CollectionElement):
         """
         Load from python object representing the item dumped out to json
         """
-        return Metal[T,dim](
-            Color4[T]._load_py_json(py_obj["albedo"]),
-            float(py_obj["fuzz"]).cast[T]())
+        return Metal[Self.T, dim](
+            Color4[Self.T]._load_py_json(py_obj["albedo"]),
+            float(py_obj["fuzz"]).cast[Self.T]())

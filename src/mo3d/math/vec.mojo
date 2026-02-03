@@ -127,26 +127,26 @@ struct Vec[T: DType, size: Int](Stringable, Equatable, Copyable, Movable, Implic
 
     @staticmethod
     fn random(mut rng : Rng) -> Self:
-        var data = InlineArray[Scalar[Self.T], Self.size](unsafe_uninitialized=True)
+        var data = InlineArray[Scalar[Self.T], Self.size](uninitialized=True)
         for i in range(Self.size):
             @parameter
             if Self.T == Self.T.float64:
                 data[i] = rng.float64().cast[Self.T]()
             else:
                 data[i] = rng.float32().cast[Self.T]()
-        return Self(data)
+        return Self(data.copy())
 
     @staticmethod
     fn random(mut rng : Rng, min: Scalar[Self.T], max: Scalar[Self.T]) -> Self:
         var delta = max - min
-        var data = InlineArray[Scalar[Self.T], Self.size](unsafe_uninitialized=True)
+        var data = InlineArray[Scalar[Self.T], Self.size](uninitialized=True)
         for i in range(Self.size):
             @parameter
             if Self.T == Self.T.float64:
                 data[i] = min + (rng.float64().cast[Self.T]() * delta)
             else:
                 data[i] = min + (rng.float32().cast[Self.T]() * delta)
-        return Self(data)
+        return Self(data.copy())
 
     fn __str__(self) -> String:
         """Readable representation of the vector."""

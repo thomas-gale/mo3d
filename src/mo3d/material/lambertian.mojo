@@ -11,30 +11,29 @@ from mo3d.random.rng import Rng
 from python import Python
 from python import PythonObject
 
-from collections import CollectionElement
 
-@value
-struct Lambertian[T: DType, dim: Int](CollectionElement):
-    var albedo: Texture[T, dim]
+@fieldwise_init
+struct Lambertian[T: DType, dim: Int](Copyable, Movable):
+    var albedo: Texture[Self.T, Self.dim]
 
     fn scatter(
         self,
         mut rng : Rng,
-        r_in: Ray[T, dim],
-        rec: HitRecord[T, dim],
-        mut attenuation: Color4[T],
-        mut scattered: Ray[T, dim],
+        r_in: Ray[Self.T, Self.dim],
+        rec: HitRecord[Self.T, Self.dim],
+        mut attenuation: Color4[Self.T],
+        mut scattered: Ray[Self.T, Self.dim],
     ) raises -> Bool:
-        var scatter_direction = rec.normal + Vec[T, dim].random_unit_vector(rng)
+        var scatter_direction = rec.normal + Vec[Self.T, Self.dim].random_unit_vector(rng)
         # Catch degenerate scatter direction
         if scatter_direction.near_zero():
             scatter_direction = rec.normal
-        scattered = Ray[T, dim](rec.p, scatter_direction, r_in.tm)
+        scattered = Ray[Self.T, Self.dim](rec.p, scatter_direction, r_in.tm)
         attenuation = self.albedo.value(rec.p)
         return True
 
-    fn emission(self, rec : HitRecord[T,dim]) -> Color4[T]:
-        return Color4[T](0, 0, 0)
+    fn emission(self, rec : HitRecord[Self.T, Self.dim]) -> Color4[Self.T]:
+        return Color4[Self.T](0, 0, 0)
 
     fn __str__(self) -> String:
         return "Lambertian(albedo: " + str(self.albedo) + ")"
@@ -52,5 +51,5 @@ struct Lambertian[T: DType, dim: Int](CollectionElement):
         """
         Load from python object representing the item dumped out to json
         """
-        return Lambertian[T,dim](
-            Texture[T, dim]._load_py_json(py_obj["albedo"]))
+        return Lambertian[Self.T, Self.dim](
+            Texture[Self.T, Self.dim]._load_py_json(py_obj["albedo"]))
